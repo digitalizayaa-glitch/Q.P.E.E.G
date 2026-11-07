@@ -2024,7 +2024,7 @@ function openSheet(className, title) {
         sheet.animate([{ transform: "none", opacity: 1 }, { transform: "scale(0.9) translateY(4%)", opacity: 0 }], { duration: 130, easing: "ease-in", fill: "forwards" });
         overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
     };
-    const onKey = e => { if (!dialogOverlay && e.key === "Escape") { e.preventDefault(); close(); } };
+    const onKey = e => { if (!dialogOverlay && !stepperOverlay && e.key === "Escape") { e.preventDefault(); close(); } };
     window.addEventListener("keydown", onKey, true);
     closeBtn.onclick = close;
     overlay.addEventListener("pointerdown", e => { if (e.target === overlay) close(); });

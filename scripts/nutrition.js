@@ -6,11 +6,11 @@
 ========================================================= */
 
 const ACTIVITY = [
-    { k: 1.2,   name: "Sedentario",         sub: "Poco o nada de ejercicio" },
-    { k: 1.375, name: "Ligero",             sub: "1-3 días de ejercicio por semana" },
-    { k: 1.55,  name: "Moderado",           sub: "3-5 días por semana" },
-    { k: 1.725, name: "Intenso",            sub: "6-7 días por semana" },
-    { k: 1.9,   name: "Muy intenso",        sub: "Entrenas 2 veces al día o trabajo físico pesado" }
+    { k: 1.2,   name: "Sedentario",  short: "poco o nada" },
+    { k: 1.375, name: "Ligero",      short: "1-3 días" },
+    { k: 1.55,  name: "Moderado",    short: "3-5 días" },
+    { k: 1.725, name: "Intenso",     short: "6-7 días" },
+    { k: 1.9,   name: "Muy intenso", short: "2 veces/día" }
 ];
 const GOALS = {
     maintain: { name: "Mantener peso", short: "Mantener", factor: 1,    sub: "Calorías de mantenimiento" },
@@ -65,145 +65,213 @@ function nutritionPlan() {
     return { kcal, goals, water: Math.round(n.profile.weight * 35 / 250) * 250 };
 }
 
-/* ---------- test TDEE: todas las preguntas en una sola ventana ---------- */
+/* ---------- piezas visuales del test y del resultado (tarjetas con mosaicos) ---------- */
 
-const TDEE_FIELDS = [
-    { k: "age",    label: "Edad",           unit: "años", min: 14,  max: 90,  mode: "numeric" },
-    { k: "weight", label: "Peso",           unit: "kg",   min: 30,  max: 250, mode: "decimal" },
-    { k: "height", label: "Altura",         unit: "cm",   min: 120, max: 230, mode: "numeric" },
-    { k: "bf",     label: "Grasa corporal", unit: "%",    min: 3,   max: 60,  mode: "decimal", optional: true }
-];
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+
+function tCard(title, right) {
+    const c = el("section", "t-card");
+    c.appendChild(el("div", "t-lbl", `<span>${title}</span>${right ? `<span>${right}</span>` : ""}`));
+    return c;
+}
+
+/* Mosaico de dato: etiqueta pequeña, número grande y unidad */
+const tTile = (label, value, unit, cls = "") =>
+    el("div", `t-tile ${cls}`, `<small>${label}</small><b>${value}</b>${unit ? `<i>${unit}</i>` : ""}`);
+
+const bmiOf = (w, h) => w / ((h / 100) ** 2);
+function bmiChip(bmi) {
+    const [name, tone] = bmi < 18.5 ? ["Bajo peso", "gold"] : bmi < 25 ? ["Normal", "green"] : bmi < 30 ? ["Sobrepeso", "gold"] : ["Obesidad", "red"];
+    return `<span class="t-chip ${tone}">IMC ${fmtNum(bmi, 1)} · ${name}</span>`;
+}
+
+/* ---------- test TDEE ---------- */
+
+const TDEE_FIELDS = {
+    age:    { label: "Edad",           unit: "años", min: 14,  max: 90,  step: 1, def: 25 },
+    weight: { label: "Peso",           unit: "kg",   min: 30,  max: 250, step: 1, def: 70, dec: true },
+    height: { label: "Altura",         unit: "cm",   min: 120, max: 230, step: 1, def: 170 },
+    bf:     { label: "Grasa corporal", unit: "%",    min: 3,   max: 60,  step: 1, def: 20, dec: true }
+};
 
 function runTdeeTest() {
     const old = nutrition()?.profile || {};
+    const v = {
+        sex: old.sex || "m", activity: old.activity || 1.55,
+        age: old.age ?? null, weight: old.weight ?? null, height: old.height ?? null,
+        bf: typeof old.bf === "number" ? old.bf : null
+    };
+    let bfUnknown = !!nutrition() && v.bf === null;
+
     const { sheet, close } = openSheet("tdee-sheet", "Test TDEE");
+    const body = el("div", "t-body");
+    sheet.appendChild(body);
+    const error = el("div", "dialog-error t-error");
+    const tiles = {};
 
-    const form = document.createElement("form");
-    form.className = "tdee-form";
-    form.noValidate = true;
-
-    const row = (labelText, control) => {
-        const label = document.createElement("div");
-        label.className = "tdee-label";
-        label.innerHTML = labelText;
-        const wrap = document.createElement("div");
-        wrap.className = "tdee-control";
-        wrap.append(...control);
-        form.append(label, wrap);
+    const show = k => (v[k] == null ? "—" : fmtNum(v[k], 1));
+    /* skip = mosaico que se está animando (no se le reescribe el número) */
+    const refresh = skip => {
+        for (const k in tiles) {
+            if (k !== skip) tiles[k].querySelector("b").textContent = show(k);
+            tiles[k].classList.toggle("empty", v[k] == null);
+        }
+        tiles.bf.classList.toggle("off", bfUnknown);
+        unknownBtn.classList.toggle("active", bfUnknown);
+        unknownBtn.setAttribute("aria-pressed", bfUnknown);
+        bmiBox.innerHTML = v.weight && v.height ? bmiChip(bmiOf(v.weight, v.height)) : "";
+    };
+    const touched = k => {
+        tiles[k].classList.remove("bad");
+        error.textContent = "";
+        if (k === "bf") bfUnknown = false;
     };
 
-    /* Género */
-    const sexes = [["m", "Hombre"], ["f", "Mujer"]].map(([value, text]) => {
-        const l = document.createElement("label");
-        l.className = "tdee-radio";
-        l.innerHTML = `<input type="radio" name="sex" value="${value}"${(old.sex || "m") === value ? " checked" : ""}> ${text}`;
-        return l;
-    });
-    row("Género", sexes);
-
-    const error = document.createElement("div");
-    error.className = "dialog-error tdee-error";
-
-    const select = document.createElement("select");
-    select.className = "tdee-select";
-    select.setAttribute("aria-label", "Ejercicio");
-    ACTIVITY.forEach(a => {
-        const o = document.createElement("option");
-        o.value = a.k;
-        o.textContent = `${a.name} (${a.sub})`;
-        o.selected = old.activity ? old.activity === a.k : a.k === 1.55;
-        select.appendChild(o);
-    });
-
-    /* Números (el ejercicio va después de la altura) */
-    const inputs = {};
-    TDEE_FIELDS.forEach(f => {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.className = "tdee-input";
-        input.inputMode = f.mode;
-        input.maxLength = 5;
-        input.autocomplete = "off";
-        input.setAttribute("aria-label", f.label);
-        if (typeof old[f.k] === "number") input.value = String(old[f.k]).replace(".", ",");
-        input.addEventListener("input", () => { input.classList.remove("bad"); error.textContent = ""; });
-        inputs[f.k] = input;
-        const unit = document.createElement("span");
-        unit.className = "tdee-unit";
-        unit.textContent = f.unit;
-        row(f.optional ? `${f.label}<small>(opcional)</small>` : f.label, [input, unit]);
-        if (f.k === "height") row("Ejercicio", [select]);
-    });
-
-    const submit = document.createElement("button");
-    submit.type = "submit";
-    submit.className = "dialog-btn accept tdee-submit";
-    submit.textContent = "Calcular";
-    form.append(error, submit);
-    sheet.appendChild(form);
-
-    form.addEventListener("submit", e => {
-        e.preventDefault();
-        const values = {};
-        for (const f of TDEE_FIELDS) {
-            const text = inputs[f.k].value.trim();
-            if (!text && f.optional) { values[f.k] = null; continue; }
-            const v = parseFloat(text.replace(",", "."));
-            if (!isFinite(v) || v < f.min || v > f.max) {
-                inputs[f.k].classList.add("bad");
-                inputs[f.k].focus();
-                error.textContent = `${f.label}: escribe un número entre ${f.min} y ${f.max}.`;
-                return;
-            }
-            values[f.k] = v;
-        }
-        const profile = {
-            age: values.age, sex: form.querySelector("input[name=sex]:checked").value,
-            height: values.height, weight: values.weight, activity: parseFloat(select.value), bf: values.bf
+    /* Número que se cambia deslizando sobre él, o tocándolo (abre el cuadro grande con ▲ ▼ y teclado) */
+    const numberTile = (k, extraCls) => {
+        const f = TDEE_FIELDS[k];
+        const t = tTile(f.label, show(k), f.unit, `t-input ${extraCls || ""}`);
+        t.setAttribute("role", "button");
+        t.tabIndex = 0;
+        t.setAttribute("aria-label", `${f.label}: toca para cambiarlo`);
+        const step = (dir, animate) => {
+            const before = v[k];
+            v[k] = before == null ? f.def : Math.min(f.max, Math.max(f.min, Math.round(before + dir * f.step)));
+            touched(k);
+            if (animate && before !== v[k]) animateValue(t.querySelector("b"), dir, show(k));
         };
+        const open = () => openStepper({
+            title: f.label,
+            subtitle: `Entre ${f.min} y ${f.max} ${f.unit}`,
+            unit: f.unit,
+            read: () => show(k),
+            step: dir => step(dir, false),
+            editMode: f.dec ? "decimal" : "numeric",
+            onEdit: text => {
+                const n = parseAmount(text, { max: f.max });
+                if (n === null || n < f.min) return "x";
+                v[k] = f.dec ? Math.round(n * 10) / 10 : Math.round(n);
+                touched(k);
+                return "";
+            },
+            onClose: () => refresh()
+        });
+        attachValueSwipe(t, dir => { step(dir, true); refresh(k); }, open);
+        t.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+        tiles[k] = t;
+        return t;
+    };
+
+    /* Sobre ti */
+    const about = tCard("Sobre ti");
+    const aboutRow = el("div", "t-row");
+    const seg = el("div", "seg t-seg");
+    [["m", "Hombre"], ["f", "Mujer"]].forEach(([value, text]) => {
+        const b = el("button", "seg-btn" + (v.sex === value ? " active" : ""));
+        b.type = "button";
+        b.textContent = text;
+        b.onclick = () => { v.sex = value; seg.querySelectorAll(".seg-btn").forEach(x => x.classList.toggle("active", x === b)); };
+        seg.appendChild(b);
+    });
+    aboutRow.append(seg, numberTile("age", "t-small"));
+    about.appendChild(aboutRow);
+
+    /* Cuerpo */
+    const bodyCard = tCard("Cuerpo");
+    const bodyRow = el("div", "t-row");
+    bodyRow.append(numberTile("weight"), numberTile("height"));
+    const bmiBox = el("div", "t-chips");
+    bodyCard.append(bodyRow, bmiBox);
+
+    /* Actividad: 5 opciones con barras de intensidad */
+    const act = tCard("Actividad");
+    const list = el("div", "t-opts");
+    ACTIVITY.forEach((a, i) => {
+        const bars = [4, 7, 10, 12, 14].map((h, j) => `<i class="${j <= i ? "on" : ""}" style="height:${h}px"></i>`).join("");
+        const b = el("button", "t-opt" + (v.activity === a.k ? " active" : ""), `<span class="t-bars" aria-hidden="true">${bars}</span><span class="t-opt-name">${a.name}</span><small>${a.short}</small>`);
+        b.type = "button";
+        b.setAttribute("aria-pressed", v.activity === a.k);
+        b.onclick = () => {
+            v.activity = a.k;
+            list.querySelectorAll(".t-opt").forEach(x => { x.classList.toggle("active", x === b); x.setAttribute("aria-pressed", x === b); });
+        };
+        list.appendChild(b);
+    });
+    act.appendChild(list);
+
+    /* Grasa corporal (opcional) */
+    const fat = tCard("Grasa corporal", "opcional");
+    const fatRow = el("div", "t-row t-fat");
+    const unknownBtn = el("button", "t-chip t-unknown", "No lo sé");
+    unknownBtn.type = "button";
+    unknownBtn.onclick = () => { bfUnknown = !bfUnknown; if (bfUnknown) v.bf = null; tiles.bf.classList.remove("bad"); refresh(); };
+    fatRow.append(numberTile("bf", "t-small"), unknownBtn);
+    fat.appendChild(fatRow);
+
+    const submit = el("button", "dialog-btn accept t-submit", "Calcular");
+    submit.type = "button";
+    submit.onclick = () => {
+        const missing = ["age", "weight", "height"].filter(k => v[k] == null);
+        if (missing.length) {
+            missing.forEach(k => tiles[k].classList.add("bad"));
+            error.textContent = `Falta: ${missing.map(k => TDEE_FIELDS[k].label.toLowerCase()).join(", ")}. Desliza o toca el número.`;
+            return;
+        }
+        const profile = { age: v.age, sex: v.sex, height: v.height, weight: v.weight, activity: v.activity, bf: bfUnknown ? null : v.bf };
         state.nutrition = { profile, goal: state.nutrition?.goal || "maintain", diet: state.nutrition?.diet || "mod" };
         saveState();
         renderFood();
         close();
         showTdeeResult();
-    });
+    };
+
+    body.append(about, bodyCard, act, fat, error, submit);
+    refresh();
 }
 
-/* ---------- resultado: cada dato en su propia sección ---------- */
+/* ---------- resultado: mismas tarjetas que el test ---------- */
 
 function showTdeeResult() {
     const n = nutrition();
     if (!n) return;
-    const t = calcTDEE(n.profile);
+    const p = n.profile, t = calcTDEE(p);
     const f = (x, d = 0) => fmtNum(x, d);
-    const { sheet, close } = openSheet("tdee-result", "Tu resultado");
+    const { sheet, close } = openSheet("tdee-sheet tdee-result", "Tu resultado");
+    const body = el("div", "t-body");
+    sheet.appendChild(body);
 
-    const card = (title, value, lines, main) => {
-        const c = document.createElement("section");
-        c.className = "tdee-card" + (main ? " main" : "");
-        c.innerHTML = `<h4>${title}</h4><div class="tdee-value">${value}</div>${lines.map(l => `<p>${l}</p>`).join("")}`;
+    const card = (title, tiles, chips) => {
+        const c = tCard(title);
+        const row = el("div", "t-row");
+        row.append(...tiles);
+        c.appendChild(row);
+        if (chips && chips.length) c.appendChild(el("div", "t-chips", chips.join("")));
         return c;
     };
 
-    const grid = document.createElement("div");
-    grid.className = "tdee-cards";
-    grid.append(
-        card("Calorías de mantenimiento", `${f(t.tdee)} <small>kcal/día</small>`, [`Metabolismo basal: ${f(t.bmr)} kcal`], true),
-        card("Peso ideal", `${f(t.ideal, 1)} <small>kg</small>`, [`Rango sano: ${f(t.idealMin, 1)}–${f(t.idealMax, 1)} kg`]),
-        card("Grasa corporal", `${f(t.bf, 0)} <small>%</small>`, [t.bfKnown ? `Masa magra: ${f(t.lean, 1)} kg` : "Estimada (no la indicaste)"]),
-        card("Máximo potencial muscular", `${f(t.leanMax, 1)} <small>kg de masa magra</small>`, [
-            `Unos ${f(t.weightAtMax, 1)} kg de peso con ${Math.round(t.bfTarget * 100)} % de grasa.`,
-            ...(t.bfKnown ? [`Te faltan ≈ ${f(t.muscleLeft, 1)} kg de músculo.`] : [])
-        ], true)
+    body.append(
+        card("Calorías", [
+            tTile("Mantenimiento", f(t.tdee), "kcal/día", "t-main"),
+            tTile("Metabolismo basal", f(t.bmr), "kcal")
+        ]),
+        card("Peso", [
+            tTile("Peso ideal", f(t.ideal, 1), "kg"),
+            tTile("Rango sano", `${f(t.idealMin, 1)}–${f(t.idealMax, 1)}`, "kg")
+        ], [bmiChip(bmiOf(p.weight, p.height))]),
+        card("Grasa corporal", t.bfKnown
+            ? [tTile("Grasa", f(t.bf, 0), "%"), tTile("Masa magra", f(t.lean, 1), "kg")]
+            : [tTile("Grasa estimada", f(t.bf, 0), "%")],
+            t.bfKnown ? [] : ['<span class="t-chip">Estimada (no la indicaste)</span>']),
+        card("Máximo potencial muscular", [
+            tTile("Masa magra máxima", f(t.leanMax, 1), "kg"),
+            tTile(`Peso con ${Math.round(t.bfTarget * 100)} % de grasa`, f(t.weightAtMax, 1), "kg")
+        ], t.bfKnown ? [`<span class="t-chip green">Te faltan ≈ ${f(t.muscleLeft, 1)} kg de músculo</span>`] : [])
     );
-    sheet.appendChild(grid);
 
-    const ok = document.createElement("button");
+    const ok = el("button", "dialog-btn accept t-submit", "Entendido");
     ok.type = "button";
-    ok.className = "dialog-btn accept tdee-submit";
-    ok.textContent = "Entendido";
     ok.onclick = close;
-    sheet.appendChild(ok);
+    body.appendChild(ok);
 }
 
 /* ---------- plan: objetivo, dieta y opciones del test (botón bajo la línea de calorías) ---------- */

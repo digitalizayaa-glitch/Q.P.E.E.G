@@ -1153,39 +1153,50 @@ main { overflow-x: hidden; }
 .fh-list .picker-group { display: flex; justify-content: space-between; }
 .fh-list .picker-group span { text-transform: none; letter-spacing: 0; }
 
-/* ---- Test TDEE: todas las preguntas en una ventana ---- */
-.tdee-form {
-    display: grid; grid-template-columns: auto 1fr; gap: 12px 14px; align-items: center;
-    padding: 6px 18px 18px; overflow-y: auto; min-height: 0;
+/* ---- Test TDEE y resultado: tarjetas con mosaicos ---- */
+.tdee-sheet { max-height: 92vh; max-height: min(92dvh, 780px); }
+.t-body { display: flex; flex-direction: column; gap: 8px; padding: 0 14px 14px; overflow-y: auto; min-height: 0; scrollbar-width: none; }
+.t-body::-webkit-scrollbar { display: none; }
+.t-card { flex-shrink: 0; border-radius: 14px; background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 10px; }
+.t-lbl { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.t-row { display: flex; gap: 8px; align-items: stretch; }
+.t-tile { flex: 1; min-width: 0; border-radius: 12px; background: var(--inset); border: 1px solid var(--glass-border); padding: 8px 10px; }
+.t-tile small { display: block; color: var(--muted); font-size: 11px; line-height: 1.25; }
+.t-tile b { display: inline-block; font-size: 26px; line-height: 1.15; }
+.t-tile i { font-style: normal; color: var(--muted); font-size: 12px; margin-left: 4px; }
+.t-tile.t-main { flex: 1.4; }
+.t-tile.t-main b { font-size: 30px; color: var(--accent); }
+.t-input { cursor: pointer; touch-action: none; -webkit-user-select: none; user-select: none; }
+.t-input:active, .t-input:focus-visible { border-color: var(--accent); outline: none; }
+.t-input.empty b { color: var(--faint); }
+.t-input.bad { border-color: var(--accent-red); }
+.t-input.off { opacity: .4; }
+.t-small { flex: 1; padding: 4px 10px; }
+.t-small b { font-size: 20px; }
+.t-seg { flex: 2; margin: 0; }
+.t-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.t-chip { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: 12px; color: var(--text-2); border: 1px solid var(--glass-border); background: var(--glass-bg); }
+.t-chip.green { border-color: var(--accent); background: rgba(76, 175, 109, 0.18); color: var(--text); }
+.t-chip.gold { border-color: var(--accent-gold); background: rgba(224, 192, 64, 0.16); color: var(--text); }
+.t-chip.red { border-color: var(--accent-red); background: rgba(224, 85, 85, 0.18); color: var(--text); }
+.t-fat { align-items: center; }
+.t-fat .t-small { flex: 0 0 110px; }
+.t-unknown { cursor: pointer; margin: 0; padding: 7px 14px; font-size: 13px; }
+.t-unknown.active { border-color: var(--accent); background: rgba(76, 175, 109, 0.18); color: var(--text); font-weight: bold; }
+.t-opts { display: flex; flex-direction: column; gap: 6px; }
+.t-opt {
+    display: flex; align-items: center; gap: 10px; width: 100%; margin: 0; padding: 7px 10px; border-radius: 10px; cursor: pointer;
+    border: 1px solid var(--glass-border); background: var(--inset); color: var(--text); font-size: 14px; text-align: left;
 }
-.tdee-label { font-weight: bold; font-size: 14px; text-align: right; }
-.tdee-label small { display: block; font-weight: normal; font-size: 11px; color: var(--muted); }
-.tdee-control { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
-.tdee-radio { display: flex; align-items: center; gap: 6px; font-size: 15px; cursor: pointer; margin-right: 8px; }
-.tdee-radio input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
-.tdee-input, .tdee-select {
-    padding: 10px 12px; border-radius: 10px; border: 1px solid var(--glass-border);
-    background: var(--inset); color: var(--text); font-size: 16px; outline: none;
-}
-.tdee-input { width: 76px; -webkit-user-select: text; user-select: text; }
-.tdee-select { width: 100%; min-width: 0; color-scheme: dark; }
-:root[data-theme="light"] .tdee-select { color-scheme: light; }
-.tdee-input:focus, .tdee-select:focus { border-color: var(--accent); }
-.tdee-input.bad { border-color: var(--accent-red); }
-.tdee-unit { color: var(--muted); font-size: 13px; }
-.tdee-error { grid-column: 1 / -1; margin: 0; }
-.tdee-submit { grid-column: 1 / -1; flex: none; }
-
-/* ---- Resultado del test: una tarjeta por dato ---- */
-.tdee-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 16px; overflow-y: auto; min-height: 0; }
-.tdee-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px; }
-.tdee-card.main { grid-column: 1 / -1; }
-.tdee-card h4 { margin: 0 0 6px; font-size: 11px; font-weight: normal; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-.tdee-value { font-size: 24px; font-weight: bold; line-height: 1.1; }
-.tdee-card.main .tdee-value { font-size: 30px; }
-.tdee-value small { font-size: 12px; font-weight: normal; color: var(--muted); }
-.tdee-card p { margin: 6px 0 0; font-size: 12px; line-height: 1.4; color: var(--text-2); }
-.tdee-result > .tdee-submit { margin: 12px 16px 16px; }
+.t-opt small { margin-left: auto; color: var(--muted); font-size: 11px; }
+.t-opt.active { border-color: var(--accent); background: rgba(76, 175, 109, 0.16); }
+.t-opt.active .t-opt-name { font-weight: bold; }
+.t-bars { display: flex; gap: 2px; align-items: flex-end; height: 14px; }
+.t-bars i { width: 4px; border-radius: 1px; background: var(--glass-border); }
+.t-bars i.on { background: var(--accent); }
+.t-error { margin: 0; min-height: 0; }
+.t-error:empty { display: none; }
+.t-submit { flex: none; flex-shrink: 0; }
 
 /* ---- Plan: objetivo y dieta ---- */
 .plan-sub { margin: 6px 16px 0; font-size: 12px; color: var(--muted); }
