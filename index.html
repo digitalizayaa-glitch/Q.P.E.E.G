@@ -44,6 +44,7 @@
 
         <div class="profile-photo" id="profilePhoto">
             <img id="profileImg" src="" alt="Foto de perfil" style="display:none;">
+            <div id="profileAvatar" class="profile-avatar" style="display:none;"></div>
             <span id="profilePlaceholder">+</span>
         </div>
 
@@ -130,10 +131,12 @@
         <section id="history" class="section">
             <h2 id="historyTitle" class="history-title"></h2>
             <div id="historyGrid" class="history-grid"></div>
+            <div id="historyChart" class="history-chart" hidden></div>
             <div class="history-actions">
                 <button id="histModeBtn" class="history-btn">Ver calorías</button>
                 <button id="histMonthsBtn" class="history-btn">Calendario completo</button>
             </div>
+            <button id="histChartBtn" class="history-btn history-chart-btn">Ver gráfica</button>
         </section>
 
     </main>
@@ -141,6 +144,7 @@
 </div>
 
 <script src="scripts/scripts.js"></script>
+<script src="scripts/figures.js"></script>
 <script src="scripts/settings.js"></script>
 <script src="scripts/nutrition.js"></script>
 <script src="scripts/food.js"></script>

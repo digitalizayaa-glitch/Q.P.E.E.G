@@ -22,6 +22,8 @@
     --primary-bg: rgba(255, 255, 255, 0.92);
     --primary-text: #111;
     --glow1: 76, 175, 109;             /* destello del fondo (se cambia en Ajustes) */
+    --ui-rgb: 76, 175, 109;            /* color de botones y selecciones: sigue al destello */
+    --ui: rgb(var(--ui-rgb));
     --glow2: 224, 192, 64;
     --ga1: 0.085;
     --ga2: 0.055;
@@ -219,26 +221,6 @@ h2 { margin-bottom: 15px; }
 
 .routine-page { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 
-.day-exercises-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.day-exercises-list > .exercise { flex: 1; min-height: 0; margin-top: 0; overflow: hidden; }
-
-.routine-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    flex-shrink: 0;
-    margin-top: 10px;
-}
-
 .page-indicator {
     display: flex;
     justify-content: center;
@@ -250,23 +232,6 @@ h2 { margin-bottom: 15px; }
 
 .page-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--glass-border); }
 .page-dot.active { background: var(--text-2); }
-
-.routine-actions .add-serie-btn {
-    width: 40px;
-    height: 40px;
-    margin: 0;
-    border-radius: 50%;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg-strong);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    color: var(--text);
-    font-size: 20px;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.routine-actions .add-serie-btn:active { background: rgba(var(--fg), 0.14); }
 
 .routine-help {
     text-align: center;
@@ -414,7 +379,6 @@ h2 { margin-bottom: 15px; }
     font-weight: bold;
 }
 
-
 /* =========================================================
     SERIES / CARRUSEL DE REPS
 ========================================================= */
@@ -431,29 +395,6 @@ h2 { margin-bottom: 15px; }
     border-radius: 6px;
     padding: 8px 0;
     font-weight: bold;
-}
-
-.add-serie-btn {
-    display: block;
-    margin: 14px auto 0 auto;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg-strong);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    color: var(--text);
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.add-serie-btn:active { background: rgba(var(--fg), 0.14); }
-
-.long-pressable {
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
 }
 
 /* =========================================================
@@ -567,19 +508,6 @@ button.primary {
     font-size: 13px;
 }
 
-.achievements-add {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg-strong);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    color: var(--text);
-    font-size: 18px;
-    cursor: pointer;
-}
-
 .achievements-limit { font-size: 12px; color: var(--muted); max-width: 300px; margin: 0 auto; line-height: 1.5; }
 
 .footer-note { margin-top: auto; padding-top: 40px; font-size: 11px; color: var(--faint); line-height: 1.6; }
@@ -680,8 +608,6 @@ main { padding: calc(20px * var(--k)) 20px; overflow-y: auto; scrollbar-width: n
 main::-webkit-scrollbar { display: none; }
 
 /* Las tarjetas nunca se comprimen por debajo de su contenido */
-.day-exercises-list { flex: 1 0 auto; overflow: visible; min-height: auto; gap: calc(10px * var(--k)); }
-.day-exercises-list > .exercise,
 .workout-page .exercise { flex: 1 0 auto; min-height: auto; overflow: visible; }
 .routine-page { overflow: visible; min-height: auto; flex: 1 0 auto; }
 #workoutExercises { flex: 1 0 auto; min-height: auto; overflow: visible; }
@@ -693,9 +619,6 @@ main::-webkit-scrollbar { display: none; }
 .exercise .kg-value { padding-top: calc(14px * var(--k)); padding-bottom: calc(14px * var(--k)); }
 .exercise .reps-value { padding: calc(14px * var(--k)) 0; }
 .exercise .series-row { margin-top: calc(8px * var(--k)); gap: calc(8px * var(--k)); }
-.exercise .add-serie-btn { margin-top: calc(14px * var(--k)); }
-.routine-actions { margin-top: calc(10px * var(--k)); }
-.routine-actions .add-serie-btn { width: 40px; height: 40px; }
 
 /* Rutinas y Entreno: el contenido define su altura (no se recorta);
    si aun así no cupiera, la zona principal se desplaza. */
@@ -823,7 +746,7 @@ main { overflow-x: hidden; }
     user-select: text;
 }
 
-.picker-search:focus { border-color: var(--accent); }
+.picker-search:focus { border-color: var(--ui); }
 
 .picker-list {
     flex: 1;
@@ -855,7 +778,7 @@ main { overflow-x: hidden; }
 }
 
 .picker-item small { color: var(--muted); font-size: 12px; }
-.picker-item:active { background: var(--glass-bg-strong); border-color: var(--accent); }
+.picker-item:active { background: var(--glass-bg-strong); border-color: var(--ui); }
 
 .picker-empty { padding: 18px 10px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.4; }
 
@@ -863,16 +786,16 @@ main { overflow-x: hidden; }
     flex-shrink: 0;
     margin: 6px 12px 12px;
     padding: 13px;
-    border: 1px solid var(--accent);
+    border: 1px solid var(--ui);
     border-radius: 12px;
-    background: rgba(76, 175, 109, 0.16);
+    background: rgba(var(--ui-rgb), 0.16);
     color: var(--text);
     font-size: 15px;
     font-weight: bold;
     cursor: pointer;
 }
 
-.picker-create:active { background: rgba(76, 175, 109, 0.3); }
+.picker-create:active { background: rgba(var(--ui-rgb), 0.3); }
 
 /* Nombres largos de ejercicio: una sola línea con puntos suspensivos */
 .exercise-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -901,7 +824,7 @@ main { overflow-x: hidden; }
     user-select: text;
 }
 
-.dialog-input:focus { border-color: var(--accent); }
+.dialog-input:focus { border-color: var(--ui); }
 .dialog-error { min-height: 18px; margin-top: 6px; color: var(--accent-red); font-size: 12px; }
 
 .dialog-actions { display: flex; gap: 10px; margin-top: 10px; }
@@ -918,7 +841,7 @@ main { overflow-x: hidden; }
 }
 
 .dialog-btn.ghost { background: var(--glass-bg); color: var(--text-2); }
-.dialog-btn.accept { background: rgba(76, 175, 109, 0.22); border-color: var(--accent); }
+.dialog-btn.accept { background: rgba(var(--ui-rgb), 0.22); border-color: var(--ui); }
 .dialog-btn.danger { background: rgba(224, 85, 85, 0.22); border-color: var(--accent-red); }
 .dialog-btn:active { filter: brightness(1.3); }
 
@@ -945,7 +868,7 @@ main { overflow-x: hidden; }
     user-select: none;
 }
 
-.stepper-btn:active { background: rgba(76, 175, 109, 0.28); color: var(--text); }
+.stepper-btn:active { background: rgba(var(--ui-rgb), 0.28); color: var(--text); }
 
 .stepper-value {
     height: 118px;
@@ -1012,7 +935,6 @@ main { overflow-x: hidden; }
 .food-chip i { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--c); transition: width .3s; }
 .food-chip.over .fc-val b { color: var(--accent-gold); }
 .food-chip:active { background: rgba(var(--fg), .12); }
-.food-add { justify-content: center; align-items: center; color: var(--accent); font-weight: bold; }
 
 .food-list-title { color: var(--muted); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0; }
 .food-list { flex: 1; min-height: 70px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; scrollbar-width: none; touch-action: pan-y; }
@@ -1041,7 +963,7 @@ main { overflow-x: hidden; }
     -webkit-mask-image: none; mask-image: none;
 }
 .achievements-list { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 10px; margin-bottom: 10px; }
-.achievement-chip, .achievements-add {
+.achievement-chip {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
@@ -1050,21 +972,18 @@ main { overflow-x: hidden; }
     padding: 12px;
 }
 .achievement-chip { font-size: 14px; font-weight: bold; text-align: left; }
-.achievements-add { display: block; width: 100%; height: auto; font-size: 20px; line-height: 1.2; color: var(--text-2); }
-.achievements-add:active { background: rgba(var(--fg), .12); }
 
 /* Logros: tarjetas pequeñas, centradas y con texto centrado */
 .achievements-list { align-items: center; }
-.achievement-chip, .achievements-add {
+.achievement-chip {
     width: 50%; min-width: 150px; box-sizing: border-box;
     padding: 16px 14px; text-align: center; overflow-wrap: anywhere;
 }
 .achievement-chip { font-size: 13px; }
 .achievements-control, #achievementsControl { display: flex; flex-direction: column; align-items: center; }
-.achievements-add { padding: 10px 14px; }
 
 /* Campo para escribir el número dentro del cuadro grande */
-.stepper-value.editing { cursor: text; border-color: var(--accent); }
+.stepper-value.editing { cursor: text; border-color: var(--ui); }
 .stepper-input {
     width: 100%; height: 100%; border: none; outline: none; background: transparent;
     color: var(--text); font: inherit; font-size: inherit; font-weight: bold; text-align: center;
@@ -1095,7 +1014,7 @@ main { overflow-x: hidden; }
     flex: 1; margin: 0; padding: 11px 8px; border-radius: 12px; font-size: 14px; cursor: pointer;
     background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text);
 }
-.seg-btn.active { border-color: var(--accent); background: rgba(76, 175, 109, 0.18); font-weight: bold; }
+.seg-btn.active { border-color: var(--ui); background: rgba(var(--ui-rgb), 0.18); font-weight: bold; }
 .swatches { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 16px; }
 .swatch {
     width: 40px; height: 40px; padding: 0; margin: 0; border-radius: 50%; cursor: pointer;
@@ -1114,11 +1033,11 @@ main { overflow-x: hidden; }
 .history-title { text-align: center; }
 .history-actions { display: flex; gap: 10px; margin-top: calc(14px * var(--k)); flex-shrink: 0; }
 .history-btn {
-    flex: 1; margin: 0; padding: 11px 8px; border-radius: 12px; font-size: 13px; cursor: pointer;
-    background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text);
+    flex: 1; margin: 0; min-height: calc(52px * var(--k)); padding: 10px 8px; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer;
+    background: rgba(var(--ui-rgb), 0.18); border: 1px solid var(--ui); color: var(--text);
     backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
 }
-.history-btn:active { background: var(--glass-bg-strong); }
+.history-btn:active { background: rgba(var(--ui-rgb), 0.3); }
 .settings-sheet { max-height: 88vh; max-height: min(88dvh, 680px); }
 
 /* Barra de calorías con los mismos colores del calendario */
@@ -1131,24 +1050,23 @@ main { overflow-x: hidden; }
 .food-setup { text-align: center; }
 .food-setup h3 { margin: 4px 0 8px; font-size: 18px; }
 .food-setup p { color: var(--text-2); font-size: 13px; line-height: 1.45; margin: 0 0 14px; }
-.food-start { margin: 0; width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: bold; color: var(--text); background: rgba(76, 175, 109, 0.22); border: 1px solid var(--accent); }
+.food-start { margin: 0; width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: bold; color: var(--text); background: rgba(var(--ui-rgb), 0.22); border: 1px solid var(--ui); }
 .food-plan {
     display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 46px;
     margin: calc(10px * var(--k)) 0 0; padding: 7px 14px; border-radius: 12px; cursor: pointer; text-align: left;
-    color: var(--text); background: rgba(76, 175, 109, 0.14); border: 1px solid var(--accent);
+    color: var(--text); background: rgba(var(--ui-rgb), 0.14); border: 1px solid var(--ui);
 }
 .food-plan small { display: block; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); }
 .food-plan b { display: block; font-size: 15px; }
-.food-plan i { font-style: normal; font-size: 20px; color: var(--accent); }
+.food-plan i { font-style: normal; font-size: 20px; color: var(--ui); }
 .food-plan:active { filter: brightness(1.25); }
-.food-add { flex-shrink: 0; font-size: 15px; padding: calc(11px * var(--k)) 12px; }
 .food-hist-btn { margin: 0; padding: calc(12px * var(--k)) 14px; border-radius: 14px; cursor: pointer; font-size: 14px; color: var(--text); background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); flex-shrink: 0; }
 .food-hist-btn small { color: var(--muted); }
-.food-hist-btn:active { background: var(--glass-bg-strong); border-color: var(--accent); }
+.food-hist-btn:active { background: var(--glass-bg-strong); border-color: var(--ui); }
 .fh-sheet { display: flex; flex-direction: column; }
 .fh-seg { margin-bottom: 8px; flex-shrink: 0; }
 .fh-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.fh-order { align-self: flex-start; margin: 0 16px 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--text); border: 1px solid var(--accent); background: rgba(76, 175, 109, 0.18); }
+.fh-order { align-self: flex-start; margin: 0 16px 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--text); border: 1px solid var(--ui); background: rgba(var(--ui-rgb), 0.18); }
 .fh-list { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 120px; }
 .fh-list .picker-group { display: flex; justify-content: space-between; }
 .fh-list .picker-group span { text-transform: none; letter-spacing: 0; }
@@ -1165,9 +1083,9 @@ main { overflow-x: hidden; }
 .t-tile b { display: inline-block; font-size: 26px; line-height: 1.15; }
 .t-tile i { font-style: normal; color: var(--muted); font-size: 12px; margin-left: 4px; }
 .t-tile.t-main { flex: 1.4; }
-.t-tile.t-main b { font-size: 30px; color: var(--accent); }
+.t-tile.t-main b { font-size: 30px; color: var(--ui); }
 .t-input { cursor: pointer; touch-action: none; -webkit-user-select: none; user-select: none; }
-.t-input:active, .t-input:focus-visible { border-color: var(--accent); outline: none; }
+.t-input:active, .t-input:focus-visible { border-color: var(--ui); outline: none; }
 .t-input.empty b { color: var(--faint); }
 .t-input.bad { border-color: var(--accent-red); }
 .t-input.off { opacity: .4; }
@@ -1182,23 +1100,423 @@ main { overflow-x: hidden; }
 .t-fat { align-items: center; }
 .t-fat .t-small { flex: 0 0 110px; }
 .t-unknown { cursor: pointer; margin: 0; padding: 7px 14px; font-size: 13px; }
-.t-unknown.active { border-color: var(--accent); background: rgba(76, 175, 109, 0.18); color: var(--text); font-weight: bold; }
+.t-unknown.active { border-color: var(--ui); background: rgba(var(--ui-rgb), 0.18); color: var(--text); font-weight: bold; }
 .t-opts { display: flex; flex-direction: column; gap: 6px; }
 .t-opt {
     display: flex; align-items: center; gap: 10px; width: 100%; margin: 0; padding: 7px 10px; border-radius: 10px; cursor: pointer;
     border: 1px solid var(--glass-border); background: var(--inset); color: var(--text); font-size: 14px; text-align: left;
 }
 .t-opt small { margin-left: auto; color: var(--muted); font-size: 11px; }
-.t-opt.active { border-color: var(--accent); background: rgba(76, 175, 109, 0.16); }
+.t-opt.active { border-color: var(--ui); background: rgba(var(--ui-rgb), 0.16); }
 .t-opt.active .t-opt-name { font-weight: bold; }
 .t-bars { display: flex; gap: 2px; align-items: flex-end; height: 14px; }
 .t-bars i { width: 4px; border-radius: 1px; background: var(--glass-border); }
-.t-bars i.on { background: var(--accent); }
+.t-bars i.on { background: var(--ui); }
 .t-error { margin: 0; min-height: 0; }
 .t-error:empty { display: none; }
 .t-submit { flex: none; flex-shrink: 0; }
 
 /* ---- Plan: objetivo y dieta ---- */
-.plan-sub { margin: 6px 16px 0; font-size: 12px; color: var(--muted); }
-.plan-actions { display: flex; flex-direction: column; gap: 8px; margin: 0 16px; }
-.plan-actions .dialog-btn { flex: none; }
+
+/* =========================================================
+    ✕ ÚNICA PARA TODA LA APP (tarjetas, ventanas, listas)
+========================================================= */
+.day-delete-x, .picker-close, .fr-del, .food-row .fr-del {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; padding: 0; margin: 0;
+    border: none; border-radius: 50%; background: none;
+    color: var(--muted); font-size: 17px; line-height: 1; font-weight: normal;
+    cursor: pointer; flex-shrink: 0; z-index: 2;
+}
+.day-delete-x { position: absolute; top: 2px; right: 2px; }
+.day-delete-x:active, .picker-close:active, .fr-del:active { background: rgba(var(--fg), .1); color: var(--text); }
+.day-delete-x:hover, .fr-del:hover { color: var(--accent-red); }
+
+/* =========================================================
+    BOTONES CUADRADOS DE AÑADIR
+========================================================= */
+.add-square.add-wide {
+    aspect-ratio: auto; width: 100%; min-height: 64px; flex-shrink: 0;
+    flex-direction: column; gap: 2px; padding: calc(8px * var(--k)) 12px;
+}
+.add-square.add-wide .add-square-plus { font-size: 26px; line-height: 1; }
+.add-square.add-compact { width: 96px; padding: 6px; gap: 2px; margin: 0 auto; }
+.add-square.add-compact .add-square-plus { font-size: 26px; line-height: 1; }
+.add-square.add-compact small { font-size: 11px; }
+
+/* "+" que se desvanece al convertirse en la tarjeta nueva */
+.convert-ghost {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 30px; color: var(--text-2); pointer-events: none;
+}
+
+/* =========================================================
+    VENTANA DEL DÍA (creador de rutinas)
+========================================================= */
+.day-sheet { max-height: 88vh; max-height: min(88dvh, 760px); }
+.day-sheet-list {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 2px 14px 16px; overflow-y: auto; min-height: 0; scrollbar-width: none;
+}
+.day-sheet-list::-webkit-scrollbar { display: none; }
+
+.rx-card { flex-shrink: 0; padding: 10px 12px 12px; }
+.rx-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: -4px -6px 6px 0; }
+.rx-head .exercise-name { text-align: left; font-size: 15px; }
+.rx-head .rx-x { position: static; }
+
+.rx-row { display: flex; align-items: flex-start; gap: 6px; }
+.rx-field { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
+.rx-field small { font-size: 10px; color: var(--muted); letter-spacing: .5px; }
+.rx-weight { flex: 1.6; }
+.rx-sets { flex: .8; }
+.rx-reps { flex: 1.3; }
+.rx-times { align-self: center; margin-top: -16px; color: var(--muted); font-size: 16px; }
+
+.rx-kg {
+    display: flex; align-items: stretch; width: 100%;
+    background: var(--inset); border: 1px solid var(--glass-border); border-radius: 8px; overflow: hidden;
+}
+.rx-kg .kg-value { flex: 1; min-width: 0; border: none; border-radius: 0; background: none; padding: 10px 4px; font-size: 18px; }
+.rx-card .rx-num, .rx-card .rx-kg .kg-value { width: 100%; padding: 10px 4px; font-size: 18px; }
+.rx-unit {
+    flex: none; margin: 0; padding: 0 9px; border: none; border-left: 1px solid var(--glass-border);
+    background: rgba(var(--fg), .05); color: var(--faint); font-size: 12px; cursor: pointer;
+}
+.rx-unit span.on { color: var(--ui); font-weight: bold; }
+.rx-unit:active { background: rgba(var(--fg), .12); }
+
+/* =========================================================
+    RANGO DE REPETICIONES (mínimo y máximo)
+========================================================= */
+.range-sheet { padding-bottom: 16px; }
+.range-sheet .stepper-sub { text-align: center; margin: -4px 0 8px; }
+.range-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 18px; }
+.range-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.range-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.range-col .stepper-btn { width: 100%; }
+.range-value { width: 100%; height: 90px; font-size: 40px; }
+.range-sheet .stepper-hint { margin: 10px 18px 12px; text-align: center; }
+.range-done { margin: 0 18px; flex: none; }
+
+/* =========================================================
+    LOGROS: completados y editor
+========================================================= */
+.achievement-chip.done { border-color: var(--accent); background: rgba(76, 175, 109, .16); }
+.achievement-chip.done::before { content: "✓ "; color: var(--accent); }
+#achievementsControl { gap: 8px; }
+.achievements-edit {
+    margin: 0; padding: 6px 14px; border-radius: 999px; font-size: 12px; cursor: pointer;
+    color: var(--text-2); background: var(--glass-bg); border: 1px solid var(--glass-border);
+}
+
+.ach-overlay {
+    position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: rgba(0, 0, 0, .7);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.ach-editor { width: 100%; max-width: 380px; max-height: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; overflow-y: auto; }
+.ach-title { margin: 0; font-size: 20px; color: #fff; letter-spacing: 2px; }
+.ach-help { margin: 0 0 4px; font-size: 12px; color: rgba(255, 255, 255, .7); }
+.ach-help .g { color: var(--accent); }
+.ach-help .r { color: var(--accent-red); }
+.ach-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.ach-row { display: flex; align-items: center; gap: 6px; width: 100% !important; padding: 10px 8px 10px 14px !important; text-align: left !important; }
+.ach-row::before { content: none !important; }
+.ach-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.ach-row.remove { border-color: var(--accent-red); background: rgba(224, 85, 85, .16); }
+.ach-row.remove .ach-text { text-decoration: line-through; opacity: .7; }
+.ach-btn {
+    width: 36px; height: 36px; margin: 0; padding: 0; flex-shrink: 0; border-radius: 50%; cursor: pointer;
+    border: 1px solid var(--glass-border); background: var(--inset); color: var(--muted); font-size: 16px;
+}
+.ach-btn.ok.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ach-btn.del.on { background: var(--accent-red); border-color: var(--accent-red); color: #fff; }
+.ach-editor .achievements-limit { color: rgba(255, 255, 255, .75); text-align: center; }
+.ach-actions { width: 100%; margin-top: 4px; }
+
+/* ---- Avatares (en lugar de foto) ---- */
+.profile-avatar, .profile-avatar svg { width: 100%; height: 100%; display: block; }
+.avatar-options { display: flex; justify-content: center; gap: 14px; margin-top: 10px; }
+.avatar-options[hidden] { display: none; }
+.avatar-option {
+    width: 62px; height: 62px; padding: 0; margin: 0; border-radius: 50%; overflow: hidden; cursor: pointer;
+    border: 1px solid var(--glass-border); background: var(--glass-bg);
+}
+.avatar-option svg { width: 100%; height: 100%; display: block; }
+.avatar-option.active { border-color: var(--ui); box-shadow: 0 0 0 2px var(--ui); }
+.settings-photo { display: flex; flex-direction: column; gap: 8px; }
+
+/* Botones de añadir (rutina, día, ejercicio, comida, logro): mismo estilo que "Empezar test" */
+.square-card.add-square { background: rgba(var(--ui-rgb), 0.18); border-color: var(--ui); color: var(--text); font-weight: bold; }
+.square-card.add-square .add-square-plus { color: var(--text); }
+.square-card.add-square small { color: var(--text); font-weight: bold; }
+.square-card.add-square:active { background: rgba(var(--ui-rgb), 0.3); }
+
+/* =========================================================
+    ENTRENO: tarjeta con insignia de estado, plan del día y series teñidas
+========================================================= */
+.wb-card { display: flex; flex-direction: column; }
+.wb-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wb-head .exercise-name { font-size: 16px; }
+.wb-badge {
+    display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+    padding: 4px 10px; border-radius: 999px; font-size: 11px; white-space: nowrap;
+    border: 1px solid var(--glass-border); color: var(--muted);
+}
+.wb-badge i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.wb-badge.green { border-color: rgba(76, 175, 109, .6); background: rgba(76, 175, 109, .14); color: var(--text); }
+.wb-badge.green i { background: var(--accent); }
+.wb-badge.gold { border-color: rgba(224, 192, 64, .6); background: rgba(224, 192, 64, .14); color: var(--text); }
+.wb-badge.gold i { background: var(--accent-gold); }
+.wb-badge.red { border-color: rgba(224, 85, 85, .6); background: rgba(224, 85, 85, .14); color: var(--text); }
+.wb-badge.red i { background: var(--accent-red); }
+
+.wb-plan { display: flex; align-items: center; gap: 6px; margin: calc(10px * var(--k)) 0 calc(12px * var(--k)); }
+.wb-kg { width: auto; flex: 0 1 auto; }
+.wb-kg .kg-value { min-width: 58px; padding: 10px 12px; font-size: 20px; border: none; border-radius: 0; background: none; }
+.wb-times { margin-top: 0; }
+.wb-pv {
+    display: flex; flex-direction: column; align-items: center; line-height: 1.15;
+    padding: 5px 10px; border-radius: 8px; border: 1px dashed var(--glass-border); color: var(--text-2);
+}
+.wb-pv b { font-size: 15px; }
+.wb-pv small { font-size: 9px; color: var(--muted); }
+
+.wb-sets { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.wb-serie { flex: 1; min-width: 52px; max-width: 68px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.wb-serie .serie-label { margin: 0; }
+.wb-serie .reps-value { border-radius: 8px; transition: background-color .25s, border-color .25s; }
+.wb-serie.green .reps-value { background: rgba(76, 175, 109, .16); border-color: rgba(76, 175, 109, .55); }
+.wb-serie.gold .reps-value { background: rgba(224, 192, 64, .14); border-color: rgba(224, 192, 64, .55); }
+.wb-serie.red .reps-value { background: rgba(224, 85, 85, .15); border-color: rgba(224, 85, 85, .55); }
+.wb-serie.extra .serie-label { color: var(--accent-gold); }
+
+/* "Añadir serie extra": ocupa el espacio libre de abajo de la tarjeta */
+.wb-extra { margin-top: auto; min-height: 48px; }
+.wb-sets { margin-bottom: 12px; }
+.wb-card .wb-extra { flex-direction: row; gap: 8px; }
+.wb-card .wb-extra .add-square-plus { font-size: 20px; }
+.wb-card .wb-extra small { font-size: 13px; }
+
+/* =========================================================
+    SEMANA SIN RUTINA
+========================================================= */
+#week.no-series .series-title, #week.no-series .series-panel { display: none; }
+#weekRoutineContent:has(.week-empty) { flex: 1; display: flex; }
+.week-empty {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 10px; padding: 24px 22px; margin: 4px 0 10px;
+    border-radius: 18px; background: var(--glass-bg); border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+}
+.week-empty-icon {
+    width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    color: var(--ui); background: radial-gradient(circle at 30% 25%, rgba(var(--ui-rgb), .35), rgba(var(--ui-rgb), .08));
+    border: 1px solid rgba(var(--ui-rgb), .45); box-shadow: 0 0 24px rgba(var(--ui-rgb), .18);
+}
+.week-empty-icon svg { width: 40px; height: 40px; }
+.week-empty h3 { margin: 6px 0 0; font-size: 20px; }
+.week-empty p { margin: 0; max-width: 280px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.week-empty-btn { width: auto; margin-top: 8px; padding: 12px 22px; }
+
+/* =========================================================
+    HISTORIAL: gráfica
+========================================================= */
+.history-chart-btn { width: 100%; flex: none; margin-top: 10px; }
+.history-chart { display: flex; flex-direction: column; gap: 8px; min-height: 250px; }
+.history-chart[hidden] { display: none; }
+.chart-caption { min-height: 20px; text-align: center; font-size: 13px; color: var(--muted); }
+.chart-caption b { color: var(--text); }
+.chart-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-grid { stroke: rgba(var(--fg), .08); stroke-width: 1; }
+.chart-base { stroke: rgba(var(--fg), .25); stroke-width: 1; }
+.chart-tick, .chart-label { fill: var(--muted); font-size: 10px; }
+.chart-line { fill: none; stroke-width: 1.5; opacity: .45; }
+.chart-pt { transform-box: fill-box; transform-origin: center; cursor: pointer; transition: opacity .2s; }
+.chart-halo { fill: var(--c); fill-opacity: .12; stroke: var(--c); stroke-opacity: .55; stroke-width: 1.5; }
+.chart-dot { fill: var(--c); stroke: var(--bg); stroke-width: 2; paint-order: stroke; }
+.chart-hit { fill: transparent; }
+.chart-svg.has-selection .chart-pt { opacity: .3; }
+.chart-svg.has-selection .chart-pt.selected { opacity: 1; }
+.chart-pt.selected .chart-halo { fill-opacity: .25; stroke-opacity: 1; }
+.chart-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font-size: 12px; color: var(--text-2); }
+.chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.chart-legend svg { width: 14px; height: 14px; }
+.chart-goal { stroke: var(--text-2); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: .7; }
+.chart-goal-label { fill: var(--text-2); font-size: 10px; }
+.chart-empty { margin: auto; text-align: center; color: var(--muted); font-size: 14px; }
+.history-grid[hidden] { display: none; }
+
+/* ---- Entreno: series a la izquierda, figura del ejercicio a la derecha ---- */
+.wb-body { flex: 1; min-height: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; margin-top: calc(10px * var(--k)); }
+.wb-left { display: flex; flex-direction: column; min-width: 0; }
+.wb-body .wb-plan { margin: 0 0 calc(10px * var(--k)); gap: 4px; }
+.wb-body .wb-kg .kg-value { min-width: 44px; padding: 9px 8px; font-size: 18px; }
+.wb-body .wb-pv { padding: 4px 7px; }
+.wb-body .wb-sets { display: grid; grid-template-columns: repeat(4, 50px); justify-content: start; gap: 8px 6px; margin-bottom: 0; }
+.wb-body .wb-serie { min-width: 0; max-width: none; }
+.wb-figure {
+    display: flex; align-items: center; justify-content: center; min-height: 110px; overflow: hidden;
+    border-radius: 12px; background: radial-gradient(circle at 50% 35%, rgba(var(--ui-rgb), .14), transparent 70%), var(--inset);
+    border: 1px solid var(--glass-border);
+}
+.fig-svg { width: 100%; height: 100%; max-height: 170px; display: block; }
+.fig-prop { fill: none; stroke: rgba(var(--fg), .28); stroke-width: 3; stroke-linecap: round; }
+.fig-limb { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.fig-glow { opacity: .55; }
+.fig-back { opacity: .45; }
+.fig-shine { fill: none; stroke: rgba(255, 255, 255, .55); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transform: translate(-1px, -1.2px); }
+.fig-head { stroke: rgba(255, 255, 255, .7); stroke-width: 1.2; }
+.fig-plate { fill: rgba(255, 255, 255, .18); stroke: rgba(255, 255, 255, .75); stroke-width: 1.3; }
+.wb-card .wb-extra { margin-top: calc(12px * var(--k)); }
+
+/* ---- Comida: Objetivo | Dieta, y Calibración debajo ---- */
+.food-plan-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: calc(10px * var(--k)); }
+.food-plan-row .food-plan { margin: 0; }
+.food-plan-row + .food-plan { margin-top: 8px; }
+.plan-opt { padding: 12px 14px; font-size: 15px; }
+.plan-opt small { font-size: 12px; text-align: right; }
+.t-actions { flex-shrink: 0; margin: 2px 0 0; }
+.t-actions .dialog-btn { flex: 1; }
+.fig-arrow { fill: none; stroke: var(--text-2); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+.fig-bar { fill: none; stroke: rgba(255, 255, 255, .7); stroke-width: 1.6; stroke-linecap: round; }
+.fig-disc { fill: rgba(255, 255, 255, .06); stroke-width: 2.4; stroke-dasharray: none; }
+.fig-hub { fill: rgba(255, 255, 255, .85); }
+
+/* =========================================================
+    ENTRENO EN VERTICAL: 2 tarjetas completas y la mitad de la siguiente
+========================================================= */
+#workoutExercises { flex: 1 1 0; min-height: 0; overflow: hidden; display: block; touch-action: none; }
+.workout-track { display: flex; flex-direction: column; gap: 10px; will-change: transform; }
+.workout-track > .exercise { flex: none; min-height: var(--card-h, 200px); padding: 10px 12px; margin: 0; }
+.workout-track .wb-head .exercise-name { font-size: 15px; }
+.workout-track .wb-badge { padding: 3px 9px; }
+.workout-track .wb-body { margin-top: 6px; gap: 8px; }
+.workout-track .wb-plan { margin-bottom: 6px; }
+.workout-track .wb-kg .kg-value { padding: 6px 8px; font-size: 16px; }
+.workout-track .wb-pv { padding: 2px 7px; }
+.workout-track .wb-pv b { font-size: 14px; }
+.workout-track .wb-sets { grid-template-columns: repeat(4, 46px); gap: 4px 6px; }
+.workout-track .wb-serie { gap: 2px; }
+.workout-track .wb-serie .serie-label { font-size: 12px; }
+.workout-track .wb-serie .reps-value { padding: 7px 0; font-size: 16px; }
+.workout-track .wb-figure { min-height: 0; }
+.workout-track .fig-svg { max-height: 120px; }
+.workout-track .wb-extra { min-height: 34px; margin-top: 8px; padding: 4px 10px; }
+.workout-track .wb-extra small { font-size: 12px; }
+.workout-track .workout-add { min-height: 56px; }
+.wb-head .wb-x { position: static; width: 30px; height: 30px; margin: -4px -6px -4px 0; }
+.wb-pv.editable { cursor: pointer; border-style: solid; border-color: rgba(var(--ui-rgb), .7); }
+.wb-pv.editable:active { background: rgba(var(--ui-rgb), .2); }
+
+/* =========================================================
+    SEMANA: entreno extraordinario, deporte y deportes del día
+========================================================= */
+#weekRoutineContent:has(.week-empty) { flex-direction: column; }
+.week-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.week-actions-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.week-actions .week-act { min-height: calc(58px * var(--k)); padding: 6px 8px; }
+.week-actions .week-act small { font-size: 12px; line-height: 1.2; }
+.sport-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.sport-chip {
+    display: inline-flex; align-items: center; gap: 2px; padding: 2px 2px 2px 12px; border-radius: 999px; font-size: 13px;
+    background: rgba(var(--ui-rgb), .14); border: 1px solid rgba(var(--ui-rgb), .6); color: var(--text-2);
+}
+.sport-chip b { color: var(--text); }
+.sport-chip .sport-x { position: static; width: 28px; height: 28px; font-size: 14px; }
+
+/* =========================================================
+    HISTORIAL: días con deporte y gráfica de deportes
+========================================================= */
+.history-cell { position: relative; }
+.history-cell.has-sport::after {
+    content: ""; position: absolute; left: 50%; bottom: 4px; width: 5px; height: 5px; margin-left: -2.5px;
+    border-radius: 50%; background: var(--ui); box-shadow: 0 0 0 1.5px var(--bg);
+}
+.history-cell.sport { background: rgba(var(--ui-rgb), .35); border-color: var(--ui); color: var(--text); }
+.chart-panel { display: flex; flex-direction: column; gap: 6px; }
+.chart-panel + .chart-panel { margin-top: 6px; }
+.chart-heading { text-align: center; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+
+/* ---- Entreno: textos y series más grandes; el "+" de serie extra va junto a las series ---- */
+.workout-track .wb-head .exercise-name { font-size: 17px; }
+.workout-track .wb-badge { font-size: 12px; padding: 4px 10px; }
+.workout-track .wb-plan { margin-bottom: 8px; }
+.workout-track .wb-kg .kg-value { padding: 8px 10px; font-size: 19px; }
+.workout-track .rx-unit { font-size: 13px; }
+.workout-track .wb-pv b { font-size: 16px; }
+.workout-track .wb-pv small { font-size: 10px; }
+.workout-track .wb-sets { grid-template-columns: repeat(4, 52px); gap: 6px 7px; }
+.workout-track .wb-serie .serie-label { font-size: 14px; }
+.workout-track .wb-serie .reps-value { padding: 10px 0; font-size: 19px; }
+.workout-track .fig-svg { max-height: 150px; }
+.wb-add-serie .serie-label { color: var(--muted); font-weight: normal; font-size: 11px !important; }
+.wb-add-btn {
+    width: 100%; margin: 0; cursor: pointer; font-weight: bold; color: var(--text);
+    background: rgba(var(--ui-rgb), .18); border: 1px dashed var(--ui); border-radius: 8px;
+}
+.wb-add-btn:active { background: rgba(var(--ui-rgb), .32); }
+
+/* ---- Entreno: fila del plan (peso × series × reps) al mismo nivel que las series ---- */
+.workout-track .wb-plan { gap: 5px; align-items: stretch; }
+.workout-track .wb-kg { min-height: 42px; }
+.workout-track .wb-kg .kg-value { display: flex; align-items: center; justify-content: center; min-width: 46px; padding: 0 9px; font-size: 21px; font-weight: bold; }
+.workout-track .rx-unit { font-size: 14px; padding: 0 9px; }
+.workout-track .wb-times { align-self: center; font-size: 17px; color: var(--text-2); }
+.workout-track .wb-pv {
+    justify-content: center; min-width: 46px; padding: 1px 9px;
+    border: 1px solid var(--glass-border); background: var(--inset); color: var(--text);
+}
+.workout-track .wb-pv b { font-size: 19px; }
+.workout-track .wb-pv small { font-size: 11px; color: var(--muted); }
+.workout-track .wb-pv.editable { border-color: rgba(var(--ui-rgb), .7); }
+
+/* =========================================================
+    BOTONES DE INICIO, CASITA Y TÍTULO CON EL COLOR DE LA APP
+========================================================= */
+.home-btn, .settings-btn {
+    color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.home-btn:active, .settings-btn:active { background: rgba(var(--ui-rgb), .32); }
+.backup-btn, .achievements-edit {
+    padding: 9px 14px; font-size: 13px; font-weight: bold; border-radius: 12px;
+    color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.backup-btn:active, .achievements-edit:active { background: rgba(var(--ui-rgb), .32); }
+.profile-photo { border-color: var(--ui); }
+
+/* el título del día o ejercicio (con ←) es un botón para volver */
+.week-date.clickable {
+    width: fit-content; max-width: 72%; margin-left: auto; margin-right: auto; padding: 0 16px;
+    border-radius: 12px; color: var(--text); white-space: nowrap; text-overflow: ellipsis;
+    background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.week-date.clickable:active { background: rgba(var(--ui-rgb), .32); }
+
+/* Activar rutina: solo un check, el doble de grande, del color de la app */
+.routine-activate {
+    width: 34px; height: 34px; padding: 0; bottom: 8px; right: 8px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--inset); border: 1.5px solid rgba(var(--ui-rgb), .7); color: rgba(var(--ui-rgb), .45);
+}
+.routine-activate svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.routine-active .routine-activate { background: var(--ui); border-color: var(--ui); color: #fff; }
+
+/* =========================================================
+    PULSO DISCRETO: indica que se puede pulsar (solo un brillo; no agranda ni mueve nada)
+========================================================= */
+@keyframes ui-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 11px 0 rgba(var(--ui-rgb), .33); }   /* +25 % */
+}
+.home-btn, .settings-btn, .profile-photo, .backup-btn, .achievements-edit,
+.square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
+.wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order {
+    animation: ui-pulse 3.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+    .home-btn, .settings-btn, .profile-photo, .backup-btn, .achievements-edit,
+    .square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
+    .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order { animation: none; }
+}

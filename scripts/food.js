@@ -305,13 +305,21 @@ function renderFood() {
                 <span>Proteína <b>${fmtNum(t.p, 0)} g</b></span>
                 <span>Grasa <b>${fmtNum(t.f, 0)} g</b></span>
             </div>
-            <button class="food-plan" data-act="plan" aria-label="Cambiar objetivo y dieta: ${GOALS[n.goal].short}, ${DIETS[n.diet].short}">
-                <span><small>Objetivo y dieta</small><b>${GOALS[n.goal].short} · ${DIETS[n.diet].short}</b></span><i aria-hidden="true">⚙</i>
+            <div class="food-plan-row">
+                <button class="food-plan" data-act="goal" aria-label="Cambiar objetivo: ${GOALS[n.goal].short}">
+                    <span><small>Objetivo</small><b>${GOALS[n.goal].short}</b></span><i aria-hidden="true">›</i>
+                </button>
+                <button class="food-plan" data-act="diet" aria-label="Cambiar dieta: ${DIETS[n.diet].short}">
+                    <span><small>Dieta</small><b>${DIETS[n.diet].short}</b></span><i aria-hidden="true">›</i>
+                </button>
+            </div>
+            <button class="food-plan" data-act="calib" aria-label="Calibración: ver, repetir o reiniciar el test TDEE">
+                <span><small>Calibración</small><b>TDEE ${fmtNum(calcTDEE(n.profile).tdee, 0)} kcal</b></span><i aria-hidden="true">⚙</i>
             </button>
         </div>
         <div class="food-groups">${top}</div>
         <div class="food-groups">${chip(last)}${waterChip}</div>
-        <button class="food-chip food-add" data-add="1">+ Comida</button>
+        <button class="square-card add-square add-wide food-add" data-add="1"><span class="add-square-plus">+</span><small>Comida</small></button>
         <button class="food-hist-btn" data-act="hist">Ver historial${foodDate ? "" : " de hoy"} <small>${entries.length ? `(${entries.length})` : ""}</small></button>`;
 }
 
@@ -412,12 +420,14 @@ document.addEventListener("click", e => {
     const act = e.target.closest("[data-act]");
     if (act) {
         if (act.dataset.act === "test") runTdeeTest();
-        else if (act.dataset.act === "plan") openPlanMenu();
+        else if (act.dataset.act === "goal") choosePlanOption("goal");
+        else if (act.dataset.act === "diet") choosePlanOption("diet");
+        else if (act.dataset.act === "calib") showTdeeResult({ calibrate: true });
         else if (act.dataset.act === "hist") openFoodHistory();
         return;
     }
 
-    const chip = e.target.closest(".food-chip");
+    const chip = e.target.closest(".food-chip, .food-add");
     if (!chip) return;
     if (chip.dataset.water) askWater();
     else openFoodPicker(chip.dataset.add ? null : chip.dataset.g);

@@ -6,7 +6,7 @@
 ========================================================= */
 
 const ACTIVITY = [
-    { k: 1.2,   name: "Sedentario",  short: "poco o nada" },
+    { k: 1.2,   name: "Sedentario",  short: "Poco o nada" },
     { k: 1.375, name: "Ligero",      short: "1-3 días" },
     { k: 1.55,  name: "Moderado",    short: "3-5 días" },
     { k: 1.725, name: "Intenso",     short: "6-7 días" },
@@ -200,7 +200,7 @@ function runTdeeTest() {
     act.appendChild(list);
 
     /* Grasa corporal (opcional) */
-    const fat = tCard("Grasa corporal", "opcional");
+    const fat = tCard("Grasa corporal", "Opcional");
     const fatRow = el("div", "t-row t-fat");
     const unknownBtn = el("button", "t-chip t-unknown", "No lo sé");
     unknownBtn.type = "button";
@@ -231,12 +231,13 @@ function runTdeeTest() {
 
 /* ---------- resultado: mismas tarjetas que el test ---------- */
 
-function showTdeeResult() {
+/* calibrate: abierto desde "Calibración" (con botones para repetir o reiniciar el test) */
+function showTdeeResult({ calibrate = false } = {}) {
     const n = nutrition();
     if (!n) return;
     const p = n.profile, t = calcTDEE(p);
     const f = (x, d = 0) => fmtNum(x, d);
-    const { sheet, close } = openSheet("tdee-sheet tdee-result", "Tu resultado");
+    const { sheet, close } = openSheet("tdee-sheet tdee-result", calibrate ? "Calibración" : "Tu resultado");
     const body = el("div", "t-body");
     sheet.appendChild(body);
 
@@ -271,60 +272,39 @@ function showTdeeResult() {
     const ok = el("button", "dialog-btn accept t-submit", "Entendido");
     ok.type = "button";
     ok.onclick = close;
+
+    if (calibrate) {
+        const row = el("div", "dialog-actions t-actions");
+        const again = el("button", "dialog-btn ghost", "Repetir el test");
+        again.type = "button";
+        again.onclick = () => { close(); runTdeeTest(); };
+        const reset = el("button", "dialog-btn danger", "Reiniciar plan");
+        reset.type = "button";
+        reset.onclick = async () => {
+            if (!await askConfirm({ title: "Reiniciar plan", message: "Se borrará el test, el objetivo y la dieta. Tu historial de comidas se mantiene.", confirmLabel: "Reiniciar" })) return;
+            state.nutrition = null; saveState(); renderFood(); close();
+        };
+        row.append(again, reset);
+        body.append(row);
+    }
     body.appendChild(ok);
 }
 
-/* ---------- plan: objetivo, dieta y opciones del test (botón bajo la línea de calorías) ---------- */
+/* ---------- Objetivo o dieta: una ventana con las opciones (la elegida, marcada) ---------- */
 
-function openPlanMenu() {
+function choosePlanOption(key) {
     if (!nutrition()) return;
-    const { sheet, close } = openSheet("settings-sheet plan-sheet", "Plan de nutrición");
+    const options = key === "goal" ? GOALS : DIETS;
+    const { sheet, close } = openSheet("tdee-sheet plan-choice", key === "goal" ? "Objetivo" : "Tipo de dieta");
+    const list = el("div", "t-body t-opts");
 
-    const choice = (title, key, options) => {
-        const label = document.createElement("div");
-        label.className = "settings-label";
-        label.textContent = title;
-        const seg = document.createElement("div");
-        seg.className = "seg";
-        const sub = document.createElement("div");
-        sub.className = "plan-sub";
-        const paint = () => {
-            seg.querySelectorAll(".seg-btn").forEach(b => b.classList.toggle("active", b.dataset.v === state.nutrition[key]));
-            sub.textContent = options[state.nutrition[key]].sub;
-        };
-        Object.entries(options).forEach(([k, v]) => {
-            const b = document.createElement("button");
-            b.type = "button";
-            b.className = "seg-btn";
-            b.dataset.v = k;
-            b.textContent = v.short;
-            b.onclick = () => { state.nutrition[key] = k; saveState(); renderFood(); paint(); };
-            seg.appendChild(b);
-        });
-        paint();
-        sheet.append(label, seg, sub);
-    };
-    choice("Objetivo", "goal", GOALS);
-    choice("Tipo de dieta", "diet", DIETS);
-
-    const label = document.createElement("div");
-    label.className = "settings-label";
-    label.textContent = "Test TDEE";
-    const actions = document.createElement("div");
-    actions.className = "plan-actions";
-    const action = (text, kind, onClick) => {
-        const b = document.createElement("button");
+    Object.entries(options).forEach(([k, v]) => {
+        const active = state.nutrition[key] === k;
+        const b = el("button", "t-opt plan-opt" + (active ? " active" : ""), `<span class="t-opt-name">${v.name}</span><small>${v.sub}</small>`);
         b.type = "button";
-        b.className = `dialog-btn ${kind}`;
-        b.textContent = text;
-        b.onclick = onClick;
-        actions.appendChild(b);
-    };
-    action("Ver mi TDEE", "ghost", () => { close(); showTdeeResult(); });
-    action("Repetir el test", "ghost", () => { close(); runTdeeTest(); });
-    action("Reiniciar plan", "danger", async () => {
-        if (!await askConfirm({ title: "Reiniciar plan", message: "Se borrará el test, el objetivo y la dieta. Tu historial de comidas se mantiene.", confirmLabel: "Reiniciar" })) return;
-        state.nutrition = null; saveState(); renderFood(); close();
+        b.setAttribute("aria-pressed", active);
+        b.onclick = () => { state.nutrition[key] = k; saveState(); renderFood(); close(); };
+        list.appendChild(b);
     });
-    sheet.append(label, actions);
+    sheet.appendChild(list);
 }
