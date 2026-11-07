@@ -1709,9 +1709,7 @@ function priorityIndex(priority, group) {
 
 let pickerOverlay = null;
 
-/* options: { title, groups: [{ title?, items: [{ label, sub?, value }] }], searchable, createLabel, emptyText, onPick(value), onCreate(query), onCancel() } */
-let pickerOnCancel = null;
-
+/* options: { title, groups: [{ title?, items: [{ label, sub?, value }] }], searchable, createLabel, emptyText, onPick(value), onCreate(query) } */
 function openPicker(options) {
     closePicker(true);
 
@@ -1757,7 +1755,6 @@ function openPicker(options) {
         createBtn.textContent = `+ ${options.createLabel}`;
         createBtn.onclick = () => {
             const query = search ? search.value.trim() : "";
-            pickerOnCancel = null;
             closePicker();
             options.onCreate(query);
         };
@@ -1792,7 +1789,6 @@ function openPicker(options) {
                     btn.appendChild(sub);
                 }
                 btn.onclick = () => {
-                    pickerOnCancel = null;
                     closePicker();
                     options.onPick(item.value);
                 };
@@ -1816,7 +1812,6 @@ function openPicker(options) {
     overlay.appendChild(sheet);
     document.body.appendChild(overlay);
     pickerOverlay = overlay;
-    pickerOnCancel = options.onCancel || null;
 
     overlay.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });
     sheet.animate(
@@ -1829,11 +1824,6 @@ function closePicker(immediate) {
     const overlay = pickerOverlay;
     if (!overlay) return;
     pickerOverlay = null;
-
-    /* cerrada sin elegir nada: avisa a quien esperaba la respuesta */
-    const cancel = pickerOnCancel;
-    pickerOnCancel = null;
-    if (cancel) cancel();
 
     if (immediate) { overlay.remove(); return; }
 
@@ -1999,6 +1989,50 @@ function showMessage({ title, message }) {
         message,
         buttons: [{ label: "Entendido", kind: "accept", confirm: true, value: true, cancelValue: undefined }]
     });
+}
+
+/* Ventana flotante genérica con título y ✕ (test TDEE, resultado, plan, historial de comida).
+   Se cierra con ✕, Escape o tocando fuera. Devuelve { sheet, close }. */
+function openSheet(className, title) {
+    const overlay = document.createElement("div");
+    overlay.className = "picker-overlay";
+    const sheet = document.createElement("div");
+    sheet.className = `picker-sheet ${className}`;
+    sheet.setAttribute("role", "dialog");
+    sheet.setAttribute("aria-modal", "true");
+
+    const head = document.createElement("div");
+    head.className = "picker-head";
+    const h = document.createElement("h3");
+    h.className = "picker-title";
+    h.textContent = title;
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "picker-close";
+    closeBtn.setAttribute("aria-label", "Cerrar");
+    closeBtn.textContent = "✕";
+    head.append(h, closeBtn);
+    sheet.appendChild(head);
+    overlay.appendChild(sheet);
+
+    let closed = false;
+    const close = () => {
+        if (closed) return;
+        closed = true;
+        window.removeEventListener("keydown", onKey, true);
+        overlay.style.pointerEvents = "none";
+        sheet.animate([{ transform: "none", opacity: 1 }, { transform: "scale(0.9) translateY(4%)", opacity: 0 }], { duration: 130, easing: "ease-in", fill: "forwards" });
+        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
+    };
+    const onKey = e => { if (!dialogOverlay && e.key === "Escape") { e.preventDefault(); close(); } };
+    window.addEventListener("keydown", onKey, true);
+    closeBtn.onclick = close;
+    overlay.addEventListener("pointerdown", e => { if (e.target === overlay) close(); });
+
+    document.body.appendChild(overlay);
+    overlay.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });
+    sheet.animate([{ transform: "scale(0.84) translateY(6%)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 240, easing: "cubic-bezier(.2,.8,.2,1)" });
+    return { sheet, close };
 }
 
 /* =========================================================

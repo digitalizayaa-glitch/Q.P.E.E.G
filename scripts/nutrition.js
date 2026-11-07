@@ -65,100 +65,198 @@ function nutritionPlan() {
     return { kcal, goals, water: Math.round(n.profile.weight * 35 / 250) * 250 };
 }
 
-/* ---------- ayudas de interfaz ---------- */
+/* ---------- test TDEE: todas las preguntas en una sola ventana ---------- */
 
-/* Devuelve el valor elegido, o null si se cierra la ventana */
-const choose = (title, items) => new Promise(resolve =>
-    openPicker({ title, groups: [{ items }], onPick: resolve, onCancel: () => resolve(null) }));
+const TDEE_FIELDS = [
+    { k: "age",    label: "Edad",           unit: "años", min: 14,  max: 90,  mode: "numeric" },
+    { k: "weight", label: "Peso",           unit: "kg",   min: 30,  max: 250, mode: "decimal" },
+    { k: "height", label: "Altura",         unit: "cm",   min: 120, max: 230, mode: "numeric" },
+    { k: "bf",     label: "Grasa corporal", unit: "%",    min: 3,   max: 60,  mode: "decimal", optional: true }
+];
 
-const numAsk = (title, label, min, max, extra = {}) => askText({
-    title, label, inputMode: "decimal", maxLength: 5, confirmLabel: "Siguiente", ...extra,
-    validate: text => {
-        const v = parseFloat(text.replace(",", "."));
-        return isFinite(v) && v >= min && v <= max ? "" : `Escribe un número entre ${min} y ${max}.`;
-    }
-});
-const toNum = text => parseFloat(String(text).replace(",", "."));
+function runTdeeTest() {
+    const old = nutrition()?.profile || {};
+    const { sheet, close } = openSheet("tdee-sheet", "Test TDEE");
 
-function describeResult(n) {
-    const p = n.profile, t = calcTDEE(p);
-    const f = (x, d = 0) => fmtNum(x, d);
-    const lines = [
-        `Calorías de mantenimiento: ${f(t.tdee)} kcal/día`,
-        `Metabolismo basal: ${f(t.bmr)} kcal`,
-        `Peso ideal: ${f(t.ideal, 1)} kg (rango sano ${f(t.idealMin, 1)}–${f(t.idealMax, 1)} kg)`,
-        `Máximo potencial muscular: ${f(t.leanMax, 1)} kg de masa magra, unos ${f(t.weightAtMax, 1)} kg de peso con ${Math.round(t.bfTarget * 100)} % de grasa.`
-    ];
-    lines.push(t.bfKnown
-        ? `Tu masa magra actual: ${f(t.lean, 1)} kg → te faltan ≈ ${f(t.muscleLeft, 1)} kg de músculo.`
-        : `Grasa corporal estimada: ${f(t.bf, 0)} % (no la indicaste).`);
-    return lines.join("\n");
+    const form = document.createElement("form");
+    form.className = "tdee-form";
+    form.noValidate = true;
+
+    const row = (labelText, control) => {
+        const label = document.createElement("div");
+        label.className = "tdee-label";
+        label.innerHTML = labelText;
+        const wrap = document.createElement("div");
+        wrap.className = "tdee-control";
+        wrap.append(...control);
+        form.append(label, wrap);
+    };
+
+    /* Género */
+    const sexes = [["m", "Hombre"], ["f", "Mujer"]].map(([value, text]) => {
+        const l = document.createElement("label");
+        l.className = "tdee-radio";
+        l.innerHTML = `<input type="radio" name="sex" value="${value}"${(old.sex || "m") === value ? " checked" : ""}> ${text}`;
+        return l;
+    });
+    row("Género", sexes);
+
+    const error = document.createElement("div");
+    error.className = "dialog-error tdee-error";
+
+    const select = document.createElement("select");
+    select.className = "tdee-select";
+    select.setAttribute("aria-label", "Ejercicio");
+    ACTIVITY.forEach(a => {
+        const o = document.createElement("option");
+        o.value = a.k;
+        o.textContent = `${a.name} (${a.sub})`;
+        o.selected = old.activity ? old.activity === a.k : a.k === 1.55;
+        select.appendChild(o);
+    });
+
+    /* Números (el ejercicio va después de la altura) */
+    const inputs = {};
+    TDEE_FIELDS.forEach(f => {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "tdee-input";
+        input.inputMode = f.mode;
+        input.maxLength = 5;
+        input.autocomplete = "off";
+        input.setAttribute("aria-label", f.label);
+        if (typeof old[f.k] === "number") input.value = String(old[f.k]).replace(".", ",");
+        input.addEventListener("input", () => { input.classList.remove("bad"); error.textContent = ""; });
+        inputs[f.k] = input;
+        const unit = document.createElement("span");
+        unit.className = "tdee-unit";
+        unit.textContent = f.unit;
+        row(f.optional ? `${f.label}<small>(opcional)</small>` : f.label, [input, unit]);
+        if (f.k === "height") row("Ejercicio", [select]);
+    });
+
+    const submit = document.createElement("button");
+    submit.type = "submit";
+    submit.className = "dialog-btn accept tdee-submit";
+    submit.textContent = "Calcular";
+    form.append(error, submit);
+    sheet.appendChild(form);
+
+    form.addEventListener("submit", e => {
+        e.preventDefault();
+        const values = {};
+        for (const f of TDEE_FIELDS) {
+            const text = inputs[f.k].value.trim();
+            if (!text && f.optional) { values[f.k] = null; continue; }
+            const v = parseFloat(text.replace(",", "."));
+            if (!isFinite(v) || v < f.min || v > f.max) {
+                inputs[f.k].classList.add("bad");
+                inputs[f.k].focus();
+                error.textContent = `${f.label}: escribe un número entre ${f.min} y ${f.max}.`;
+                return;
+            }
+            values[f.k] = v;
+        }
+        const profile = {
+            age: values.age, sex: form.querySelector("input[name=sex]:checked").value,
+            height: values.height, weight: values.weight, activity: parseFloat(select.value), bf: values.bf
+        };
+        state.nutrition = { profile, goal: state.nutrition?.goal || "maintain", diet: state.nutrition?.diet || "mod" };
+        saveState();
+        renderFood();
+        close();
+        showTdeeResult();
+    });
 }
 
-/* ---------- test TDEE ---------- */
+/* ---------- resultado: cada dato en su propia sección ---------- */
 
-async function runTdeeTest() {
-    const age = await numAsk("Edad", "¿Cuántos años tienes?", 14, 90, { inputMode: "numeric" });
-    if (age === null) return false;
-
-    const sex = await choose("Género", [{ label: "Hombre", value: "m" }, { label: "Mujer", value: "f" }]);
-    if (sex === null) return false;
-    const height = await numAsk("Altura", "Altura en centímetros", 120, 230, { inputMode: "numeric" });
-    if (height === null) return false;
-    const weight = await numAsk("Peso", "Peso en kilogramos", 30, 250);
-    if (weight === null) return false;
-
-    const activity = await choose("Ejercicio", ACTIVITY.map(a => ({ label: a.name, sub: a.sub, value: a.k })));
-    if (activity === null) return false;
-    const bfText = await numAsk("Grasa corporal", "% de grasa corporal (déjalo vacío si no lo sabes)", 3, 60, { allowEmpty: true, confirmLabel: "Calcular" });
-    if (bfText === null) return false;
-
-    const profile = { age: toNum(age), sex, height: toNum(height), weight: toNum(weight), activity, bf: bfText === "" ? null : toNum(bfText) };
-    state.nutrition = { profile, goal: state.nutrition?.goal || "maintain", diet: state.nutrition?.diet || "mod" };
-
-    /* se guarda ya: si luego se cierra la elección de objetivo o dieta, quedan los valores por defecto */
-    saveState();
-    renderFood();
-    await showMessage({ title: "Tu resultado", message: describeResult(state.nutrition) });
-    const goal = await chooseGoal(true);
-    if (goal) await chooseDiet(true);
-    return true;
-}
-
-async function chooseGoal(first) {
-    const g = await choose(first ? "¿Cuál es tu objetivo?" : "Cambiar objetivo",
-        Object.entries(GOALS).map(([k, v]) => ({ label: v.name, sub: v.sub, value: k })));
-    if (g) { state.nutrition.goal = g; saveState(); renderFood(); }
-    return g;
-}
-
-async function chooseDiet(first) {
-    const d = await choose(first ? "¿Qué tipo de dieta prefieres?" : "Cambiar dieta",
-        Object.entries(DIETS).map(([k, v]) => ({ label: v.name, sub: v.sub, value: k })));
-    if (d) { state.nutrition.diet = d; saveState(); renderFood(); }
-    return d;
-}
-
-function openPlanMenu() {
+function showTdeeResult() {
     const n = nutrition();
     if (!n) return;
-    openPicker({
-        title: "Plan de nutrición",
-        groups: [{ items: [
-            { label: `Objetivo: ${GOALS[n.goal].short}`, sub: "Mantener, bulking o cutting", value: "goal" },
-            { label: `Dieta: ${DIETS[n.diet].short}`, sub: "Carbohidratos altos, moderados o bajos", value: "diet" },
-            { label: "Ver mi TDEE", sub: "Mantenimiento, peso ideal y potencial", value: "info" },
-            { label: "Repetir el test", sub: "Actualiza edad, peso, ejercicio…", value: "test" },
-            { label: "Reiniciar plan", sub: "Borra el test (el historial se conserva)", value: "reset" }
-        ] }],
-        onPick: async v => {
-            if (v === "goal") chooseGoal(false);
-            else if (v === "diet") chooseDiet(false);
-            else if (v === "info") showMessage({ title: "Tu TDEE", message: describeResult(n) });
-            else if (v === "test") runTdeeTest();
-            else if (v === "reset" && await askConfirm({ title: "Reiniciar plan", message: "Se borrará el test, el objetivo y la dieta. Tu historial de comidas se mantiene.", confirmLabel: "Reiniciar" })) {
-                state.nutrition = null; saveState(); renderFood();
-            }
-        }
+    const t = calcTDEE(n.profile);
+    const f = (x, d = 0) => fmtNum(x, d);
+    const { sheet, close } = openSheet("tdee-result", "Tu resultado");
+
+    const card = (title, value, lines, main) => {
+        const c = document.createElement("section");
+        c.className = "tdee-card" + (main ? " main" : "");
+        c.innerHTML = `<h4>${title}</h4><div class="tdee-value">${value}</div>${lines.map(l => `<p>${l}</p>`).join("")}`;
+        return c;
+    };
+
+    const grid = document.createElement("div");
+    grid.className = "tdee-cards";
+    grid.append(
+        card("Calorías de mantenimiento", `${f(t.tdee)} <small>kcal/día</small>`, [`Metabolismo basal: ${f(t.bmr)} kcal`], true),
+        card("Peso ideal", `${f(t.ideal, 1)} <small>kg</small>`, [`Rango sano: ${f(t.idealMin, 1)}–${f(t.idealMax, 1)} kg`]),
+        card("Grasa corporal", `${f(t.bf, 0)} <small>%</small>`, [t.bfKnown ? `Masa magra: ${f(t.lean, 1)} kg` : "Estimada (no la indicaste)"]),
+        card("Máximo potencial muscular", `${f(t.leanMax, 1)} <small>kg de masa magra</small>`, [
+            `Unos ${f(t.weightAtMax, 1)} kg de peso con ${Math.round(t.bfTarget * 100)} % de grasa.`,
+            ...(t.bfKnown ? [`Te faltan ≈ ${f(t.muscleLeft, 1)} kg de músculo.`] : [])
+        ], true)
+    );
+    sheet.appendChild(grid);
+
+    const ok = document.createElement("button");
+    ok.type = "button";
+    ok.className = "dialog-btn accept tdee-submit";
+    ok.textContent = "Entendido";
+    ok.onclick = close;
+    sheet.appendChild(ok);
+}
+
+/* ---------- plan: objetivo, dieta y opciones del test (botón bajo la línea de calorías) ---------- */
+
+function openPlanMenu() {
+    if (!nutrition()) return;
+    const { sheet, close } = openSheet("settings-sheet plan-sheet", "Plan de nutrición");
+
+    const choice = (title, key, options) => {
+        const label = document.createElement("div");
+        label.className = "settings-label";
+        label.textContent = title;
+        const seg = document.createElement("div");
+        seg.className = "seg";
+        const sub = document.createElement("div");
+        sub.className = "plan-sub";
+        const paint = () => {
+            seg.querySelectorAll(".seg-btn").forEach(b => b.classList.toggle("active", b.dataset.v === state.nutrition[key]));
+            sub.textContent = options[state.nutrition[key]].sub;
+        };
+        Object.entries(options).forEach(([k, v]) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "seg-btn";
+            b.dataset.v = k;
+            b.textContent = v.short;
+            b.onclick = () => { state.nutrition[key] = k; saveState(); renderFood(); paint(); };
+            seg.appendChild(b);
+        });
+        paint();
+        sheet.append(label, seg, sub);
+    };
+    choice("Objetivo", "goal", GOALS);
+    choice("Tipo de dieta", "diet", DIETS);
+
+    const label = document.createElement("div");
+    label.className = "settings-label";
+    label.textContent = "Test TDEE";
+    const actions = document.createElement("div");
+    actions.className = "plan-actions";
+    const action = (text, kind, onClick) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = `dialog-btn ${kind}`;
+        b.textContent = text;
+        b.onclick = onClick;
+        actions.appendChild(b);
+    };
+    action("Ver mi TDEE", "ghost", () => { close(); showTdeeResult(); });
+    action("Repetir el test", "ghost", () => { close(); runTdeeTest(); });
+    action("Reiniciar plan", "danger", async () => {
+        if (!await askConfirm({ title: "Reiniciar plan", message: "Se borrará el test, el objetivo y la dieta. Tu historial de comidas se mantiene.", confirmLabel: "Reiniciar" })) return;
+        state.nutrition = null; saveState(); renderFood(); close();
     });
+    sheet.append(label, actions);
 }

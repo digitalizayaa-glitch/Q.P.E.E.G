@@ -1132,19 +1132,62 @@ main { overflow-x: hidden; }
 .food-setup h3 { margin: 4px 0 8px; font-size: 18px; }
 .food-setup p { color: var(--text-2); font-size: 13px; line-height: 1.45; margin: 0 0 14px; }
 .food-start { margin: 0; width: 100%; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: bold; color: var(--text); background: rgba(76, 175, 109, 0.22); border: 1px solid var(--accent); }
-.food-plan { display: block; margin: 8px auto 0; padding: 4px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--text-2); background: var(--glass-bg); border: 1px solid var(--glass-border); }
-.food-last { grid-template-columns: 1fr 1fr 1fr; }
-.food-last .food-chip { flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: calc(9px * var(--k)) 6px calc(12px * var(--k)); text-align: center; }
-.food-last .food-add { font-size: 13px; }
+.food-plan {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 46px;
+    margin: calc(10px * var(--k)) 0 0; padding: 7px 14px; border-radius: 12px; cursor: pointer; text-align: left;
+    color: var(--text); background: rgba(76, 175, 109, 0.14); border: 1px solid var(--accent);
+}
+.food-plan small { display: block; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); }
+.food-plan b { display: block; font-size: 15px; }
+.food-plan i { font-style: normal; font-size: 20px; color: var(--accent); }
+.food-plan:active { filter: brightness(1.25); }
+.food-add { flex-shrink: 0; font-size: 15px; padding: calc(11px * var(--k)) 12px; }
 .food-hist-btn { margin: 0; padding: calc(12px * var(--k)) 14px; border-radius: 14px; cursor: pointer; font-size: 14px; color: var(--text); background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); flex-shrink: 0; }
 .food-hist-btn small { color: var(--muted); }
 .food-hist-btn:active { background: var(--glass-bg-strong); border-color: var(--accent); }
 .fh-sheet { display: flex; flex-direction: column; }
 .fh-seg { margin-bottom: 8px; flex-shrink: 0; }
-.fh-bands { display: flex; gap: 6px; margin: 0 16px 6px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
-.fh-bands::-webkit-scrollbar { display: none; }
-.fh-band { flex: none; margin: 0; padding: 6px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--text-2); background: var(--glass-bg); border: 1px solid var(--glass-border); }
-.fh-band.active { border-color: var(--accent); background: rgba(76, 175, 109, 0.18); color: var(--text); }
+.fh-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.fh-order { align-self: flex-start; margin: 0 16px 6px; padding: 6px 12px; border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--text); border: 1px solid var(--accent); background: rgba(76, 175, 109, 0.18); }
 .fh-list { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 120px; }
 .fh-list .picker-group { display: flex; justify-content: space-between; }
 .fh-list .picker-group span { text-transform: none; letter-spacing: 0; }
+
+/* ---- Test TDEE: todas las preguntas en una ventana ---- */
+.tdee-form {
+    display: grid; grid-template-columns: auto 1fr; gap: 12px 14px; align-items: center;
+    padding: 6px 18px 18px; overflow-y: auto; min-height: 0;
+}
+.tdee-label { font-weight: bold; font-size: 14px; text-align: right; }
+.tdee-label small { display: block; font-weight: normal; font-size: 11px; color: var(--muted); }
+.tdee-control { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.tdee-radio { display: flex; align-items: center; gap: 6px; font-size: 15px; cursor: pointer; margin-right: 8px; }
+.tdee-radio input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.tdee-input, .tdee-select {
+    padding: 10px 12px; border-radius: 10px; border: 1px solid var(--glass-border);
+    background: var(--inset); color: var(--text); font-size: 16px; outline: none;
+}
+.tdee-input { width: 76px; -webkit-user-select: text; user-select: text; }
+.tdee-select { width: 100%; min-width: 0; color-scheme: dark; }
+:root[data-theme="light"] .tdee-select { color-scheme: light; }
+.tdee-input:focus, .tdee-select:focus { border-color: var(--accent); }
+.tdee-input.bad { border-color: var(--accent-red); }
+.tdee-unit { color: var(--muted); font-size: 13px; }
+.tdee-error { grid-column: 1 / -1; margin: 0; }
+.tdee-submit { grid-column: 1 / -1; flex: none; }
+
+/* ---- Resultado del test: una tarjeta por dato ---- */
+.tdee-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 16px; overflow-y: auto; min-height: 0; }
+.tdee-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px; }
+.tdee-card.main { grid-column: 1 / -1; }
+.tdee-card h4 { margin: 0 0 6px; font-size: 11px; font-weight: normal; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.tdee-value { font-size: 24px; font-weight: bold; line-height: 1.1; }
+.tdee-card.main .tdee-value { font-size: 30px; }
+.tdee-value small { font-size: 12px; font-weight: normal; color: var(--muted); }
+.tdee-card p { margin: 6px 0 0; font-size: 12px; line-height: 1.4; color: var(--text-2); }
+.tdee-result > .tdee-submit { margin: 12px 16px 16px; }
+
+/* ---- Plan: objetivo y dieta ---- */
+.plan-sub { margin: 6px 16px 0; font-size: 12px; color: var(--muted); }
+.plan-actions { display: flex; flex-direction: column; gap: 8px; margin: 0 16px; }
+.plan-actions .dialog-btn { flex: none; }

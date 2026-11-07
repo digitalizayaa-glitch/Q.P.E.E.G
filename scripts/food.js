@@ -305,10 +305,13 @@ function renderFood() {
                 <span>Proteína <b>${fmtNum(t.p, 0)} g</b></span>
                 <span>Grasa <b>${fmtNum(t.f, 0)} g</b></span>
             </div>
-            <button class="food-plan" data-act="plan">${GOALS[n.goal].short} · ${DIETS[n.diet].short} ⚙</button>
+            <button class="food-plan" data-act="plan" aria-label="Cambiar objetivo y dieta: ${GOALS[n.goal].short}, ${DIETS[n.diet].short}">
+                <span><small>Objetivo y dieta</small><b>${GOALS[n.goal].short} · ${DIETS[n.diet].short}</b></span><i aria-hidden="true">⚙</i>
+            </button>
         </div>
         <div class="food-groups">${top}</div>
-        <div class="food-groups food-last">${chip(last)}<button class="food-chip food-add" data-add="1">+ Comida</button>${waterChip}</div>
+        <div class="food-groups">${chip(last)}${waterChip}</div>
+        <button class="food-chip food-add" data-add="1">+ Comida</button>
         <button class="food-hist-btn" data-act="hist">Ver historial${foodDate ? "" : " de hoy"} <small>${entries.length ? `(${entries.length})` : ""}</small></button>`;
 }
 
@@ -316,20 +319,12 @@ function renderFood() {
 
 function openFoodHistory() {
     let mode = "time";          /* "time" = por hora, "kcal" = por calorías */
-    let band = "all";
     let desc = true;
 
-    const overlay = document.createElement("div");
-    overlay.className = "picker-overlay";
-    const sheet = document.createElement("div");
-    sheet.className = "picker-sheet fh-sheet";
-    overlay.appendChild(sheet);
-
-    const close = () => {
-        overlay.style.pointerEvents = "none";
-        sheet.animate([{ transform: "none", opacity: 1 }, { transform: "scale(0.9) translateY(4%)", opacity: 0 }], { duration: 140, easing: "ease-in", fill: "forwards" });
-        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
-    };
+    const { sheet } = openSheet("fh-sheet", `Historial${foodDate ? "" : " de hoy"}`);
+    const body = document.createElement("div");
+    body.className = "fh-body";
+    sheet.appendChild(body);
 
     const kcalOf = e => { const g = FOOD_GROUP[e.g]; return g ? e.p * groupKcal(g) : 0; };
     const rowHtml = e => {
@@ -340,61 +335,46 @@ function openFoodHistory() {
             <span class="fr-dot"></span>
             <span class="fr-name">${esc(e.n)}<small>${e.ts ? fmtTime(e.ts) + " · " : ""}${esc(e.t)}</small></span>
             <span class="fr-kcal">${isWater ? fmtNum(e.p * WATER_ML, 0) + " ml" : fmtNum(kcalOf(e), 0) + " kcal"}</span>
-            <button class="fr-del" data-id="${e.id}" aria-label="Quitar">✕</button>
+            <button class="fr-del" data-id="${esc(e.id)}" aria-label="Quitar">✕</button>
         </div>`;
     };
 
+    /* Por hora: todas las franjas del día, cada una con su total */
     const draw = () => {
         const all = foodEntries();
-        let body = "";
+        let list;
         if (mode === "kcal") {
-            const list = all.slice().sort((a, b) => desc ? kcalOf(b) - kcalOf(a) : kcalOf(a) - kcalOf(b));
-            body = list.length ? list.map(rowHtml).join("") : '<p class="picker-empty">Aún no hay comidas.</p>';
+            const sorted = all.slice().sort((a, b) => desc ? kcalOf(b) - kcalOf(a) : kcalOf(a) - kcalOf(b));
+            list = sorted.map(rowHtml).join("");
         } else {
-            const bands = TIME_BANDS.filter(b => band === "all" || band === b.k);
-            const parts = bands.map(b => {
-                const list = all.filter(e => bandOf(e.ts)?.k === b.k).sort((x, y) => x.ts - y.ts);
-                if (!list.length) return "";
-                const kc = list.reduce((s, e) => s + kcalOf(e), 0);
-                return `<div class="picker-group">${b.name} · ${b.hint} <span>${fmtNum(kc, 0)} kcal</span></div>${list.map(rowHtml).join("")}`;
-            });
-            if (band === "all") {
-                const old = all.filter(e => !e.ts);
-                if (old.length) parts.push(`<div class="picker-group">Sin hora registrada</div>${old.map(rowHtml).join("")}`);
-            }
-            body = parts.join("") || '<p class="picker-empty">No hay comidas en este horario.</p>';
+            list = TIME_BANDS.map(b => {
+                const items = all.filter(e => bandOf(e.ts)?.k === b.k).sort((x, y) => x.ts - y.ts);
+                if (!items.length) return "";
+                const kc = items.reduce((s, e) => s + kcalOf(e), 0);
+                return `<div class="picker-group">${b.name} · ${b.hint} <span>${fmtNum(kc, 0)} kcal</span></div>${items.map(rowHtml).join("")}`;
+            }).join("");
+            const old = all.filter(e => !e.ts);
+            if (old.length) list += `<div class="picker-group">Sin hora registrada</div>${old.map(rowHtml).join("")}`;
         }
 
-        const bandBtns = mode === "time"
-            ? `<div class="fh-bands">${[{ k: "all", name: "Todo el día" }, ...TIME_BANDS].map(b =>
-                `<button class="fh-band${band === b.k ? " active" : ""}" data-band="${b.k}">${b.name}</button>`).join("")}</div>`
-            : `<div class="fh-bands"><button class="fh-band active" data-order="1">${desc ? "Más calorías primero ▼" : "Menos calorías primero ▲"}</button></div>`;
-
-        sheet.innerHTML = `
-            <div class="picker-head"><h3 class="picker-title">Historial${foodDate ? "" : " de hoy"}</h3><button class="picker-close" data-close="1" aria-label="Cerrar">✕</button></div>
+        body.innerHTML = `
             <div class="seg fh-seg">
                 <button class="seg-btn${mode === "time" ? " active" : ""}" data-mode="time">Hora</button>
                 <button class="seg-btn${mode === "kcal" ? " active" : ""}" data-mode="kcal">Calorías</button>
             </div>
-            ${bandBtns}
-            <div class="picker-list fh-list">${body}</div>`;
+            ${mode === "kcal" && all.length > 1 ? `<button class="fh-order" data-order="1">${desc ? "Más calorías primero ▼" : "Menos calorías primero ▲"}</button>` : ""}
+            <div class="picker-list fh-list">${list || '<p class="picker-empty">Aún no hay comidas.</p>'}</div>`;
     };
 
-    sheet.addEventListener("click", e => {
+    body.addEventListener("click", e => {
         const t = e.target.closest("button");
         if (!t) return;
-        if (t.dataset.close) close();
-        else if (t.dataset.mode) { mode = t.dataset.mode; draw(); }
-        else if (t.dataset.band) { band = t.dataset.band; draw(); }
+        if (t.dataset.mode) { mode = t.dataset.mode; draw(); }
         else if (t.dataset.order) { desc = !desc; draw(); }
         else if (t.dataset.id) { removeFoodEntry(t.dataset.id); renderFood(); draw(); }
     });
-    overlay.addEventListener("pointerdown", e => { if (e.target === overlay) close(); });
 
     draw();
-    document.body.appendChild(overlay);
-    overlay.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });
-    sheet.animate([{ transform: "scale(0.84) translateY(6%)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 240, easing: "cubic-bezier(.2,.8,.2,1)" });
 }
 
 function askWater() {
