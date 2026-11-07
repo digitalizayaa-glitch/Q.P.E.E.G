@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>Q.P.E.E.G</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#181818">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Q.P.E.E.G">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" href="icons/icon-192.png">
+
+    <link rel="stylesheet" href="styles/stylesheet.css">
+
+    <!-- evita el parpadeo del tema claro al abrir -->
+    <script>try{var _s=JSON.parse(localStorage.getItem("qpeeg_state_v1")||"{}").settings;if(_s&&_s.theme==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+</head>
+
+<body>
+
+<!-- =========================
+    PANTALLA DE INICIO
+========================== -->
+
+<div id="landing" class="landing">
+
+    <button id="settingsBtn" class="settings-btn" aria-label="Ajustes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+        </svg>
+    </button>
+
+    <h1 class="landing-title">Q.P.E.E.G</h1>
+
+    <div class="profile-wrap">
+        <div id="profileTooltip" class="tooltip">Tocar para entrar</div>
+
+        <div class="profile-photo" id="profilePhoto">
+            <img id="profileImg" src="" alt="Foto de perfil" style="display:none;">
+            <span id="profilePlaceholder">+</span>
+        </div>
+
+        <input type="file" id="photoInput" accept="image/*" hidden>
+    </div>
+
+    <div class="achievements-panel">
+        <div id="achievementsList" class="achievements-list"></div>
+        <div id="achievementsControl"></div>
+    </div>
+
+    <div class="backup-row">
+        <button id="exportBtn" class="backup-btn">Exportar respaldo</button>
+        <button id="importBtn" class="backup-btn">Importar respaldo</button>
+        <input type="file" id="importInput" accept="application/json,.json" hidden>
+    </div>
+
+    <p class="footer-note">
+        Esta app está en desarrollo y aún puede mejorar, se ejecuta de forma
+        local y no necesita internet, gracias por escoger este proyecto
+        sobre otros.
+    </p>
+
+</div>
+
+
+<!-- =========================
+    APP PRINCIPAL
+========================== -->
+
+<div class="app" id="mainApp" style="display:none;">
+
+    <header>
+        <div class="week-tabs">
+            <div class="week-tab-label">SEMANA</div>
+        </div>
+
+        <div class="tab-dots" id="tabDots"></div>
+
+        <div class="header-sub">
+            <button class="home-btn" id="homeBtn" onclick="goHome()" aria-label="Ir al inicio">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 11.5 12 4l9 7.5"/>
+                    <path d="M5.5 10v9.5h5v-6h3v6h5V10"/>
+                </svg>
+            </button>
+            <p class="week-date" id="weekDate"></p>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- SEMANA -->
+        <section id="week" class="section active">
+            <div id="weekRoutineContent"></div>
+
+            <h2 class="series-title">Series</h2>
+            <div class="series-panel">
+                <div class="series-col" id="seriesColLeft"></div>
+                <div class="series-divider"></div>
+                <div class="series-col" id="seriesColRight"></div>
+            </div>
+        </section>
+
+        <!-- ENTRENAMIENTO -->
+        <section id="workout" class="section">
+
+            <div id="workoutExercises"></div>
+            <div id="workoutDots" class="page-indicator"></div>
+
+        </section>
+
+        <!-- RUTINAS -->
+        <section id="exercises" class="section">
+            <div id="routinesContainer"></div>
+        </section>
+
+        <!-- COMIDA -->
+        <section id="food" class="section">
+            <div id="foodContent"></div>
+        </section>
+
+        <!-- HISTORIAL -->
+        <section id="history" class="section">
+            <h2 id="historyTitle" class="history-title"></h2>
+            <div id="historyGrid" class="history-grid"></div>
+            <div class="history-actions">
+                <button id="histModeBtn" class="history-btn">Ver calorías</button>
+                <button id="histMonthsBtn" class="history-btn">Calendario completo</button>
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+<script src="scripts/scripts.js"></script>
+<script src="scripts/settings.js"></script>
+<script src="scripts/nutrition.js"></script>
+<script src="scripts/food.js"></script>
+</body>
+</html>
