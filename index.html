@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="styles/stylesheet.css">
 
     <!-- evita el parpadeo del tema claro al abrir -->
-    <script>try{var _s=JSON.parse(localStorage.getItem("qpeeg_state_v1")||"{}").settings;if(_s&&_s.theme==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+    <script>try{var _t=localStorage.getItem("qpeeg_theme");if(!_t){var _s=JSON.parse(localStorage.getItem("qpeeg_state_v1")||"{}").settings;_t=_s&&_s.theme}if(_t==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 </head>
 
 <body>
@@ -143,10 +143,21 @@
 
 </div>
 
-<script src="scripts/scripts.js"></script>
-<script src="scripts/figures.js"></script>
-<script src="scripts/settings.js"></script>
-<script src="scripts/nutrition.js"></script>
-<script src="scripts/food.js"></script>
+<script src="scripts/core/almacenamiento.js"></script>
+<script src="scripts/app/estado.js"></script>
+<script src="scripts/app/inicio.js"></script>
+<script src="scripts/app/semana.js"></script>
+<script src="scripts/app/navegacion.js"></script>
+<script src="scripts/app/entreno.js"></script>
+<script src="scripts/app/rutinas.js"></script>
+<script src="scripts/app/selector-numero.js"></script>
+<script src="scripts/app/menu-emergente.js"></script>
+<script src="scripts/app/dialogos.js"></script>
+<script src="scripts/app/historial.js"></script>
+<script src="scripts/app/arranque.js"></script>
+<script src="scripts/app/figuras.js"></script>
+<script src="scripts/app/ajustes.js"></script>
+<script src="scripts/app/nutricion.js"></script>
+<script src="scripts/app/comida.js"></script>
 </body>
 </html>

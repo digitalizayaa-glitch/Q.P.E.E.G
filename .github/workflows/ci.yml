@@ -1,0 +1,28 @@
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Sintaxis y caché del service worker al día
+        run: npm run check
+      - name: Pruebas de lógica
+        run: npm test
+      - name: Instalar navegador de pruebas
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Pruebas de interfaz
+        run: npm run test:e2e

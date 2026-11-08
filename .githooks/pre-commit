@@ -1,0 +1,4 @@
+#!/bin/sh
+# Actualiza la caché del service worker en cada commit.
+# Activar una vez por clon:  git config core.hooksPath .githooks
+node tools/build-sw.mjs >/dev/null && git add service-worker.js
