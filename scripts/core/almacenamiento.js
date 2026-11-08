@@ -61,20 +61,27 @@ const QStore = (() => {
     }
 
     /* Devuelve { json, savedAt } o null */
-    async function load() {
+    function load() { return getKey(DB_KEY); }
+
+    /* Lectura / escritura genérica (también la usa la cuenta de sincronización) */
+    async function getKey(key) {
         const db = await openDb();
         return new Promise((resolve, reject) => {
-            const req = db.transaction(DB_STORE, "readonly").objectStore(DB_STORE).get(DB_KEY);
+            const req = db.transaction(DB_STORE, "readonly").objectStore(DB_STORE).get(key);
             req.onsuccess = () => resolve(req.result || null);
             req.onerror = () => reject(req.error);
         });
     }
 
-    async function save(json, savedAt) {
+    function save(json, savedAt) { return putKey(DB_KEY, { json, savedAt }); }
+
+    /* value = undefined borra la clave */
+    async function putKey(key, value) {
         const db = await openDb();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(DB_STORE, "readwrite");
-            tx.objectStore(DB_STORE).put({ json, savedAt }, DB_KEY);
+            if (value === undefined) tx.objectStore(DB_STORE).delete(key);
+            else tx.objectStore(DB_STORE).put(value, key);
             tx.oncomplete = () => resolve(true);
             tx.onerror = () => reject(tx.error);
             tx.onabort = () => reject(tx.error);
@@ -103,7 +110,7 @@ const QStore = (() => {
     /* Espera a que lo pendiente quede escrito (antes de recargar la página) */
     function flush() { return running || Promise.resolve(true); }
 
-    return { SCHEMA_VERSION, MIGRATIONS, migrate, schemaOf, newId, load, queueSave, flush };
+    return { SCHEMA_VERSION, MIGRATIONS, migrate, schemaOf, newId, load, queueSave, flush, getKey, putKey };
 })();
 
 if (typeof module !== "undefined" && module.exports) module.exports = QStore;

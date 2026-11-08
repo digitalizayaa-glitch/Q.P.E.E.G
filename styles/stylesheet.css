@@ -1520,3 +1520,7 @@ main { overflow-x: hidden; }
     .square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
     .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order { animation: none; }
 }
+
+/* Cuenta y sincronización (Ajustes) */
+.settings-note { margin: 0 2px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.dialog-btn.account-code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 15px; letter-spacing: 1px; color: var(--text); }

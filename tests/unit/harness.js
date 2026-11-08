@@ -44,7 +44,8 @@ function loadApp({ localStorageData } = {}) {
         console, structuredClone, setTimeout, clearTimeout, setInterval, clearInterval, URL, Blob: stub(),
         localStorage: ls, document: dom, navigator: {}, location: stub(), matchMedia: () => ({ matches: false, addEventListener() {} }),
         requestAnimationFrame: () => 0, getComputedStyle: () => stub(), crypto: globalThis.crypto,
-        Intl, Date, Math, JSON, Promise, Map, Set
+        Intl, Date, Math, JSON, Promise, Map, Set, TextEncoder, TextDecoder, atob, btoa, Response,
+        CompressionStream, DecompressionStream
     };
     ctx.window = ctx; ctx.self = ctx;
     ctx.addEventListener = () => {};

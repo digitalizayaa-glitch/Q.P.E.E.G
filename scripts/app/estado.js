@@ -246,6 +246,7 @@ function saveState() {
     let localOk = true;
     try { localStorage.setItem(STORAGE_KEY, json); } catch (e) { localOk = false; }
     try { localStorage.setItem(THEME_KEY, state.settings.theme === "light" ? "light" : "dark"); } catch (e) { /* nada */ }
+    if (typeof scheduleSync === "function") scheduleSync();   /* cuenta.js: sube el cambio en unos segundos */
     return QStore.queueSave(json, state.meta.savedAt).then(idbOk => {
         if (!idbOk && !localOk && !saveWarned) {
             saveWarned = true;

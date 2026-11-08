@@ -189,11 +189,16 @@ function openSettings() {
     photoWrap.append(avatarBtn, avatarRow);
     sheet.append(label("Foto de perfil"), photoWrap);
 
+    /* Cuenta y sincronización (solo si hay servidor configurado) */
+    const account = buildAccountSection(label);
+    sheet.append(...account.nodes);
+
     overlay.appendChild(sheet);
 
     const close = () => {
         if (!settingsOverlay) return;
         settingsOverlay = null;
+        account.dispose();
         window.removeEventListener("keydown", onKey, true);
         overlay.style.pointerEvents = "none";
         sheetCollapse(sheet, 130);
