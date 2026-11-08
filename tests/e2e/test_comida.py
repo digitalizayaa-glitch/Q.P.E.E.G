@@ -72,7 +72,7 @@ def main():
             pg.fill(".picker-search", ""); pg.wait_for_timeout(300)
             r["varias_marcadas"] = pg.locator(".picker-item.picked").count() == 3
             if SHOTS: pg.screenshot(path=f"{SHOTS}/menu_agregadas.png")
-            r["guardadas"] = pg.evaluate("foodEntries().map(e => e.n).sort().join()") == "Arroz blanco,Pechuga de pollo / Salmón"
+            r["guardadas"] = pg.evaluate("foodEntries().map(e => e.n).sort().join()") == "Arroz blanco,Pechuga de pollo"
             pg.locator(".picker-close").click(); pg.wait_for_timeout(500)
             r["resumen_actualizado"] = "/" in pg.locator(".food-macros").inner_text()
             r["cerrado"] = pg.locator(".picker-overlay").count() == 0

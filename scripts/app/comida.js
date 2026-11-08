@@ -64,7 +64,7 @@ const FOOD_CATALOG = {
         ["Cereal Allinklusive ZERO", "1/4 taza (26 g)"],
         ["Cereal (Cheerios, Zucaritas…)", "1/4 taza (20 g)"],
         ["Cereal Trijuelas", "1/4 taza (17,5 g)"],
-        ["Pan cuadrado", "2 rebanadas (según tu menú)"],
+        ["Pan cuadrado blanco Bimbo", "2 rebanadas (62 g)"],
         ["Pan / Bollitos Ruiseñor", "1 unidad"],
         ["Pan Thins Bimbo", "1 pieza"],
         ["Pan baguette", "4 dedos"],
@@ -81,12 +81,13 @@ const FOOD_CATALOG = {
         ["Miel", "1 cda (25 ml)"],
         ["Mermelada con azúcar", "1 cda (25 g)"],
         ["Pasas", "1 cda (20 g)"],
-        ["Cocoa 0% azúcar", "1 cdta (20 g)"],
-        ["Torta de arroz", "100 g"],
+        ["Cocoa 0% azúcar", "4 cdtas (20 g)"],
+        ["Torta de arroz", "1 torta (100 g)"],
         ["Chicharritos de harina o maíz (snack)", "15 g"]
     ],
     bg: [
-        ["Pechuga de pollo / Salmón", "30 g"],
+        ["Pechuga de pollo", "30 g"],
+        ["Salmón", "30 g"],
         ["Muslo deshuesado", "25 g"],
         ["Beef steak / Molida res 10%", "20 g"],
         ["Molida res premium 5%", "25 g"],
@@ -142,7 +143,7 @@ const FOOD_CATALOG = {
         ["Chocolate Dark 75% o más", "2 piezas (10 g)"],
         ["Chips de chocolate / Granola Keto", "2 cdtas (10 g)"],
         ["Natilla Light Dos Pinos", "2 cdas (40 g)"],
-        ["Mayonesa Delga-C", "2 cdas (45 g)"],
+        ["Mayonesa Delga-C (ultra light)", "3 cdas (45 g)"],
         ["Mayonesa Light Helmans", "2 cdas (20 g)"],
         ["Queso crema Dos Pinos Light", "1 cda (20 g)"],
         ["Leche de almendra", "1 taza (300 ml)"],
@@ -220,6 +221,13 @@ const FOOD_CALIBRATION = {
     "Helado Prote DP (chocolate, coco y otros sabores)": { k: 91, c: 11.1, p: 6.9, f: 2.2, pt: { l: 0.5, h: 0.5 } },
     /* Tabla nutricional de referencia por 100 g */
     "Torta de arroz":            { k: 295, c: 44,   p: 8.2, f: 9.5, pt: { h: 2.5, l: 0.5, g: 1 } },
+
+    /* Pan Bimbo blanco: 2 rebanadas (62 g) = 146 kcal → 2 harinas */
+    "Pan cuadrado blanco Bimbo":       { k: 146, c: 28.3, p: 5.1, f: 1.4, pt: { h: 2 } },
+    /* Salmón cocido (30 g): más grasa que la pechuga → mitad baja y mitad media en grasa */
+    "Salmón":                          { k: 62,  c: 0,    p: 6.6, f: 3.7, pt: { bg: 0.5, mg: 0.5 } },
+    /* Delga-C ultra light: ~15 kcal por cucharada (15 g) */
+    "Mayonesa Delga-C (ultra light)":  { k: 50,  c: 3,    p: 0,   f: 4.5, pt: { g: 1 } },
 
     /* Leches (250 ml) */
     "Leche entera":              { k: 157, c: 12.4, p: 8.1, f: 8.4, pt: { l: 1, g: 1 } },

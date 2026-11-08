@@ -5,9 +5,19 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.5.4";
+const APP_VERSION = "1.5.5";
 
 const CHANGELOG = [
+    {
+        v: "1.5.5",
+        items: [
+            "Pan cuadrado blanco Bimbo: 2 rebanadas (62 g) son 146 kcal, que equivalen a 2 harinas.",
+            "Salmón separado de la pechuga: 30 g = 0,5 prot. BG · 0,5 prot. MG.",
+            "Mayonesa Delga-C ultra light: la porción son 3 cucharadas (45 g) = 1 grasa.",
+            "Cocoa 0 % azúcar: la porción son 4 cucharaditas (20 g).",
+            "Torta de arroz: 1 torta = 100 g."
+        ]
+    },
     {
         v: "1.5.4",
         items: [
