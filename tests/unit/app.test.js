@@ -289,3 +289,10 @@ test("las porciones de la comida rápida suman en los grupos (también lo ya reg
     ])`);
     assert.deepEqual(t.portions, { h: 5.5, mg: 1, g: 2 });
 });
+
+test("el texto de equivalencias nombra todos los grupos (y todo lo calibrado se puede mostrar)", () => {
+    for (const k of ev("FOOD_GROUPS.map(g => g.k)")) assert.ok(!call("portionsText", { [k]: 1 }).includes("undefined"), k);
+    for (const [name, cal] of Object.entries(ev("FOOD_CALIBRATION"))) {
+        assert.ok(!call("portionsText", cal.pt).includes("undefined"), name);
+    }
+});

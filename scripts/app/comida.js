@@ -81,7 +81,9 @@ const FOOD_CATALOG = {
         ["Miel", "1 cda (25 ml)"],
         ["Mermelada con azúcar", "1 cda (25 g)"],
         ["Pasas", "1 cda (20 g)"],
-        ["Cocoa 0% azúcar", "1 cdta (20 g)"]
+        ["Cocoa 0% azúcar", "1 cdta (20 g)"],
+        ["Torta de arroz", "100 g"],
+        ["Chicharritos de harina o maíz (snack)", "15 g"]
     ],
     bg: [
         ["Pechuga de pollo / Salmón", "30 g"],
@@ -121,9 +123,8 @@ const FOOD_CATALOG = {
         ["Queso Turrialba del Prado", "25 g"],
         ["Queso Dos Pinos 50%+ proteína", "28 g"],
         ["String cheese (stick)", "1 unidad"],
-        ["Chicharritos Jacks", "15 g"],
+        ["Chicharritos Jacks de cerdo (chicharrón)", "15 g"],
         ["Atún Member Selection", "1 lata = 4 porciones", "latas", 4],
-        ["Torta de arroz estándar", "1 torta = 2 porciones", "tortas", 2],
         ["Torta Beef Angus MS", "1 torta = 5 porciones", "tortas", 5]
     ],
     g: [
@@ -145,7 +146,10 @@ const FOOD_CATALOG = {
         ["Mayonesa Light Helmans", "2 cdas (20 g)"],
         ["Queso crema Dos Pinos Light", "1 cda (20 g)"],
         ["Leche de almendra", "1 taza (300 ml)"],
-        ["Leche de coco", "1/2 taza (150 ml)"]
+        ["Leche de coco de cartón (sin azúcar)", "1 taza (240 ml)"],
+        ["Leche de coco de cartón (con azúcar)", "1 taza (240 ml)"],
+        ["Leche de coco de lata", "2 cdas (30 ml)"],
+        ["Leche de coco de lata light", "1/4 taza (60 ml)"]
     ],
     v: [
         ["Vegetales frescos (ensalada)", "1 taza"],
@@ -180,11 +184,16 @@ const FOOD_CATALOG = {
         ["Mermelada St-Dalfour", "1 cda (25 g)"]
     ],
     l: [
-        ["Leche", "1 taza (250 ml)"],
-        ["Yogurt 0% grasa", "1/2 taza (200 ml)"],
-        ["Yogurt griego Member Selection", "1/2 taza (175 ml)"],
+        ["Leche entera", "1 taza (250 ml)"],
+        ["Leche semidescremada (2 %)", "1 taza (250 ml)"],
+        ["Leche descremada", "1 taza (250 ml)"],
+        ["Yogurt 0 % grasa natural", "1/2 taza (200 ml)"],
+        ["Yogurt 0 % grasa de sabor (con edulcorante)", "1/2 taza (200 ml)"],
+        ["Yogurt griego natural Member's Selection", "1/2 taza (175 ml)"],
+        ["Yogurt griego de sabor", "1/2 taza (175 ml)"],
         ["Yogurt natural Dos Pinos", "1/2 taza (165 ml)"],
-        ["Helado Prote DP (chocolate o coco)", "4 cdas (70 g)"],
+        ["Yogurt de sabor con azúcar (batido o bebible)", "1/2 taza (165 ml)"],
+        ["Helado Prote DP (chocolate, coco y otros sabores)", "4 cdas (70 g)"],
         ["Leche condensada", "5 cdas (75 g)"]
     ]
 };
@@ -205,7 +214,35 @@ const FOOD_CALIBRATION = {
     "Mermelada con azúcar":      { k: 70,  c: 17,   p: 0.1, f: 0,   pt: { h: 1 } },
     "Pasas":                     { k: 60,  c: 15.9, p: 0.6, f: 0.1, pt: { h: 1 } },
     "Leche condensada":          { k: 241, c: 40.7, p: 5.9, f: 6.5, pt: { l: 0.5, h: 2, g: 0.5 } },
-    "Leche condensada (INISA)":  { k: 69,  c: 11.7, p: 1.7, f: 1.9, pt: { h: 0.5, g: 0.5 } }
+    "Leche condensada (INISA)":  { k: 69,  c: 11.7, p: 1.7, f: 1.9, pt: { h: 0.5, g: 0.5 } },
+
+    /* Etiqueta Dos Pinos (sabor chocolate, ½ taza = 63 g: 82 kcal) llevada a 70 g; cubre los demás sabores */
+    "Helado Prote DP (chocolate, coco y otros sabores)": { k: 91, c: 11.1, p: 6.9, f: 2.2, pt: { l: 0.5, h: 0.5 } },
+    /* Tabla nutricional de referencia por 100 g */
+    "Torta de arroz":            { k: 295, c: 44,   p: 8.2, f: 9.5, pt: { h: 2.5, l: 0.5, g: 1 } },
+
+    /* Leches (250 ml) */
+    "Leche entera":              { k: 157, c: 12.4, p: 8.1, f: 8.4, pt: { l: 1, g: 1 } },
+    "Leche semidescremada (2 %)": { k: 128, c: 12.4, p: 8.2, f: 5,   pt: { l: 1, g: 0.5 } },
+    "Leche descremada":          { k: 87,  c: 12.5, p: 8.6, f: 0.2, pt: { l: 1 } },
+
+    /* Leche de coco: la de cartón es bebida (muy diluida); la de lata es para cocinar (muy grasosa) */
+    "Leche de coco de cartón (sin azúcar)": { k: 45, c: 1,   p: 0,   f: 4.5, pt: { g: 1 } },
+    "Leche de coco de cartón (con azúcar)": { k: 80, c: 7,   p: 0,   f: 5,   pt: { g: 1, h: 0.5 } },
+    "Leche de coco de lata":                { k: 59, c: 0.8, p: 0.6, f: 6.4, pt: { g: 1.5 } },
+    "Leche de coco de lata light":          { k: 50, c: 1,   p: 0.5, f: 5,   pt: { g: 1 } },
+
+    /* Yogurts: natural (sin azúcar) y de sabor */
+    "Yogurt 0 % grasa natural":                       { k: 112, c: 15.4, p: 11.4, f: 0.4, pt: { l: 1 } },
+    "Yogurt 0 % grasa de sabor (con edulcorante)":    { k: 100, c: 14,   p: 10,   f: 0.4, pt: { l: 1 } },
+    "Yogurt griego natural Member's Selection":       { k: 100, c: 6.4,  p: 17.4, f: 0.7, pt: { l: 0.5, bg: 1.5 } },
+    "Yogurt griego de sabor":                         { k: 150, c: 18,   p: 14,   f: 2,   pt: { l: 1, bg: 1 } },
+    "Yogurt natural Dos Pinos":                       { k: 101, c: 7.8,  p: 5.8,  f: 5.4, pt: { l: 1 } },
+    "Yogurt de sabor con azúcar (batido o bebible)":  { k: 163, c: 30.7, p: 6.6,  f: 1.8, pt: { l: 0.5, h: 1.5 } },
+
+    /* Chicharritos: de cerdo (proteína y grasa) o de harina/maíz (harina y grasa) */
+    "Chicharritos Jacks de cerdo (chicharrón)":  { k: 82, c: 0, p: 9.2, f: 4.7, pt: { mg: 1 } },
+    "Chicharritos de harina o maíz (snack)":     { k: 75, c: 9, p: 1,   f: 4,   pt: { h: 0.5, g: 1 } }
 };
 
 /* ---------- datos ---------- */
@@ -295,8 +332,11 @@ const entryPortions = e => Object.fromEntries(Object.entries(unitPortions(e)).ma
 /* Flechas de 1 en 1; las medias porciones se escriben (0,5 · 1,5 · 2,5…) */
 const stepByOne = (q, dir) => { const n = Math.round((q + dir) * 100) / 100; return n >= 0.5 ? n : q; };
 /* "2,5 harinas · 1 prot. MG · 1 grasa" */
-const PORTION_SHORT = { h: ["harina", "harinas"], bg: ["prot. BG", "prot. BG"], mg: ["prot. MG", "prot. MG"], g: ["grasa", "grasas"] };
-const portionsText = pt => Object.entries(pt).map(([k, v]) => `${fmtNum(v, 1)} ${PORTION_SHORT[k][v === 1 ? 0 : 1]}`).join(" · ");
+const PORTION_SHORT = {
+    h: ["harina", "harinas"], bg: ["prot. BG", "prot. BG"], mg: ["prot. MG", "prot. MG"], g: ["grasa", "grasas"],
+    v: ["vegetal", "vegetales"], fr: ["fruta", "frutas"], l: ["lácteo", "lácteos"]
+};
+const portionsText = pt => Object.entries(pt).map(([k, v]) => `${fmtNum(v, 1)} ${PORTION_SHORT[k][v <= 1 ? 0 : 1]}`).join(" · ");
 
 function foodTotals(entries) {
     const portions = {};

@@ -5,9 +5,19 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.5.3";
+const APP_VERSION = "1.5.4";
 
 const CHANGELOG = [
+    {
+        v: "1.5.4",
+        items: [
+            "Leche: ahora hay entera, semidescremada (2 %) y descremada, cada una con sus calorías.",
+            "Leche de coco: de cartón (con y sin azúcar) y de lata (normal y light).",
+            "Yogurts: natural y de sabor, en 0 % grasa, griego y normal.",
+            "Chicharritos: de cerdo o de harina y maíz.",
+            "Helado Prote DP y torta de arroz calibrados con su tabla nutricional."
+        ]
+    },
     {
         v: "1.5.3",
         items: [
