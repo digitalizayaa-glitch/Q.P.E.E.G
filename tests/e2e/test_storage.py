@@ -3,12 +3,16 @@
 Uso:  python3 tests/e2e/test_storage.py            (desde la raíz del repositorio)
 Variables opcionales: CHROME=/ruta/a/chrome  PORT=8801
 """
-import json, os, subprocess, sys, time
+import json, os, re, subprocess, sys, time
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8801")
 URL = f"http://localhost:{PORT}/index.html"
+
+# Las pruebas no son sobre el aviso de novedades: se marca la versión actual como ya vista
+_VER = re.search(r'APP_VERSION = "([^"]+)"', open(os.path.join(ROOT, "scripts/core/version.js")).read()).group(1)
+SEEN = "localStorage.setItem('qpeeg_seen_version', '%s');" % _VER
 KEY = "qpeeg_state_v1"
 
 V1_STATE = {  # datos tal como los guardaba la versión anterior (sin "meta")
@@ -37,7 +41,7 @@ def main():
             b = p.chromium.launch(**opts)
 
             # 1) Datos v1 en localStorage → se migran a v2 y se copian a IndexedDB
-            ctx = b.new_context(service_workers="block")
+            ctx = b.new_context(service_workers="block"); ctx.add_init_script(SEEN)
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
             pg.goto(URL); pg.evaluate(f"localStorage.setItem('{KEY}', {json.dumps(json.dumps(V1_STATE))})")
             pg.reload(); pg.wait_for_function("document.readyState==='complete'"); pg.wait_for_timeout(600)
@@ -62,7 +66,7 @@ def main():
             ctx.close()
 
             # 4) Instalación nueva: sin datos → estado vacío con id de dispositivo
-            ctx = b.new_context(service_workers="block")
+            ctx = b.new_context(service_workers="block"); ctx.add_init_script(SEEN)
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
             pg.goto(URL); pg.wait_for_timeout(800)
             results["nuevo_vacio"] = pg.evaluate("state.routines.length === 0 && !!state.meta.device && state.meta.schema === 2")

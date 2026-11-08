@@ -10,6 +10,10 @@ from playwright.sync_api import sync_playwright
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8803")
 URL = f"http://localhost:{PORT}/index.html"
+
+# Las pruebas no son sobre el aviso de novedades: se marca la versión actual como ya vista
+_VER = re.search(r'APP_VERSION = "([^"]+)"', open(os.path.join(ROOT, "scripts/core/version.js")).read()).group(1)
+SEEN = "localStorage.setItem('qpeeg_seen_version', '%s');" % _VER
 SHOTS = os.environ.get("SHOTS")
 SERVER = "https://sync.prueba"
 
@@ -43,6 +47,7 @@ def rpc(route):
 
 def phone(browser, data, errors):
     ctx = browser.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
+    ctx.add_init_script(SEEN)
     ctx.route("**/scripts/core/config.js", lambda r: r.fulfill(
         content_type="text/javascript", body=f'const QPEEG_SYNC = {{ url: "{SERVER}", key: "clave-publica" }};'))
     ctx.route(f"{SERVER}/rest/v1/rpc/*", rpc)

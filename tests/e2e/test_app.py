@@ -3,12 +3,16 @@
 Uso:  python3 tests/e2e/test_app.py            (desde la raíz del repositorio)
 Variables opcionales: CHROME=/ruta/a/chrome  PORT=8802
 """
-import json, os, subprocess, sys, time
+import json, os, re, subprocess, sys, time
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8802")
 URL = f"http://localhost:{PORT}/index.html"
+
+# Las pruebas no son sobre el aviso de novedades: se marca la versión actual como ya vista
+_VER = re.search(r'APP_VERSION = "([^"]+)"', open(os.path.join(ROOT, "scripts/core/version.js")).read()).group(1)
+SEEN = "localStorage.setItem('qpeeg_seen_version', '%s');" % _VER
 
 ex = lambda i, n, s: {"id": i, "name": n, "kg": 40, "unit": "kg", "series": [{"min": 8, "max": 12}] * s}
 STATE = {
@@ -30,6 +34,7 @@ def main():
             if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
             b = p.chromium.launch(**opts)
             ctx = b.new_context(viewport={"width": 390, "height": 844})
+            ctx.add_init_script(SEEN)
             pg = ctx.new_page()
             pg.on("pageerror", lambda e: errors.append(str(e)))
             pg.add_init_script("if (!localStorage.getItem('qpeeg_state_v1')) localStorage.setItem('qpeeg_state_v1', %s)"
