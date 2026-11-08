@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.3.1";
+const APP_VERSION = "1.4.0";
 
 const CHANGELOG = [
+    {
+        v: "1.4.0",
+        items: [
+            "Rutinas y Semana: las tarjetas de rutinas y días tienen el color de los botones.",
+            "Comida: puedes agregar varias comidas seguidas. Cada una se marca con el color de la app y el menú no se cierra.",
+            "Comida: nueva sección Frecuentes arriba del menú, con lo que agregaste más de 3 veces. Si pasan 3 días sin agregarla, desaparece."
+        ]
+    },
     {
         v: "1.3.1",
         items: [

@@ -49,7 +49,9 @@ function priorityIndex(priority, group) {
 
 let pickerOverlay = null;
 
-/* options: { title, groups: [{ title?, items: [{ label, sub?, value }] }], searchable, createLabel, emptyText, onPick(value), onCreate(query) } */
+/* options: { title, groups: [{ title?, items: [{ label, sub?, value }] }], searchable, createLabel, emptyText, onPick(value), onCreate(query),
+              keepOpen (no se cierra al elegir; onPick recibe además refresh() para volver a pintar la lista),
+              itemClass(value) (clase extra para un elemento, p. ej. "picked") } */
 function openPicker(options) {
     closePicker(true);
 
@@ -120,6 +122,8 @@ function openPicker(options) {
             items.forEach(item => {
                 const btn = document.createElement("button");
                 btn.className = "picker-item";
+                const extra = options.itemClass && options.itemClass(item.value);
+                if (extra) btn.classList.add(extra);
                 const label = document.createElement("span");
                 label.textContent = item.label;
                 btn.appendChild(label);
@@ -129,6 +133,7 @@ function openPicker(options) {
                     btn.appendChild(sub);
                 }
                 btn.onclick = () => {
+                    if (options.keepOpen) { options.onPick(item.value, renderList); return; }
                     closePicker();
                     options.onPick(item.value);
                 };
@@ -170,4 +175,5 @@ function closePicker(immediate) {
     overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
 }
 
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !dialogOverlay) closePicker(); });
+/* Con un cuadro de cantidad abierto encima, Escape cierra solo ese cuadro */
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !dialogOverlay && !document.querySelector(".stepper-overlay")) closePicker(); });

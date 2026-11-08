@@ -435,18 +435,52 @@ document.addEventListener("click", e => {
 
 /* ---------- agregar ---------- */
 
+const FREQUENT_MIN = 4;                       /* "más de 3 veces" */
+const FREQUENT_WINDOW = 3 * 24 * 3600 * 1000; /* 3 días sin agregarla → deja de ser frecuente */
+
+/* Comidas agregadas más de 3 veces y usadas en los últimos 3 días, de la más usada a la menos */
+function frequentFoods(now = Date.now()) {
+    const stats = new Map();
+    const log = (state.food && state.food.log) || {};
+    for (const day in log) {
+        const dayTs = parseKey(day).getTime() + 12 * 3600 * 1000;
+        for (const e of log[day]) {
+            if (!FOOD_GROUP[e.g] || !e.n) continue;
+            const key = e.g + "|" + e.n;
+            const s = stats.get(key) || { g: e.g, n: e.n, count: 0, last: 0 };
+            s.count++;
+            s.last = Math.max(s.last, e.ts || dayTs);
+            stats.set(key, s);
+        }
+    }
+    return [...stats.values()]
+        .filter(s => s.count >= FREQUENT_MIN && now - s.last <= FREQUENT_WINDOW)
+        .sort((a, b) => b.count - a.count || b.last - a.last)
+        .slice(0, 8)
+        .map(s => ({ g: s.g, item: (FOOD_CATALOG[s.g] || []).find(i => i[0] === s.n) || [s.n, "1 porción"] }));
+}
+
 function openFoodPicker(groupKey) {
     const keys = groupKey ? [groupKey] : FOOD_GROUPS.map(g => g.k);
+    const picked = new Set();                 /* lo agregado sin cerrar el menú: se pinta con el color de la app */
+    const keyOf = v => v.g + "|" + v.item[0];
+    const asItem = (g, item) => ({ label: item[0], sub: item[1], value: { g, item } });
+
+    const frequent = frequentFoods().filter(f => keys.includes(f.g));
+    const groups = keys.map(k => ({
+        title: groupKey ? null : FOOD_GROUP[k].name,
+        items: FOOD_CATALOG[k].map(item => asItem(k, item))
+    }));
+    if (frequent.length) groups.unshift({ title: "Frecuentes", items: frequent.map(f => asItem(f.g, f.item)) });
 
     openPicker({
         title: groupKey ? FOOD_GROUP[groupKey].name : "Agregar comida",
         searchable: true,
-        groups: keys.map(k => ({
-            title: groupKey ? null : FOOD_GROUP[k].name,
-            items: FOOD_CATALOG[k].map(item => ({ label: item[0], sub: item[1], value: { g: k, item } }))
-        })),
+        keepOpen: true,
+        itemClass: v => picked.has(keyOf(v)) ? "picked" : "",
+        groups,
         createLabel: "Porciones sueltas",
-        onPick: ({ g, item }) => askFoodAmount(g, item),
+        onPick: (v, refresh) => askFoodAmount(v.g, v.item, () => { picked.add(keyOf(v)); refresh(); }),
         onCreate: query => {
             const loose = g => askFoodAmount(g, [query || FOOD_GROUP[g].name, "1 porción"]);
             if (groupKey) { loose(groupKey); return; }
@@ -460,7 +494,7 @@ function openFoodPicker(groupKey) {
     });
 }
 
-function askFoodAmount(groupKey, item) {
+function askFoodAmount(groupKey, item, onAdded) {
     const [name, equiv, unit, per] = item;
     const perUnit = per || 1;
     const unitName = unit || "porciones";
@@ -490,6 +524,7 @@ function askFoodAmount(groupKey, item) {
                 t: `${fmtNum(qty, 2)} ${qty === 1 ? unitName.replace(/(ciones|s)$/, m => m === "ciones" ? "ción" : "") : unitName}`
             });
             renderFood();
+            if (onAdded) onAdded();
         }
     });
 }

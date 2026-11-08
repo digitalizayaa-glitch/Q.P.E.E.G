@@ -1538,3 +1538,11 @@ main { overflow-x: hidden; }
 .t-tile.t-sm { padding: 7px 8px; }
 .t-tile.t-sm b { font-size: 20px; }
 .t-tile.t-sm i { margin-left: 2px; font-size: 11px; }
+
+/* Rutinas y días (pestañas Rutinas y Semana) con color de botón */
+.day-card, .split-card { background: rgba(var(--ui-rgb), 0.14); border-color: var(--ui); }
+.day-card:active, .split-card:active { background: rgba(var(--ui-rgb), 0.28); }
+
+/* Menú de comida: lo ya agregado sin salir del menú */
+.picker-item.picked { background: rgba(var(--ui-rgb), 0.2); border-color: var(--ui); }
+.picker-item.picked span::after { content: " ✓"; color: var(--ui); font-weight: bold; }

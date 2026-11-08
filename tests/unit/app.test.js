@@ -161,3 +161,20 @@ test("versión: package.json y la app dicen lo mismo, y hay novedades de la vers
     assert.equal(call("compareVersions", "1.10.0", "1.9.2"), 1);
     assert.equal(call("compareVersions", "1.3", "1.3.0"), 0);
 });
+
+test("comida frecuente: más de 3 veces y usada en los últimos 3 días", () => {
+    const day = d => { const x = new Date(2026, 10, d, 12); return { key: app(`dateKey(new Date(${x.getTime()}))`), ts: x.getTime() }; };
+    const log = {};
+    const add = (d, n, g = "h") => { const { key, ts } = day(d); (log[key] ??= []).push({ id: n + d + Math.random(), n, g, p: 1, t: "1 porción", ts }); };
+    for (const d of [1, 2, 3, 4]) add(d, "Arroz blanco");      /* 4 veces, la última el día 4 */
+    for (const d of [2, 3, 4]) add(d, "Banano", "fr");        /* solo 3 veces */
+    for (const d of [1, 2, 3, 5, 6]) add(d, "Huevo (completo)", "mg");
+    add(6, "Agua", "agua"); add(6, "Agua", "agua"); add(6, "Agua", "agua"); add(6, "Agua", "agua");
+    app(`state.food = { log: ${JSON.stringify(log)} }`);
+    const at = d => new Date(2026, 10, d, 12).getTime();
+    const names = d => ev(`frequentFoods(${at(d)}).map(f => f.item[0])`);
+    assert.deepEqual(names(6), ["Huevo (completo)", "Arroz blanco"], "más usada primero; banano (3) y agua no cuentan");
+    assert.deepEqual(names(8), ["Huevo (completo)"], "arroz lleva 4 días sin agregarse: desaparece");
+    assert.deepEqual(names(10), [], "a los 4 días de la última vez ya no hay frecuentes");
+    assert.equal(ev(`frequentFoods(${at(6)})[0].item[1]`), "1 unidad", "usa la porción del catálogo");
+});
