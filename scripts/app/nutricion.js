@@ -62,7 +62,11 @@ function nutritionPlan() {
     });
     const goals = {};
     for (const k in raw) goals[k] = Math.max(1, Math.round(raw[k] * kcal / sum * 2) / 2);
-    return { kcal, goals, water: Math.round(n.profile.weight * 35 / 250) * 250 };
+    /* Gramos de cada macro al día: las porciones del plan × lo que aporta cada porción */
+    const macros = { c: 0, p: 0, f: 0 };
+    for (const k in goals) for (const m in macros) macros[m] += goals[k] * FOOD_GROUP[k][m];
+    for (const m in macros) macros[m] = Math.round(macros[m]);
+    return { kcal, goals, macros, water: Math.round(n.profile.weight * 35 / 250) * 250 };
 }
 
 /* ---------- piezas visuales del test y del resultado (tarjetas con mosaicos) ---------- */

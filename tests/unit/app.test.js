@@ -97,7 +97,18 @@ test("plan de nutrición: objetivo aplica el factor y redondea a 10 kcal", () =>
         assert.ok(Math.abs(plan.kcal - 2759 * factor) <= 5, goal);
         assert.equal(plan.water, 2750);
         for (const k in plan.goals) assert.ok(plan.goals[k] >= 1);
+        const macroKcal = 4 * plan.macros.c + 4 * plan.macros.p + 9 * plan.macros.f;
+        assert.ok(Math.abs(macroKcal - plan.kcal) / plan.kcal < 0.05, "los gramos de macros suman las calorías de la meta");
     }
+});
+
+test("macros: la dieta baja en carbos da menos carbohidratos y más proteína", () => {
+    const profile = { sex: "m", age: 30, height: 180, weight: 80, activity: 1.55, bf: null };
+    app(`state.nutrition = ${JSON.stringify({ profile, goal: "maintain", diet: "mod" })}`);
+    const mod = ev("nutritionPlan().macros");
+    app(`state.nutrition.diet = "low"`);
+    const low = ev("nutritionPlan().macros");
+    assert.ok(low.c < mod.c && low.p > mod.p && low.f > mod.f);
 });
 
 test("números romanos y rangos", () => {

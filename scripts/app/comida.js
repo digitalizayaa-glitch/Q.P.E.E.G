@@ -301,9 +301,9 @@ function renderFood() {
             <div class="food-kcal"><b>${fmtNum(t.kcal, 0)}</b><span>/ ${fmtNum(kcalGoal, 0)} kcal</span></div>
             <div class="food-bar"><i class="${hasFood ? kcalStatus(t.kcal) : ""}" style="width:${pct}%"></i></div>
             <div class="food-macros">
-                <span>Carbohidratos <b>${fmtNum(t.c, 0)} g</b></span>
-                <span>Proteína <b>${fmtNum(t.p, 0)} g</b></span>
-                <span>Grasa <b>${fmtNum(t.f, 0)} g</b></span>
+                <span>Carbohidratos <b>${fmtNum(t.c, 0)} / ${fmtNum(plan.macros.c, 0)} g</b></span>
+                <span>Proteína <b>${fmtNum(t.p, 0)} / ${fmtNum(plan.macros.p, 0)} g</b></span>
+                <span>Grasa <b>${fmtNum(t.f, 0)} / ${fmtNum(plan.macros.f, 0)} g</b></span>
             </div>
             <div class="food-plan-row">
                 <button class="food-plan" data-act="goal" aria-label="Cambiar objetivo: ${GOALS[n.goal].short}">

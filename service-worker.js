@@ -4,7 +4,7 @@
    el nombre lleva un hash del contenido, así cada cambio publica una caché nueva sola. */
 
 /* <generado> */
-const CACHE_NAME = "qpeeg-3cfbc6edd0";
+const CACHE_NAME = "qpeeg-ad215f22c2";
 const CORE_ASSETS = [
     "./",
     "./icons/apple-touch-icon.png",
