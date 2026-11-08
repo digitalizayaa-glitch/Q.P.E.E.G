@@ -13,6 +13,7 @@ styles/stylesheet.css      Todos los estilos
 icons/                     Iconos de la app
 supabase/                  Servidor de sincronización (esquema SQL y guía: supabase/LEEME.md)
 scripts/
+  core/version.js          Versión de la app y novedades (CHANGELOG)
   core/config.js           Dirección y clave pública del servidor (vacío = sin sincronización)
   core/almacenamiento.js   IndexedDB + localStorage, versión de los datos y migraciones
   core/sincronizacion.js   Código de cuenta, cifrado, fusión de cambios y motor de sincronización
@@ -33,6 +34,7 @@ scripts/
     nutricion.js           Test TDEE y plan
     comida.js              Registro de comida
     cuenta.js              Ajustes → Cuenta: crear/entrar/vincular y sincronizar
+    novedades.js           Versión en la pantalla de inicio y aviso de novedades
 tests/
   unit/                    Lógica pura (Node, sin navegador)
   e2e/                     Interfaz real en Chromium (Playwright)
@@ -55,6 +57,11 @@ tools/build-sw.mjs         Genera la caché del service worker
   cambios de los dos lados; si los dos cambiaron el mismo dato, gana el más reciente.
 - No se aplican cambios de otro teléfono mientras se entrena o hay una ventana de edición abierta.
 - Para vincular otro teléfono sin teclear el código largo: código temporal de 8 caracteres, 10 min, un solo uso.
+
+## Publicar una versión
+
+1. Sube `APP_VERSION` en `scripts/core/version.js` y `version` en `package.json` (las pruebas comprueban que coincidan).
+2. Añade arriba en `CHANGELOG` lo nuevo, en frases cortas para el usuario: cada teléfono lo verá una vez al actualizarse.
 
 ## Desarrollo
 

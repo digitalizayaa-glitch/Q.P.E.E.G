@@ -1524,3 +1524,11 @@ main { overflow-x: hidden; }
 /* Cuenta y sincronización (Ajustes) */
 .settings-note { margin: 0 2px; font-size: 13px; line-height: 1.4; color: var(--muted); }
 .dialog-btn.account-code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 15px; letter-spacing: 1px; color: var(--text); }
+
+/* Versión al pie de la pantalla de inicio (toca para ver novedades) */
+.app-version {
+    margin: 14px auto 0; padding: 4px 12px; border-radius: 999px; cursor: pointer;
+    background: none; border: 1px solid transparent; color: var(--faint);
+    font-size: 11px; letter-spacing: .5px; font-family: inherit;
+}
+.app-version:active { border-color: var(--glass-border); color: var(--muted); }

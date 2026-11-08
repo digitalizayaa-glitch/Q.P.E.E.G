@@ -142,3 +142,13 @@ test("figuras: todas las poses generan un SVG", () => {
     } finally { app("figureMoveFor = globalThis.__move"); }
     assert.match(call("exerciseFigure", "Sentadilla"), /^<svg/);
 });
+
+test("versión: package.json y la app dicen lo mismo, y hay novedades de la versión actual", () => {
+    const pkg = require("../../package.json");
+    const { APP_VERSION, CHANGELOG } = require("../../scripts/core/version.js");
+    assert.equal(pkg.version, APP_VERSION);
+    const cur = CHANGELOG.find(e => e.v === APP_VERSION);
+    assert.ok(cur && cur.items.length > 0);
+    assert.equal(call("compareVersions", "1.10.0", "1.9.2"), 1);
+    assert.equal(call("compareVersions", "1.3", "1.3.0"), 0);
+});
