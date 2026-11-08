@@ -151,7 +151,14 @@ function sanitizeState(src) {
     for (const key in foodLog) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !Array.isArray(foodLog[key])) continue;
         const list = foodLog[key].filter(f => isObj(f) && typeof f.g === "string" && typeof f.p === "number" && isFinite(f.p))
-            .map(f => ({ ...f, id: String(f.id ?? ""), n: str(f.n, 80), t: str(f.t, 80) }));
+            .map(f => {
+                const out = { ...f, id: String(f.id ?? ""), n: str(f.n, 80), t: str(f.t, 80) };
+                /* Comida rápida y "dar el día": calorías y macros propios por unidad */
+                for (const k of ["k", "mc", "mp", "mf"]) {
+                    if (k in out) out[k] = Math.min(20000, Math.max(0, Number(out[k]) || 0));
+                }
+                return out;
+            });
         if (list.length) s.food.log[key] = list;
     }
 

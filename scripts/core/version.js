@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.4.0";
+const APP_VERSION = "1.5.0";
 
 const CHANGELOG = [
+    {
+        v: "1.5.0",
+        items: [
+            "Comida: nuevo botón a la par de la barra de calorías para dar el día. Completa las calorías que faltan como volumen sucio, para los días en que comes fuera de lo común. Si lo tocas otra vez, lo quitas.",
+            "Comida: catálogo de comida rápida (Papa John's, Pizza Hut, Rey Pizza, Domino's, McDonald's, Burger King, KFC, Popeyes, Subway y Taco Bell). Las pizzas van por slice.",
+            "Lo que comes en comida rápida también suma carbohidratos, proteína y grasa, y puede salir en Frecuentes."
+        ]
+    },
     {
         v: "1.4.0",
         items: [

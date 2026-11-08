@@ -178,3 +178,52 @@ test("comida frecuente: más de 3 veces y usada en los últimos 3 días", () => 
     assert.deepEqual(names(10), [], "a los 4 días de la última vez ya no hay frecuentes");
     assert.equal(ev(`frequentFoods(${at(6)})[0].item[1]`), "1 unidad", "usa la porción del catálogo");
 });
+
+test("comida rápida: catálogo coherente (calorías ≈ macros) y pizzas por slice", () => {
+    const chains = ev("FAST_FOOD");
+    assert.ok(chains.length >= 8);
+    for (const { chain, items } of chains) for (const [name, unit, plural, kcal, c, p, f] of items) {
+        const fromMacros = 4 * c + 4 * p + 9 * f;
+        /* hasta 20 %: las cadenas redondean y la fibra/alcoholes de azúcar no suman igual */
+        assert.ok(Math.abs(fromMacros - kcal) / kcal < 0.2, `${chain} · ${name}: ${kcal} kcal vs ${fromMacros}`);
+        if (/^Pizza (de|pepperoni|suprema|hawaiana|Super|Zesty|Ultimate|Pepperoni|Deluxe)/i.test(name)) assert.equal(unit, "slice", `${chain} · ${name} va por slice`);
+        assert.ok(plural && plural !== unit);
+    }
+});
+
+test("totales: comida rápida suma calorías y macros; volumen sucio solo calorías", () => {
+    const t = ev(`foodTotals([
+        { g: "rapida", p: 2, k: 300, mc: 34, mp: 12, mf: 13 },
+        { g: "libre", p: 1, k: 900 },
+        { g: "h", p: 1 }
+    ])`);
+    const h = ev("groupKcal(FOOD_GROUP.h)");
+    assert.equal(Math.round(t.kcal), Math.round(600 + 900 + h));
+    assert.equal(Math.round(t.p), Math.round(24 + ev("FOOD_GROUP.h.p")));
+    assert.equal(t.portions.h, 1);
+    assert.equal(t.portions.rapida, undefined, "la comida rápida no cuenta como porciones de un grupo");
+});
+
+test("stateFrom conserva y limpia las calorías propias de las entradas", () => {
+    const s = call("stateFrom", { food: { log: { "2026-11-08": [
+        { id: "a", n: "Pizza Hut · Pizza", g: "rapida", p: 2, k: 220, mc: 25, mp: 9, mf: 9, t: "2 slices" },
+        { id: "b", n: "Volumen sucio", g: "libre", p: 1, k: -50, t: "x" },
+        { id: "c", n: "Raro", g: "rapida", p: 1, k: "mucho", t: "x" }
+    ] } } });
+    const [a, b, c] = s.food.log["2026-11-08"];
+    assert.equal(a.k, 220); assert.equal(a.mc, 25);
+    assert.equal(b.k, 0, "no hay calorías negativas");
+    assert.equal(c.k, 0);
+});
+
+test("frecuentes incluye comida rápida usada más de 3 veces", () => {
+    const log = {};
+    const key = ev(`FAST_FOOD[1].chain + " · " + FAST_FOOD[1].items[0][0]`);
+    for (const d of [5, 6, 7, 8]) {
+        const ts = new Date(2026, 10, d, 20).getTime();
+        log[app(`dateKey(new Date(${ts}))`)] = [{ id: "x" + d, n: key, g: "rapida", p: 2, k: 210, ts }];
+    }
+    app(`state.food = { log: ${JSON.stringify(log)} }`);
+    const out = ev(`frequentFoods(${new Date(2026, 10, 8, 21).getTime()})`);
+    assert.deepEqual(out, [{ g: "rapida", fk: key }]);
+});

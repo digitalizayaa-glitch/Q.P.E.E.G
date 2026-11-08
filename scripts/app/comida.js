@@ -236,10 +236,28 @@ function kcalStatus(kcal) {
     return "red";
 }
 
+/* Entradas con calorías propias: comida rápida ("rapida") y el día dado como volumen sucio ("libre") */
+const FAST_GROUP = "rapida", FREE_GROUP = "libre";
+const ENTRY_COLORS = { [FAST_GROUP]: "#e08a3c", [FREE_GROUP]: "#9b7fd4" };
+const hasOwnKcal = e => typeof e.k === "number";
+function entryKcal(e) {
+    if (hasOwnKcal(e)) return e.p * e.k;
+    const g = FOOD_GROUP[e.g];
+    return g ? e.p * groupKcal(g) : 0;
+}
+const entryColor = e => (FOOD_GROUP[e.g] ? FOOD_GROUP[e.g].color : ENTRY_COLORS[e.g] || "#4aa8d8");
+
 function foodTotals(entries) {
     const portions = {};
     let kcal = 0, c = 0, p = 0, f = 0;
     entries.forEach(e => {
+        if (hasOwnKcal(e)) {
+            kcal += e.p * e.k;
+            c += e.p * (e.mc || 0);
+            p += e.p * (e.mp || 0);
+            f += e.p * (e.mf || 0);
+            return;
+        }
         const g = FOOD_GROUP[e.g];
         if (!g) return;
         portions[e.g] = (portions[e.g] || 0) + e.p;
@@ -275,6 +293,7 @@ function renderFood() {
     const pct = Math.min(100, (t.kcal / kcalGoal) * 100);
     const water = entries.filter(e => e.g === "agua").reduce((s, e) => s + e.p, 0);
     const hasFood = entries.some(e => e.g !== "agua");
+    const dayGiven = entries.some(e => e.g === FREE_GROUP);
 
     const chip = g => {
         const have = t.portions[g.k] || 0;
@@ -299,7 +318,12 @@ function renderFood() {
     root.innerHTML = `
         <div class="food-summary">
             <div class="food-kcal"><b>${fmtNum(t.kcal, 0)}</b><span>/ ${fmtNum(kcalGoal, 0)} kcal</span></div>
-            <div class="food-bar"><i class="${hasFood ? kcalStatus(t.kcal) : ""}" style="width:${pct}%"></i></div>
+            <div class="food-bar-row">
+                <div class="food-bar"><i class="${hasFood ? kcalStatus(t.kcal) : ""}" style="width:${pct}%"></i></div>
+                <button class="food-done${dayGiven ? " on" : ""}" data-act="done" aria-label="${dayGiven ? "Quitar el día dado (volumen sucio)" : "Dar el día: completar las calorías que faltan como volumen sucio"}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>
+                </button>
+            </div>
             <div class="food-macros">
                 <span>Carbohidratos <b>${fmtNum(t.c, 0)} / ${fmtNum(plan.macros.c, 0)} g</b></span>
                 <span>Proteína <b>${fmtNum(t.p, 0)} / ${fmtNum(plan.macros.p, 0)} g</b></span>
@@ -334,10 +358,9 @@ function openFoodHistory() {
     body.className = "fh-body";
     sheet.appendChild(body);
 
-    const kcalOf = e => { const g = FOOD_GROUP[e.g]; return g ? e.p * groupKcal(g) : 0; };
+    const kcalOf = entryKcal;
     const rowHtml = e => {
-        const g = FOOD_GROUP[e.g];
-        const color = g ? g.color : "#4aa8d8";
+        const color = entryColor(e);
         const isWater = e.g === "agua";
         return `<div class="food-row" style="--c:${color}">
             <span class="fr-dot"></span>
@@ -424,6 +447,7 @@ document.addEventListener("click", e => {
         else if (act.dataset.act === "diet") choosePlanOption("diet");
         else if (act.dataset.act === "calib") showTdeeResult({ calibrate: true });
         else if (act.dataset.act === "hist") openFoodHistory();
+        else if (act.dataset.act === "done") giveTheDay();
         return;
     }
 
@@ -445,7 +469,7 @@ function frequentFoods(now = Date.now()) {
     for (const day in log) {
         const dayTs = parseKey(day).getTime() + 12 * 3600 * 1000;
         for (const e of log[day]) {
-            if (!FOOD_GROUP[e.g] || !e.n) continue;
+            if (!e.n || !(FOOD_GROUP[e.g] || (e.g === FAST_GROUP && FAST_FOOD_BY_KEY.has(e.n)))) continue;
             const key = e.g + "|" + e.n;
             const s = stats.get(key) || { g: e.g, n: e.n, count: 0, last: 0 };
             s.count++;
@@ -457,21 +481,33 @@ function frequentFoods(now = Date.now()) {
         .filter(s => s.count >= FREQUENT_MIN && now - s.last <= FREQUENT_WINDOW)
         .sort((a, b) => b.count - a.count || b.last - a.last)
         .slice(0, 8)
-        .map(s => ({ g: s.g, item: (FOOD_CATALOG[s.g] || []).find(i => i[0] === s.n) || [s.n, "1 porción"] }));
+        .map(s => s.g === FAST_GROUP
+            ? { g: FAST_GROUP, fk: s.n }
+            : { g: s.g, item: (FOOD_CATALOG[s.g] || []).find(i => i[0] === s.n) || [s.n, "1 porción"] });
 }
 
 function openFoodPicker(groupKey) {
     const keys = groupKey ? [groupKey] : FOOD_GROUPS.map(g => g.k);
     const picked = new Set();                 /* lo agregado sin cerrar el menú: se pinta con el color de la app */
-    const keyOf = v => v.g + "|" + v.item[0];
+    const keyOf = v => v.g + "|" + (v.fk || v.item[0]);
     const asItem = (g, item) => ({ label: item[0], sub: item[1], value: { g, item } });
+    const fastItem = key => {
+        const { item } = FAST_FOOD_BY_KEY.get(key);
+        return { label: key, sub: `1 ${item[1]} · ${fmtNum(item[3], 0)} kcal`, value: { g: FAST_GROUP, fk: key } };
+    };
 
-    const frequent = frequentFoods().filter(f => keys.includes(f.g));
+    const frequent = frequentFoods().filter(f => f.g === FAST_GROUP ? !groupKey : keys.includes(f.g));
     const groups = keys.map(k => ({
         title: groupKey ? null : FOOD_GROUP[k].name,
         items: FOOD_CATALOG[k].map(item => asItem(k, item))
     }));
-    if (frequent.length) groups.unshift({ title: "Frecuentes", items: frequent.map(f => asItem(f.g, f.item)) });
+    if (!groupKey) {
+        FAST_FOOD.forEach(({ chain, items }) => groups.push({
+            title: `Comida rápida · ${chain}`,
+            items: items.map(it => fastItem(`${chain} · ${it[0]}`))
+        }));
+    }
+    if (frequent.length) groups.unshift({ title: "Frecuentes", items: frequent.map(f => f.g === FAST_GROUP ? fastItem(f.fk) : asItem(f.g, f.item)) });
 
     openPicker({
         title: groupKey ? FOOD_GROUP[groupKey].name : "Agregar comida",
@@ -480,7 +516,11 @@ function openFoodPicker(groupKey) {
         itemClass: v => picked.has(keyOf(v)) ? "picked" : "",
         groups,
         createLabel: "Porciones sueltas",
-        onPick: (v, refresh) => askFoodAmount(v.g, v.item, () => { picked.add(keyOf(v)); refresh(); }),
+        onPick: (v, refresh) => {
+            const done = () => { picked.add(keyOf(v)); refresh(); };
+            if (v.g === FAST_GROUP) askFastFood(v.fk, done);
+            else askFoodAmount(v.g, v.item, done);
+        },
         onCreate: query => {
             const loose = g => askFoodAmount(g, [query || FOOD_GROUP[g].name, "1 porción"]);
             if (groupKey) { loose(groupKey); return; }
@@ -527,4 +567,75 @@ function askFoodAmount(groupKey, item, onAdded) {
             if (onAdded) onAdded();
         }
     });
+}
+
+/* ---------- comida rápida ---------- */
+
+function askFastFood(key, onAdded) {
+    const { item } = FAST_FOOD_BY_KEY.get(key);
+    const [name, unit, plural, kcal, c, p, f] = item;
+    let qty = 1;
+    openStepper({
+        title: name,
+        subtitle: `${key.split(" · ")[0]} · 1 ${unit} = ${fmtNum(kcal, 0)} kcal`,
+        unit: plural,
+        doneLabel: "Agregar",
+        cancelLabel: "Cancelar",
+        read: () => fmtNum(qty, 2),
+        step: dir => { qty = Math.max(0.5, Math.round((qty + dir) * 100) / 100); },
+        onEdit: text => {
+            const n = parseAmount(text, { max: 99 });
+            if (n === null || n <= 0) return "x";
+            qty = n;
+            return "";
+        },
+        onClose: confirmed => {
+            if (!confirmed) return;
+            addFoodEntry({
+                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                n: key, g: FAST_GROUP, p: qty, k: kcal, mc: c, mp: p, mf: f,
+                t: `${fmtNum(qty, 2)} ${qty === 1 ? unit : plural}`
+            });
+            renderFood();
+            if (onAdded) onAdded();
+        }
+    });
+}
+
+/* ---------- dar el día ----------
+   Para días en que se come fuera de lo común y no se puede contar: completa las calorías
+   que faltan para la meta con una entrada "Volumen sucio" (sin macros: no se conocen).
+   Si ya se dio el día, el mismo botón permite quitarlo. */
+async function giveTheDay() {
+    const entries = foodEntries();
+    const given = entries.find(e => e.g === FREE_GROUP);
+    if (given) {
+        const ok = await askConfirm({
+            title: "Quitar el día dado",
+            message: `Se quitarán las ${fmtNum(entryKcal(given), 0)} kcal de volumen sucio de este día.`,
+            confirmLabel: "Quitar"
+        });
+        if (!ok) return;
+        removeFoodEntry(given.id);
+        renderFood();
+        return;
+    }
+    const goal = nutritionPlan().kcal;
+    const missing = Math.round(goal - foodTotals(entries).kcal);
+    if (missing <= 0) {
+        await showMessage({ title: "Meta alcanzada", message: "Ya llegaste a tu meta de calorías de este día." });
+        return;
+    }
+    const ok = await askConfirm({
+        title: "Dar el día",
+        message: `Se sumarán ${fmtNum(missing, 0)} kcal como volumen sucio para completar tu meta de ${fmtNum(goal, 0)} kcal.\n\nÚsalo los días en que comes fuera de lo común y no puedes contar.`,
+        confirmLabel: "Dar el día"
+    });
+    if (!ok) return;
+    addFoodEntry({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        n: "Volumen sucio", g: FREE_GROUP, p: 1, k: missing,
+        t: "Calorías que faltaban"
+    });
+    renderFood();
 }
