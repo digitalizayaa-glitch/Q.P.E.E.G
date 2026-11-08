@@ -38,10 +38,13 @@ function calcTDEE(p) {
     const ideal = 22 * h * h;
     const leanMax = (p.height - 100) * 0.95 * (male ? 1 : 0.85);
     const bfTarget = male ? 0.10 : 0.18;
+    /* Peso con el máximo de músculo a tres niveles de grasa: muy definido, definido y en volumen ligero */
+    const bfSteps = [bfTarget, bfTarget + 0.03, bfTarget + 0.06];
     return {
         bmr, tdee, bf, bfKnown, lean,
         ideal, idealMin: 20 * h * h, idealMax: 24.9 * h * h,
         leanMax, weightAtMax: leanMax / (1 - bfTarget), bfTarget,
+        weightsAtMax: bfSteps.map(b => ({ bf: Math.round(b * 100), weight: leanMax / (1 - b) })),
         muscleLeft: Math.max(0, leanMax - lean)
     };
 }
@@ -267,11 +270,18 @@ function showTdeeResult({ calibrate = false } = {}) {
             ? [tTile("Grasa", f(t.bf, 0), "%"), tTile("Masa magra", f(t.lean, 1), "kg")]
             : [tTile("Grasa estimada", f(t.bf, 0), "%")],
             t.bfKnown ? [] : ['<span class="t-chip">Estimada (no la indicaste)</span>']),
-        card("Máximo potencial muscular", [
-            tTile("Masa magra máxima", f(t.leanMax, 1), "kg"),
-            tTile(`Peso con ${Math.round(t.bfTarget * 100)} % de grasa`, f(t.weightAtMax, 1), "kg")
-        ], t.bfKnown ? [`<span class="t-chip green">Te faltan ≈ ${f(t.muscleLeft, 1)} kg de músculo</span>`] : [])
+        potentialCard()
     );
+
+    /* Masa magra máxima arriba y, debajo, el peso que tendrías con ella a 3 niveles de grasa */
+    function potentialCard() {
+        const c = card("Máximo potencial muscular", [tTile("Masa magra máxima", f(t.leanMax, 1), "kg")],
+            t.bfKnown ? [`<span class="t-chip green">Te faltan ≈ ${f(t.muscleLeft, 1)} kg de músculo</span>`] : []);
+        const row = el("div", "t-row");
+        row.append(...t.weightsAtMax.map(x => tTile(`Peso con ${x.bf} % de grasa`, f(x.weight, 1), "kg", "t-sm")));
+        c.querySelector(".t-row").after(row);
+        return c;
+    }
 
     const ok = el("button", "dialog-btn accept t-submit", "Entendido");
     ok.type = "button";

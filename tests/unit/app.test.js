@@ -82,6 +82,15 @@ test("TDEE: fórmula de Mifflin-St Jeor sin % de grasa", () => {
     assert.equal(Math.round(f.bmr), Math.round(10 * 60 + 6.25 * 165 - 150 - 161));
 });
 
+test("TDEE: peso con el máximo muscular a 10, 13 y 16 % de grasa (mujeres 18, 21, 24)", () => {
+    const m = call("calcTDEE", { sex: "m", age: 30, height: 180, weight: 80, activity: 1.55, bf: null });
+    assert.deepEqual(m.weightsAtMax.map(x => x.bf), [10, 13, 16]);
+    m.weightsAtMax.forEach(x => assert.ok(Math.abs(x.weight - m.leanMax / (1 - x.bf / 100)) < 1e-9));
+    assert.ok(m.weightsAtMax[0].weight < m.weightsAtMax[1].weight && m.weightsAtMax[1].weight < m.weightsAtMax[2].weight);
+    const f = call("calcTDEE", { sex: "f", age: 30, height: 165, weight: 60, activity: 1.2, bf: null });
+    assert.deepEqual(f.weightsAtMax.map(x => x.bf), [18, 21, 24]);
+});
+
 test("TDEE: fórmula de Katch-McArdle con % de grasa", () => {
     const t = call("calcTDEE", { sex: "m", age: 30, height: 180, weight: 80, activity: 1.55, bf: 15 });
     assert.equal(Math.round(t.lean), 68);

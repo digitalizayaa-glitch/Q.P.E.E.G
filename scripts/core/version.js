@@ -5,9 +5,16 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.3.0";
+const APP_VERSION = "1.3.1";
 
 const CHANGELOG = [
+    {
+        v: "1.3.1",
+        items: [
+            "Comida: el botón \"Ver historial\" ahora tiene el color de los demás botones.",
+            "Test TDEE: el máximo potencial muscular muestra tu peso con 10 %, 13 % y 16 % de grasa (mujeres: 18 %, 21 % y 24 %)."
+        ]
+    },
     {
         v: "1.3.0",
         items: [

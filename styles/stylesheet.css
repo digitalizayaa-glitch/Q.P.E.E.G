@@ -1060,9 +1060,9 @@ main { overflow-x: hidden; }
 .food-plan b { display: block; font-size: 15px; }
 .food-plan i { font-style: normal; font-size: 20px; color: var(--ui); }
 .food-plan:active { filter: brightness(1.25); }
-.food-hist-btn { margin: 0; padding: calc(12px * var(--k)) 14px; border-radius: 14px; cursor: pointer; font-size: 14px; color: var(--text); background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); flex-shrink: 0; }
-.food-hist-btn small { color: var(--muted); }
-.food-hist-btn:active { background: var(--glass-bg-strong); border-color: var(--ui); }
+.food-hist-btn { margin: 0; padding: calc(12px * var(--k)) 14px; border-radius: 14px; cursor: pointer; font-size: 14px; font-weight: bold; color: var(--text); background: rgba(var(--ui-rgb), 0.14); border: 1px solid var(--ui); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); flex-shrink: 0; }
+.food-hist-btn small { color: var(--muted); font-weight: normal; }
+.food-hist-btn:active { background: rgba(var(--ui-rgb), 0.28); }
 .fh-sheet { display: flex; flex-direction: column; }
 .fh-seg { margin-bottom: 8px; flex-shrink: 0; }
 .fh-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
@@ -1512,13 +1512,13 @@ main { overflow-x: hidden; }
 }
 .home-btn, .settings-btn, .profile-photo, .backup-btn, .achievements-edit,
 .square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
-.wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order {
+.wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order, .food-hist-btn {
     animation: ui-pulse 3.4s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
     .home-btn, .settings-btn, .profile-photo, .backup-btn, .achievements-edit,
     .square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
-    .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order { animation: none; }
+    .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order, .food-hist-btn { animation: none; }
 }
 
 /* Cuenta y sincronización (Ajustes) */
@@ -1532,3 +1532,9 @@ main { overflow-x: hidden; }
     font-size: 11px; letter-spacing: .5px; font-family: inherit;
 }
 .app-version:active { border-color: var(--glass-border); color: var(--muted); }
+
+/* Potencial muscular: fila de 3 pesos (más pequeña) */
+.t-row + .t-row { margin-top: 8px; }
+.t-tile.t-sm { padding: 7px 8px; }
+.t-tile.t-sm b { font-size: 20px; }
+.t-tile.t-sm i { margin-left: 2px; font-size: 11px; }
