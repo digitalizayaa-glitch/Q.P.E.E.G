@@ -5,9 +5,16 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.5.0";
+const APP_VERSION = "1.5.1";
 
 const CHANGELOG = [
+    {
+        v: "1.5.1",
+        items: [
+            "Comida rápida: catálogo más grande, con Wendy's, Little Caesars, Carl's Jr., Church's Texas Chicken y Rostipollos, y más productos en las cadenas que ya estaban.",
+            "Pizza de jamón y queso en todas las pizzerías, por slice."
+        ]
+    },
     {
         v: "1.5.0",
         items: [

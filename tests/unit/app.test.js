@@ -186,9 +186,19 @@ test("comida rápida: catálogo coherente (calorías ≈ macros) y pizzas por sl
         const fromMacros = 4 * c + 4 * p + 9 * f;
         /* hasta 20 %: las cadenas redondean y la fibra/alcoholes de azúcar no suman igual */
         assert.ok(Math.abs(fromMacros - kcal) / kcal < 0.2, `${chain} · ${name}: ${kcal} kcal vs ${fromMacros}`);
-        if (/^Pizza (de|pepperoni|suprema|hawaiana|Super|Zesty|Ultimate|Pepperoni|Deluxe)/i.test(name)) assert.equal(unit, "slice", `${chain} · ${name} va por slice`);
+        if (/^Pizza /.test(name) && !/^Subway/.test(chain)) assert.equal(unit, "slice", `${chain} · ${name} va por slice`);
         assert.ok(plural && plural !== unit);
     }
+});
+
+test("comida rápida: cada pizzería tiene pizza de jamón y queso", () => {
+    const pizzerias = ev("FAST_FOOD").filter(c => c.items.some(i => /^Pizza /.test(i[0]) && i[1] === "slice"));
+    assert.ok(pizzerias.length >= 5);
+    for (const { chain, items } of pizzerias) {
+        assert.ok(items.some(i => /jamón y queso/i.test(i[0])), `${chain} no tiene pizza de jamón y queso`);
+    }
+    const keys = ev("[...FAST_FOOD_BY_KEY.keys()]");
+    assert.equal(new Set(keys).size, keys.length, "sin productos repetidos");
 });
 
 test("totales: comida rápida suma calorías y macros; volumen sucio solo calorías", () => {

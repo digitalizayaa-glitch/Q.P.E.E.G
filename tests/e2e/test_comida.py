@@ -82,7 +82,10 @@ def main():
             pg.fill(".picker-search", "pepperoni"); pg.wait_for_timeout(300)
             r["catalogo_pizzas"] = pg.locator(".picker-group", has_text="Pizza Hut").count() == 1 and \
                 pg.locator(".picker-group", has_text="Papa John's").count() == 1 and pg.locator(".picker-group", has_text="Rey Pizza").count() == 1
-            if SHOTS: pg.screenshot(path=f"{SHOTS}/menu_rapida.png")
+            if SHOTS:
+                pg.fill(".picker-search", "jamón y queso"); pg.wait_for_timeout(300)
+                pg.screenshot(path=f"{SHOTS}/menu_jamon_queso.png")
+                pg.fill(".picker-search", "pepperoni"); pg.wait_for_timeout(300)
             kcal0 = pg.evaluate("foodTotals(foodEntries()).kcal")
             pg.locator(".picker-item", has_text="Pizza Hut · Pizza pepperoni mediana").first.click(); pg.wait_for_timeout(500)
             r["stepper_slices"] = "slices" in pg.locator(".stepper-overlay").inner_text()
