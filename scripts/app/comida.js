@@ -247,6 +247,31 @@ function entryKcal(e) {
 }
 const entryColor = e => (FOOD_GROUP[e.g] ? FOOD_GROUP[e.g].color : ENTRY_COLORS[e.g] || "#4aa8d8");
 
+/* Equivalencia en porciones (de 0,5 en 0,5) de UNA unidad de comida rápida, a partir de sus macros:
+   1) los carbohidratos van a Harinas;
+   2) la proteína que queda, a Proteína: Media Grasa mientras la grasa alcance (queso, carne, pollo frito)
+      y el resto a Baja Grasa;
+   3) la grasa que sobra, a Grasas.
+   Así una pizza, una hamburguesa o un sub reparten sus porciones en varios grupos. */
+const half = x => Math.round(x * 2) / 2;
+function fastPortions(c, p, f) {
+    const h = half(c / 15);
+    const prot = half(Math.max(0, p - 3 * h) / 7);
+    const mg = Math.min(prot, half(Math.max(0, (f - h - prot) / 4)));
+    const bg = prot - mg;
+    const g = half(Math.max(0, f - h - mg * 5 - bg) / 5);
+    const out = {};
+    for (const [k, v] of [["h", h], ["bg", bg], ["mg", mg], ["g", g]]) if (v > 0) out[k] = v;
+    return out;
+}
+/* Porciones de una entrada de comida rápida (por cantidad); el "volumen sucio" no tiene */
+const entryPortions = e => (e.g === FAST_GROUP && typeof e.mc === "number")
+    ? Object.fromEntries(Object.entries(fastPortions(e.mc, e.mp || 0, e.mf || 0)).map(([k, v]) => [k, v * e.p]))
+    : {};
+/* "2,5 harinas · 1 prot. MG · 1 grasa" */
+const PORTION_SHORT = { h: ["harina", "harinas"], bg: ["prot. BG", "prot. BG"], mg: ["prot. MG", "prot. MG"], g: ["grasa", "grasas"] };
+const portionsText = pt => Object.entries(pt).map(([k, v]) => `${fmtNum(v, 1)} ${PORTION_SHORT[k][v === 1 ? 0 : 1]}`).join(" · ");
+
 function foodTotals(entries) {
     const portions = {};
     let kcal = 0, c = 0, p = 0, f = 0;
@@ -256,6 +281,7 @@ function foodTotals(entries) {
             c += e.p * (e.mc || 0);
             p += e.p * (e.mp || 0);
             f += e.p * (e.mf || 0);
+            for (const [k, v] of Object.entries(entryPortions(e))) portions[k] = (portions[k] || 0) + v;
             return;
         }
         const g = FOOD_GROUP[e.g];
@@ -364,7 +390,7 @@ function openFoodHistory() {
         const isWater = e.g === "agua";
         return `<div class="food-row" style="--c:${color}">
             <span class="fr-dot"></span>
-            <span class="fr-name">${esc(e.n)}<small>${e.ts ? fmtTime(e.ts) + " · " : ""}${esc(e.t)}</small></span>
+            <span class="fr-name">${esc(e.n)}<small>${e.ts ? fmtTime(e.ts) + " · " : ""}${esc(e.t)}${e.g === FAST_GROUP ? " = " + esc(portionsText(entryPortions(e))) : ""}</small></span>
             <span class="fr-kcal">${isWater ? fmtNum(e.p * WATER_ML, 0) + " ml" : fmtNum(kcalOf(e), 0) + " kcal"}</span>
             <button class="fr-del" data-id="${esc(e.id)}" aria-label="Quitar">✕</button>
         </div>`;
@@ -547,7 +573,7 @@ function askFoodAmount(groupKey, item, onAdded) {
         doneLabel: "Agregar",
         cancelLabel: "Cancelar",
         read: () => fmtNum(qty, 2),
-        step: dir => { qty = Math.max(1, Math.round((qty + dir) * 100) / 100); },
+        step: dir => { qty = Math.max(0.5, Math.round((qty + dir * 0.5) * 100) / 100); },   /* medias porciones: 0,5 · 1 · 1,5 … */
         onEdit: text => {
             const n = parseAmount(text, { max: 99 });
             if (n === null || n <= 0) return "x";
@@ -577,12 +603,12 @@ function askFastFood(key, onAdded) {
     let qty = 1;
     openStepper({
         title: name,
-        subtitle: `${key.split(" · ")[0]} · 1 ${unit} = ${fmtNum(kcal, 0)} kcal`,
+        subtitle: `1 ${unit} = ${fmtNum(kcal, 0)} kcal\n= ${portionsText(fastPortions(c, p, f))}`,
         unit: plural,
         doneLabel: "Agregar",
         cancelLabel: "Cancelar",
         read: () => fmtNum(qty, 2),
-        step: dir => { qty = Math.max(0.5, Math.round((qty + dir) * 100) / 100); },
+        step: dir => { qty = Math.max(0.5, Math.round((qty + dir * 0.5) * 100) / 100); },
         onEdit: text => {
             const n = parseAmount(text, { max: 99 });
             if (n === null || n <= 0) return "x";

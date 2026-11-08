@@ -89,10 +89,20 @@ def main():
             kcal0 = pg.evaluate("foodTotals(foodEntries()).kcal")
             pg.locator(".picker-item", has_text="Pizza Hut · Pizza pepperoni mediana").first.click(); pg.wait_for_timeout(500)
             r["stepper_slices"] = "slices" in pg.locator(".stepper-overlay").inner_text()
+            r["stepper_equivalencia"] = "harina" in pg.locator(".stepper-overlay").inner_text()
+            pg.locator(".stepper-overlay button[aria-label*='Subir'], .stepper-overlay .stepper-up").first.click(); pg.wait_for_timeout(200)
+            r["paso_medio"] = "1,5" in pg.locator(".stepper-overlay").inner_text()
+            if SHOTS: pg.screenshot(path=f"{SHOTS}/stepper_pizza.png")
+            pg.locator(".stepper-overlay .stepper-down, .stepper-overlay button[aria-label*='Bajar']").first.click(); pg.wait_for_timeout(200)
             pg.locator(".stepper-overlay button", has_text="Agregar").click(); pg.wait_for_timeout(500)
             r["rapida_marcada"] = pg.locator(".picker-item.picked", has_text="Pizza Hut").count() == 1
             pg.locator(".picker-close").click(); pg.wait_for_timeout(500)
             r["rapida_suma"] = round(pg.evaluate("foodTotals(foodEntries()).kcal") - kcal0) == 220
+            r["rapida_suma_porciones"] = pg.evaluate("foodTotals(foodEntries()).portions.h") >= 1.5
+            pg.locator(".food-hist-btn").click(); pg.wait_for_timeout(500)
+            r["historial_equivalencia"] = "harina" in pg.locator(".fh-list").inner_text()
+            if SHOTS: pg.screenshot(path=f"{SHOTS}/historial_porciones.png")
+            pg.locator(".picker-close").click(); pg.wait_for_timeout(400)
 
             # Dar el día
             goal = pg.evaluate("nutritionPlan().kcal")

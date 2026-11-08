@@ -853,7 +853,7 @@ main { overflow-x: hidden; }
 
 .stepper-sheet { width: min(100%, 320px); max-height: none; padding: 18px; align-items: stretch; text-align: center; }
 .stepper-title { font-size: 18px; margin-bottom: 2px; }
-.stepper-sub { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+.stepper-sub { color: var(--muted); font-size: 13px; margin-bottom: 12px; white-space: pre-line; }
 
 .stepper-btn {
     height: 54px;
@@ -1558,3 +1558,6 @@ main { overflow-x: hidden; }
 .food-done svg { width: 16px; height: 16px; }
 .food-done:active { background: rgba(var(--ui-rgb), 0.3); }
 .food-done.on { background: var(--ui); color: var(--bg); }
+
+/* Historial: la equivalencia en porciones de la comida rápida puede ocupar dos renglones */
+.fh-list .fr-name small { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }

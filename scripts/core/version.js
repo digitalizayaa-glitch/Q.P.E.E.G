@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.5.1";
+const APP_VERSION = "1.5.2";
 
 const CHANGELOG = [
+    {
+        v: "1.5.2",
+        items: [
+            "Comida rápida: ahora también suma porciones. Cada producto se reparte en harinas, proteína y grasas (por ejemplo, 1 slice = 2,5 harinas · 0,5 prot. MG · 1 grasa). Lo que ya registraste se corrige solo.",
+            "Al agregar comida rápida ves a cuántas porciones equivale, y en el historial aparece la equivalencia de cada cosa.",
+            "Las cantidades se cambian de media en media (0,5 · 1 · 1,5 · 2,5…)."
+        ]
+    },
     {
         v: "1.5.1",
         items: [

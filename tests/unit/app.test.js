@@ -210,8 +210,9 @@ test("totales: comida rápida suma calorías y macros; volumen sucio solo calor�
     const h = ev("groupKcal(FOOD_GROUP.h)");
     assert.equal(Math.round(t.kcal), Math.round(600 + 900 + h));
     assert.equal(Math.round(t.p), Math.round(24 + ev("FOOD_GROUP.h.p")));
-    assert.equal(t.portions.h, 1);
-    assert.equal(t.portions.rapida, undefined, "la comida rápida no cuenta como porciones de un grupo");
+    assert.equal(t.portions.h, 1 + 2 * call("fastPortions", 34, 12, 13).h, "la comida rápida reparte porciones en los grupos");
+    assert.equal(t.portions.rapida, undefined);
+    assert.equal(t.portions.libre, undefined, "el volumen sucio no suma porciones");
 });
 
 test("stateFrom conserva y limpia las calorías propias de las entradas", () => {
@@ -236,4 +237,26 @@ test("frecuentes incluye comida rápida usada más de 3 veces", () => {
     app(`state.food = { log: ${JSON.stringify(log)} }`);
     const out = ev(`frequentFoods(${new Date(2026, 10, 8, 21).getTime()})`);
     assert.deepEqual(out, [{ g: "rapida", fk: key }]);
+});
+
+test("comida rápida → porciones: cada producto se reparte en grupos y cuadra con sus calorías", () => {
+    const G = ev("Object.fromEntries(FOOD_GROUPS.map(g => [g.k, groupKcal(g)]))");
+    for (const { chain, items } of ev("FAST_FOOD")) for (const [name, , , kcal, c, p, f] of items) {
+        const pt = call("fastPortions", c, p, f);
+        for (const v of Object.values(pt)) assert.equal(v * 2, Math.round(v * 2), `${name}: porciones de 0,5 en 0,5`);
+        const fromPortions = Object.entries(pt).reduce((s, [k, v]) => s + v * G[k], 0);
+        const sugarOnly = p <= 1 && f <= 1;      /* refrescos y salsas dulces: solo carbohidratos → harinas */
+        if (!sugarOnly) assert.ok(Math.abs(fromPortions - kcal) / kcal <= 0.16, `${chain} · ${name}: ${kcal} kcal vs porciones ${fromPortions}`);
+    }
+    assert.deepEqual(call("fastPortions", 38, 11, 10), { h: 2.5, mg: 0.5, g: 1 }, "slice de queso grande");
+    assert.deepEqual(call("fastPortions", 46, 25, 34), { h: 3, mg: 2.5, g: 3.5 }, "Big Mac");
+});
+
+test("las porciones de la comida rápida suman en los grupos (también lo ya registrado)", () => {
+    const t = ev(`foodTotals([
+        { g: "rapida", n: "Papa John's · Pizza de queso grande (14\\") original", p: 2, k: 290, mc: 38, mp: 11, mf: 10 },
+        { g: "libre", p: 1, k: 500 },
+        { g: "h", p: 0.5 }
+    ])`);
+    assert.deepEqual(t.portions, { h: 5.5, mg: 1, g: 2 });
 });
