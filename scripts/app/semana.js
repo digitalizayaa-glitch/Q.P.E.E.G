@@ -13,8 +13,7 @@ const TAB_ORDER = [
 /* Deslizar recorre TAB_ORDER en bucle; desde Entreno
    (que no pertenece a TAB_ORDER) salen tomando "Semana" como base */
 function shiftWeekTab(direction) {
-    selectedDate = null;
-    foodDate = null;
+    /* El día que se está viendo se mantiene al cambiar de pestaña (solo "Hoy" o la casita vuelven a hoy) */
 
     const current = document.querySelector(".section.active").id;
     let currentIndex = TAB_ORDER.findIndex(tab => tab.id === current);
@@ -75,7 +74,7 @@ function renderWeekSection() {
 
     const caption = document.createElement("p");
     caption.className = "split-caption";
-    caption.textContent = "Elige el día de hoy";
+    caption.textContent = viewDate() ? "Elige el día que entrenaste" : "Elige el día de hoy";
     container.append(caption, weekActions());
 }
 

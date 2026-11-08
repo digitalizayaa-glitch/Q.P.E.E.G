@@ -5,9 +5,18 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.5.5";
+const APP_VERSION = "1.5.6";
 
 const CHANGELOG = [
+    {
+        v: "1.5.6",
+        items: [
+            "Al tocar un día en el calendario, toda la app queda en ese día (Semana, Entreno, Comida e Historial) y puedes deslizar entre pestañas sin volver a hoy.",
+            "Para volver a hoy, toca el botón \"Hoy\" a la derecha de la fecha, o la casita.",
+            "El título ya no se corta con fechas largas: se ajusta al espacio.",
+            "En el calendario se marca el día que estás viendo."
+        ]
+    },
     {
         v: "1.5.5",
         items: [

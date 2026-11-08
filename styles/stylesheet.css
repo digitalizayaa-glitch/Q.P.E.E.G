@@ -1561,3 +1561,18 @@ main { overflow-x: hidden; }
 
 /* Historial: la equivalencia en porciones de la comida rápida puede ocupar dos renglones */
 .fh-list .fr-name small { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
+
+/* Botón "Hoy": a la derecha del título, solo al ver otro día (mismo tamaño que la casita) */
+.today-btn {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    height: max(30px, calc(var(--hdr) * 0.4)); padding: 0 12px; border-radius: 10px; cursor: pointer;
+    font-size: 13px; font-weight: bold; color: var(--text);
+    background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+    animation: ui-pulse 3.4s ease-in-out infinite;
+}
+.today-btn[hidden] { display: none; }
+.today-btn:active { background: rgba(var(--ui-rgb), .32); }
+@media (prefers-reduced-motion: reduce) { .today-btn { animation: none; } }
+.header-sub .week-date { padding: 0 64px 0 44px; display: block; text-align: center; line-height: 1.25; overflow: hidden; }
+/* Día que se está viendo en el calendario */
+.history-grid .viewing { outline: 2px solid var(--ui); outline-offset: -2px; }

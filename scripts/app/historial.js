@@ -91,6 +91,7 @@ function renderHistory(animate) {
         const cell = document.createElement("button");
         cell.className = "history-cell";
         cell.textContent = d;
+        cell.dataset.key = key;
 
         if (status === "green") cell.classList.add("green");
         if (status === "red") cell.classList.add("red");
@@ -104,10 +105,11 @@ function renderHistory(animate) {
         } else if (historyMode === "workout") {
             cell.onclick = () => navFade(() => openHistoryDay(key));
         } else if (historyMode === "sport") {
-            cell.onclick = () => navFade(() => { selectedDate = key === dateKey() ? null : key; showSection("week"); });
+            cell.onclick = () => navFade(() => { setViewDate(key); showSection("week"); });
         } else {
-            cell.onclick = () => navFade(() => { foodDate = key === dateKey() ? null : key; showSection("food"); });
+            cell.onclick = () => navFade(() => { setViewDate(key); showSection("food"); });
         }
+        if (key === viewDate()) cell.classList.add("viewing");   /* el día que se está viendo */
 
         grid.appendChild(cell);
     }
@@ -470,7 +472,7 @@ function workoutDayStatus(key) {
 }
 
 function openHistoryDay(key) {
-    selectedDate = (key === dateKey()) ? null : key;
+    setViewDate(key);
 
     const entry = state.logs[state.activeRoutineId]?.[key];
     const routine = findRoutine(state.activeRoutineId);
