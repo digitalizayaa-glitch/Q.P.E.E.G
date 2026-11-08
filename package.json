@@ -1,10 +1,10 @@
 {
   "name": "qpeeg",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "private": true,
   "description": "Q.P.E.E.G: rutinas de entrenamiento, series, progreso y nutrición. PWA 100 % offline.",
   "scripts": {
-    "check": "for f in scripts/core/*.js scripts/app/*.js service-worker.js; do node --check \"$f\" || exit 1; done && node tools/build-sw.mjs --check",
+    "check": "for f in scripts/core/*.js scripts/app/*.js service-worker.js; do node --check \"$f\" || exit 1; done && node tools/build-sw.mjs --check && node tools/calibrar-porciones.mjs --check >/dev/null",
     "build:sw": "node tools/build-sw.mjs",
     "test": "node --test tests/unit/*.test.js",
     "test:e2e": "python3 tests/e2e/test_storage.py && python3 tests/e2e/test_app.py && python3 tests/e2e/test_sync.py && python3 tests/e2e/test_novedades.py && python3 tests/e2e/test_comida.py",

@@ -239,17 +239,46 @@ test("frecuentes incluye comida rápida usada más de 3 veces", () => {
     assert.deepEqual(out, [{ g: "rapida", fk: key }]);
 });
 
-test("comida rápida → porciones: cada producto se reparte en grupos y cuadra con sus calorías", () => {
+test("comida rápida → porciones calibradas: cada producto cuadra con sus calorías", () => {
     const G = ev("Object.fromEntries(FOOD_GROUPS.map(g => [g.k, groupKcal(g)]))");
-    for (const { chain, items } of ev("FAST_FOOD")) for (const [name, , , kcal, c, p, f] of items) {
-        const pt = call("fastPortions", c, p, f);
+    const errs = [];
+    for (const { chain, items } of ev("FAST_FOOD")) for (const [name, , , kcal, , , , pt] of items) {
+        assert.ok(pt && Object.keys(pt).length, `${chain} · ${name} sin calibrar (node tools/calibrar-porciones.mjs)`);
         for (const v of Object.values(pt)) assert.equal(v * 2, Math.round(v * 2), `${name}: porciones de 0,5 en 0,5`);
         const fromPortions = Object.entries(pt).reduce((s, [k, v]) => s + v * G[k], 0);
-        const sugarOnly = p <= 1 && f <= 1;      /* refrescos y salsas dulces: solo carbohidratos → harinas */
-        if (!sugarOnly) assert.ok(Math.abs(fromPortions - kcal) / kcal <= 0.16, `${chain} · ${name}: ${kcal} kcal vs porciones ${fromPortions}`);
+        const diff = Math.abs(fromPortions - kcal);
+        errs.push(diff / kcal);
+        /* el límite es media porción del grupo más pequeño (~20 kcal) o el 6 %, lo que sea mayor */
+        assert.ok(diff <= Math.max(0.06 * kcal, 21), `${chain} · ${name}: ${kcal} kcal vs porciones ${fromPortions}`);
     }
-    assert.deepEqual(call("fastPortions", 38, 11, 10), { h: 2.5, mg: 0.5, g: 1 }, "slice de queso grande");
-    assert.deepEqual(call("fastPortions", 46, 25, 34), { h: 3, mg: 2.5, g: 3.5 }, "Big Mac");
+    assert.ok(errs.reduce((a, b) => a + b, 0) / errs.length < 0.02, "error medio menor al 2 %");
+    assert.deepEqual(ev(`FAST_FOOD_BY_KEY.get("Papa John's · Pizza de queso grande (14\\") original").item[7]`), { h: 2.5, mg: 0.5, g: 1 });
+});
+
+test("catálogo normal calibrado: existe en el catálogo y sus porciones cuadran", () => {
+    const G = ev("Object.fromEntries(FOOD_GROUPS.map(g => [g.k, groupKcal(g)]))");
+    const names = ev("Object.values(FOOD_CATALOG).flat().map(i => i[0])");
+    for (const [name, cal] of Object.entries(ev("FOOD_CALIBRATION"))) {
+        assert.ok(names.includes(name), `${name} no está en el catálogo`);
+        assert.ok(Math.abs(4 * cal.c + 4 * cal.p + 9 * cal.f - cal.k) / cal.k < 0.15, `${name}: kcal ≈ macros (la fibra no aporta igual)`);
+        const fromPortions = Object.entries(cal.pt).reduce((s, [k, v]) => s + v * G[k], 0);
+        assert.ok(Math.abs(fromPortions - cal.k) <= Math.max(0.15 * cal.k, 21), `${name}: ${cal.k} vs ${fromPortions}`);
+    }
+});
+
+test("flechas de 1 en 1; las medias se escriben y se respetan", () => {
+    assert.equal(call("stepByOne", 1, 1), 2);
+    assert.equal(call("stepByOne", 1, -1), 1, "no baja de 1 con las flechas");
+    assert.equal(call("stepByOne", 2.5, -1), 1.5);
+    assert.equal(call("stepByOne", 1.5, -1), 0.5);
+    assert.equal(call("stepByOne", 0.5, 1), 1.5);
+    assert.equal(call("stepByOne", 0.5, -1), 0.5);
+});
+
+test("alimento calibrado registrado: calorías reales y porciones en varios grupos", () => {
+    const t = ev(`foodTotals([{ g: "mg", n: "Nuggets de pollo Pipasa", p: 2, k: 100, mc: 5.6, mp: 5.6, mf: 6, pt: { h: 0.5, mg: 0.5, g: 0.5 } }])`);
+    assert.equal(Math.round(t.kcal), 200);
+    assert.deepEqual(t.portions, { h: 1, mg: 1, g: 1 });
 });
 
 test("las porciones de la comida rápida suman en los grupos (también lo ya registrado)", () => {

@@ -91,7 +91,7 @@ def main():
             r["stepper_slices"] = "slices" in pg.locator(".stepper-overlay").inner_text()
             r["stepper_equivalencia"] = "harina" in pg.locator(".stepper-overlay").inner_text()
             pg.locator(".stepper-overlay button[aria-label*='Subir'], .stepper-overlay .stepper-up").first.click(); pg.wait_for_timeout(200)
-            r["paso_medio"] = "1,5" in pg.locator(".stepper-overlay").inner_text()
+            r["flecha_de_uno"] = "2" in pg.locator(".stepper-value, .stepper-overlay").first.inner_text().split("slices")[0]
             if SHOTS: pg.screenshot(path=f"{SHOTS}/stepper_pizza.png")
             pg.locator(".stepper-overlay .stepper-down, .stepper-overlay button[aria-label*='Bajar']").first.click(); pg.wait_for_timeout(200)
             pg.locator(".stepper-overlay button", has_text="Agregar").click(); pg.wait_for_timeout(500)

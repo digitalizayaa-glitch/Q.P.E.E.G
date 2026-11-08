@@ -5,9 +5,18 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.5.2";
+const APP_VERSION = "1.5.3";
 
 const CHANGELOG = [
+    {
+        v: "1.5.3",
+        items: [
+            "Porciones recalibradas: cada producto de comida rápida tiene su equivalencia ajustada, con un error medio del 1,4 % frente a sus calorías reales. Lo que ya registraste se corrige solo.",
+            "Refrescos y salsas: ahora cuentan las porciones de harina que corresponden a sus calorías.",
+            "Catálogo normal: nuggets Pipasa, ricotta, chocolate oscuro, miel, mermelada, pasas y leche condensada tienen sus calorías reales y se reparten en los grupos que corresponden.",
+            "Las flechas vuelven a subir de 1 en 1. Las medias porciones (0,5 · 1,5 · 2,5) se escriben tocando el número."
+        ]
+    },
     {
         v: "1.5.2",
         items: [

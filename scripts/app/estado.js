@@ -157,6 +157,16 @@ function sanitizeState(src) {
                 for (const k of ["k", "mc", "mp", "mf"]) {
                     if (k in out) out[k] = Math.min(20000, Math.max(0, Number(out[k]) || 0));
                 }
+                /* Equivalencia en porciones por unidad (comida rápida y alimentos calibrados) */
+                if ("pt" in out) {
+                    const pt = isObj(out.pt) ? out.pt : {};
+                    out.pt = {};
+                    for (const g of ["h", "bg", "mg", "g", "v", "fr", "l"]) {
+                        const v = Number(pt[g]);
+                        if (v > 0 && v <= 100) out.pt[g] = v;
+                    }
+                    if (!Object.keys(out.pt).length) delete out.pt;
+                }
                 return out;
             });
         if (list.length) s.food.log[key] = list;

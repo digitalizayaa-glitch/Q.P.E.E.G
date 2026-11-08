@@ -193,6 +193,21 @@ const FOOD_CATALOG = {
 const FOOD_INISA = {"h":[["Arracache (INISA)","72 g"],["Camote (INISA)","52 g (≈1/3 unidad)"],["Ñame (INISA)","62 g"],["Ñampí (INISA)","67 g (≈1 unidad)"],["Papa (INISA)","84 g (≈1,5 unidades)"],["Raíz de chayote (INISA)","76 g"],["Yuca (INISA)","40 g"],["Arepa (INISA)","41 g (≈1/3 unidad)"],["Arroz crudo (INISA)","19 g (≈1,5 cdas)"],["Arroz frito (INISA)","56 g (≈2 cdas)"],["Avena (cruda) (INISA)","22,5 g (≈2 cdas)"],["Cebada (INISA)","20 g (≈1,5 cdas)"],["Corn flakes (INISA)","17,5 g"],["Galleta dulce (INISA)","20 g (≈3 unidades)"],["Galleta María (INISA)","22,5 g"],["Galleta soda (INISA)","21,5 g (≈6 unidades)"],["Harina de trigo (INISA)","19,5 g (≈1 cda)"],["Maicena (INISA)","17,5 g (≈1,5 cdas)"],["Maíz pelado (INISA)","19,5 g"],["Pan de rodaja blanco (INISA)","24,5 g (≈1 rebanada)"],["Pan de rodaja integral (INISA)","26 g (≈1 rebanada)"],["Pan francés (INISA)","30 g (≈1 pedazo)"],["Pasta cruda (INISA)","20,5 g (≈1 cda)"],["Tamal asado (INISA)","30 g (≈1/2 pedazo)"],["Tortilla de maíz (INISA)","35 g (≈1,5 unidades)"],["Plátano verde (INISA)","42 g"],["Puré de papa (INISA)","115 g (≈6 cdas)"],["Macarrones cocidos (INISA)","43 g (≈1 cda)"],["Gallo pinto (INISA)","60 g (≈1,5 cdas)"],["Frijol crudo (INISA)","24,5 g (≈3 cdas)"],["Arvejas secas (INISA)","24,5 g"],["Garbanzo crudo (INISA)","24,5 g"],["Lenteja cruda (INISA)","24,5 g"],["Gandul seco (INISA)","23,5 g"]],"bg":[["Pollo, muslo (INISA)","34 g"],["Pollo, pechuga (crudo) (INISA)","36 g"],["Res, carne magra (INISA)","33 g"],["Res, hígado (INISA)","35 g"],["Res, corazón (INISA)","41 g"],["Cerdo, hígado (INISA)","36 g"],["Venado asado (INISA)","23,5 g"],["Pescado fresco de mar (INISA)","35 g"],["Pescado de río (filete) (INISA)","38 g"],["Camarón fresco (INISA)","40 g (≈1 unidad)"],["Cangrejo / Langosta (INISA)","40 g"],["Calamares (INISA)","43 g"],["Bacalao seco (INISA)","8,5 g"],["Clara de huevo (INISA)","64 g (≈2 unidades)"],["Queso oreado semidescremado (INISA)","27,5 g"],["Casilán (INISA)","8 g"]],"mg":[["Pollo, tierno (INISA)","38 g"],["Res, molida / semigorda (INISA)","37 g"],["Res, lengua (INISA)","44 g"],["Ternera (INISA)","36 g"],["Cerdo, carne (INISA)","53 g"],["Conejo (INISA)","34 g"],["Atún en aceite (escurrido) (INISA)","29 g"],["Sardina en tomate (INISA)","37 g"],["Huevo de gallina (INISA)","62 g (≈1 unidad)"],["Yema de huevo (INISA)","44 g (≈2,5 unidades)"],["Chorizo (INISA)","44 g (≈1 pedazo)"],["Jamón de cerdo (INISA)","45 g"],["Mortadela (INISA)","47 g (≈1,5 rodajas)"],["Salchicha de res (INISA)","51 g (≈1,5 unidades)"],["Queso fresco (leche íntegra) (INISA)","40 g"],["Queso fresco semidescremado (INISA)","34 g"],["Queso duro (leche íntegra) (INISA)","25 g"],["Queso Kraft (INISA)","28 g (≈1 rodaja)"],["Requesón (INISA)","74 g (≈1,5 cdas)"],["Cuajada (INISA)","37 g"]],"g":[["Aguacate (INISA)","32 g (≈1/3 unidad)"],["Coco maduro (pulpa) (INISA)","18,5 g"],["Maní pelado (INISA)","10 g"],["Semilla de marañón (INISA)","12,5 g"],["Aceite vegetal / de palma (INISA)","5 g (≈1/2 cda)"],["Manteca de cerdo (INISA)","5 g (≈1/4 cda)"],["Manteca vegetal (INISA)","5 g (≈1/8 cda)"],["Mantequilla (INISA)","6 g (≈1/2 cda)"],["Margarina (INISA)","6 g (≈1/4 cda)"],["Mayonesa (INISA)","13,5 g (≈1/2 cda)"],["Tocino (INISA)","7,5 g"],["Chicharrones (INISA)","9 g"],["Natilla espesa (INISA)","13,5 g"],["Queso crema (INISA)","12 g"]],"v":[["Apio (INISA)","120 g"],["Ayote tierno (INISA)","91 g (≈1,5 pedazos)"],["Berenjena (INISA)","79 g"],["Berro (INISA)","125 g"],["Cebolla (INISA)","52 g (≈1 unidad)"],["Chayote (INISA)","83 g (≈1/3 unidad)"],["Chile dulce (INISA)","63 g (≈1,5 unidades)"],["Coliflor (INISA)","77 g"],["Espinaca (INISA)","100 g"],["Lechuga (INISA)","170 g (≈18,5 hojas)"],["Palmito (INISA)","96 g"],["Pepino (INISA)","145 g"],["Rábano (INISA)","100 g"],["Remolacha (INISA)","53 g"],["Repollo picado (INISA)","82 g (≈6 cdas)"],["Tomate (INISA)","110 g (≈1/2 unidad)"],["Vainicas (INISA)","76 g"],["Zanahoria (INISA)","53 g (≈1/2 unidad)"],["Hojas de mostaza / rábano (INISA)","105 g"],["Quelite de ayote (INISA)","145 g"],["Jugo de tomate (INISA)","115 g"]],"fr":[["Anona blanca (INISA)","60 g"],["Cereza (INISA)","100 g"],["Ciruela fresca (INISA)","125 g (≈2,5 unidades)"],["Durazno (INISA)","115 g (≈2,5 unidades)"],["Fresa (INISA)","175 g (≈16,5 unidades)"],["Grapefruit / Toronja (INISA)","155 g"],["Guayaba (INISA)","91 g (≈1,5 unidades)"],["Higo (INISA)","155 g (≈8,5 unidades)"],["Jocote maduro (INISA)","68 g (≈4,5 unidades)"],["Limón dulce (INISA)","215 g (≈2,5 unidades)"],["Mandarina (INISA)","140 g (≈2,5 unidades)"],["Mango maduro (INISA)","97 g (≈1,5 unidades)"],["Manzana de agua (INISA)","190 g (≈3,5 unidades)"],["Manzana rosa (INISA)","91 g"],["Marañón (fruta) (INISA)","130 g (≈2 unidades)"],["Melocotón / Durazno enlatado (INISA)","82 g"],["Nance (INISA)","105 g"],["Níspero (INISA)","140 g"],["Piña (INISA)","110 g (≈1,5 rodajas)"],["Tamarindo (INISA)","21 g"],["Uvas (INISA)","90 g (≈7,5 unidades)"],["Zapote (INISA)","48 g"],["Banano maduro (INISA)","59 g (≈1 unidad)"],["Guineo maduro (INISA)","55 g (≈1 unidad)"],["Plátano maduro (INISA)","46 g (≈1,5 rodajas)"],["Jugo de naranja (INISA)","150 g"],["Jugo de piña enlatado (INISA)","130 g"],["Jugo de manzana (INISA)","125 g"],["Agua de coco (INISA)","395 g"]],"l":[["Leche fluida de vaca (INISA)","230 g (≈1 vaso)"],["Leche descremada en polvo (INISA)","24,5 g (≈3 cdas)"],["Leche entera en polvo (INISA)","31 g (≈2 cdas)"],["Leche evaporada (INISA)","105 g (≈7,5 cdas)"],["Leche chocolatada (INISA)","110 g (≈1/2 caja)"],["Yogurt natural semidescremado (INISA)","230 g (≈12,5 cdas)"],["Leche condensada (INISA)","21,5 g (≈1 cda)"],["Helado de leche (INISA)","81 g"]]};
 for (const k in FOOD_INISA) FOOD_CATALOG[k].push(...FOOD_INISA[k]);
 
+/* Calibración de alimentos del catálogo cuya porción no cuadra con su valor real
+   (mezclan grupos o se alejan mucho del promedio del grupo). Por porción listada:
+   k = kcal reales, c/p/f = carbohidratos/proteína/grasa (g), pt = equivalencia en porciones (de 0,5 en 0,5).
+   Valores de referencia USDA para la cantidad indicada en el catálogo. */
+const FOOD_CALIBRATION = {
+    "Nuggets de pollo Pipasa":   { k: 100, c: 5.6,  p: 5.6, f: 6,   pt: { h: 0.5, mg: 0.5, g: 0.5 } },
+    "Queso ricotta":             { k: 70,  c: 1.2,  p: 4.5, f: 5.2, pt: { mg: 1 } },
+    "Chocolate Dark 75% o más":  { k: 60,  c: 4.6,  p: 0.8, f: 4.3, pt: { h: 0.5, g: 0.5 } },
+    "Miel":                      { k: 108, c: 29,   p: 0.1, f: 0,   pt: { h: 1.5 } },
+    "Mermelada con azúcar":      { k: 70,  c: 17,   p: 0.1, f: 0,   pt: { h: 1 } },
+    "Pasas":                     { k: 60,  c: 15.9, p: 0.6, f: 0.1, pt: { h: 1 } },
+    "Leche condensada":          { k: 241, c: 40.7, p: 5.9, f: 6.5, pt: { l: 0.5, h: 2, g: 0.5 } },
+    "Leche condensada (INISA)":  { k: 69,  c: 11.7, p: 1.7, f: 1.9, pt: { h: 0.5, g: 0.5 } }
+};
+
 /* ---------- datos ---------- */
 
 const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -264,10 +279,21 @@ function fastPortions(c, p, f) {
     for (const [k, v] of [["h", h], ["bg", bg], ["mg", mg], ["g", g]]) if (v > 0) out[k] = v;
     return out;
 }
-/* Porciones de una entrada de comida rápida (por cantidad); el "volumen sucio" no tiene */
-const entryPortions = e => (e.g === FAST_GROUP && typeof e.mc === "number")
-    ? Object.fromEntries(Object.entries(fastPortions(e.mc, e.mp || 0, e.mf || 0)).map(([k, v]) => [k, v * e.p]))
-    : {};
+/* Porciones de una entrada con calorías propias, por la cantidad registrada:
+   la equivalencia guardada al registrar; si no tiene (registros anteriores), la del catálogo;
+   y si el producto ya no está, el reparto aproximado. El "volumen sucio" no tiene porciones. */
+function unitPortions(e) {
+    if (e.pt && typeof e.pt === "object") return e.pt;
+    if (e.g === FAST_GROUP) {
+        const hit = FAST_FOOD_BY_KEY.get(e.n);
+        if (hit && hit.item[7]) return hit.item[7];
+        if (typeof e.mc === "number") return fastPortions(e.mc, e.mp || 0, e.mf || 0);
+    }
+    return {};
+}
+const entryPortions = e => Object.fromEntries(Object.entries(unitPortions(e)).map(([k, v]) => [k, v * e.p]));
+/* Flechas de 1 en 1; las medias porciones se escriben (0,5 · 1,5 · 2,5…) */
+const stepByOne = (q, dir) => { const n = Math.round((q + dir) * 100) / 100; return n >= 0.5 ? n : q; };
 /* "2,5 harinas · 1 prot. MG · 1 grasa" */
 const PORTION_SHORT = { h: ["harina", "harinas"], bg: ["prot. BG", "prot. BG"], mg: ["prot. MG", "prot. MG"], g: ["grasa", "grasas"] };
 const portionsText = pt => Object.entries(pt).map(([k, v]) => `${fmtNum(v, 1)} ${PORTION_SHORT[k][v === 1 ? 0 : 1]}`).join(" · ");
@@ -390,7 +416,7 @@ function openFoodHistory() {
         const isWater = e.g === "agua";
         return `<div class="food-row" style="--c:${color}">
             <span class="fr-dot"></span>
-            <span class="fr-name">${esc(e.n)}<small>${e.ts ? fmtTime(e.ts) + " · " : ""}${esc(e.t)}${e.g === FAST_GROUP ? " = " + esc(portionsText(entryPortions(e))) : ""}</small></span>
+            <span class="fr-name">${esc(e.n)}<small>${e.ts ? fmtTime(e.ts) + " · " : ""}${esc(e.t)}${e.pt || e.g === FAST_GROUP ? " = " + esc(portionsText(entryPortions(e))) : ""}</small></span>
             <span class="fr-kcal">${isWater ? fmtNum(e.p * WATER_ML, 0) + " ml" : fmtNum(kcalOf(e), 0) + " kcal"}</span>
             <button class="fr-del" data-id="${esc(e.id)}" aria-label="Quitar">✕</button>
         </div>`;
@@ -564,16 +590,17 @@ function askFoodAmount(groupKey, item, onAdded) {
     const [name, equiv, unit, per] = item;
     const perUnit = per || 1;
     const unitName = unit || "porciones";
+    const cal = FOOD_CALIBRATION[name] || null;    /* alimentos calibrados: calorías reales y porciones en varios grupos */
     let qty = 1;
 
     openStepper({
         title: name,
-        subtitle: unit ? equiv : `1 porción = ${equiv}`,
+        subtitle: (unit ? equiv : `1 porción = ${equiv}`) + (cal ? `\n= ${fmtNum(cal.k, 0)} kcal · ${portionsText(cal.pt)}` : ""),
         unit: unitName,
         doneLabel: "Agregar",
         cancelLabel: "Cancelar",
         read: () => fmtNum(qty, 2),
-        step: dir => { qty = Math.max(0.5, Math.round((qty + dir * 0.5) * 100) / 100); },   /* medias porciones: 0,5 · 1 · 1,5 … */
+        step: dir => { qty = stepByOne(qty, dir); },
         onEdit: text => {
             const n = parseAmount(text, { max: 99 });
             if (n === null || n <= 0) return "x";
@@ -587,7 +614,8 @@ function askFoodAmount(groupKey, item, onAdded) {
                 n: name,
                 g: groupKey,
                 p: qty * perUnit,
-                t: `${fmtNum(qty, 2)} ${qty === 1 ? unitName.replace(/(ciones|s)$/, m => m === "ciones" ? "ción" : "") : unitName}`
+                t: `${fmtNum(qty, 2)} ${qty === 1 ? unitName.replace(/(ciones|s)$/, m => m === "ciones" ? "ción" : "") : unitName}`,
+                ...(cal ? { k: cal.k, mc: cal.c, mp: cal.p, mf: cal.f, pt: cal.pt } : {})
             });
             renderFood();
             if (onAdded) onAdded();
@@ -600,15 +628,16 @@ function askFoodAmount(groupKey, item, onAdded) {
 function askFastFood(key, onAdded) {
     const { item } = FAST_FOOD_BY_KEY.get(key);
     const [name, unit, plural, kcal, c, p, f] = item;
+    const pt = item[7] || fastPortions(c, p, f);
     let qty = 1;
     openStepper({
         title: name,
-        subtitle: `1 ${unit} = ${fmtNum(kcal, 0)} kcal\n= ${portionsText(fastPortions(c, p, f))}`,
+        subtitle: `1 ${unit} = ${fmtNum(kcal, 0)} kcal\n= ${portionsText(pt)}`,
         unit: plural,
         doneLabel: "Agregar",
         cancelLabel: "Cancelar",
         read: () => fmtNum(qty, 2),
-        step: dir => { qty = Math.max(0.5, Math.round((qty + dir * 0.5) * 100) / 100); },
+        step: dir => { qty = stepByOne(qty, dir); },
         onEdit: text => {
             const n = parseAmount(text, { max: 99 });
             if (n === null || n <= 0) return "x";
@@ -619,7 +648,7 @@ function askFastFood(key, onAdded) {
             if (!confirmed) return;
             addFoodEntry({
                 id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-                n: key, g: FAST_GROUP, p: qty, k: kcal, mc: c, mp: p, mf: f,
+                n: key, g: FAST_GROUP, p: qty, k: kcal, mc: c, mp: p, mf: f, pt,
                 t: `${fmtNum(qty, 2)} ${qty === 1 ? unit : plural}`
             });
             renderFood();
