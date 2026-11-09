@@ -41,7 +41,10 @@ function loadApp({ localStorageData } = {}) {
     for (const k in localStorageData || {}) ls.setItem(k, localStorageData[k]);
     const dom = stub();
     const ctx = {
-        console, structuredClone, setTimeout, clearTimeout, setInterval, clearInterval, URL, Blob: stub(),
+        console, structuredClone, clearTimeout, clearInterval, URL, Blob: stub(),
+        /* Los temporizadores de la app (p. ej. la sincronización cada 90 s) no deben mantener viva la prueba */
+        setTimeout: (...a) => { const t = setTimeout(...a); t.unref?.(); return t; },
+        setInterval: (...a) => { const t = setInterval(...a); t.unref?.(); return t; },
         localStorage: ls, document: dom, navigator: {}, location: stub(), matchMedia: () => ({ matches: false, addEventListener() {} }),
         requestAnimationFrame: () => 0, getComputedStyle: () => stub(), crypto: globalThis.crypto,
         Intl, Date, Math, JSON, Promise, Map, Set, TextEncoder, TextDecoder, atob, btoa, Response,

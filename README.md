@@ -11,7 +11,8 @@ manifest.json              Datos de instalación (nombre, iconos, colores)
 service-worker.js          Caché offline (la lista de archivos se genera, ver abajo)
 styles/stylesheet.css      Todos los estilos
 icons/                     Iconos de la app
-supabase/                  Servidor de sincronización (esquema SQL y guía: supabase/LEEME.md)
+cloudflare/                Servidor de sincronización en uso: Worker + D1 (cloudflare/LEEME.md)
+supabase/                  Alternativa equivalente en Supabase (no se usa)
 scripts/
   core/version.js          Versión de la app y novedades (CHANGELOG)
   core/config.js           Dirección y clave pública del servidor (vacío = sin sincronización)

@@ -152,7 +152,9 @@ def main():
             for c in (ctxA, ctxB, ctxC): c.close()
 
             # Sin servidor configurado la sección no aparece
-            ctx = b.new_context(service_workers="block"); pg = ctx.new_page()
+            ctx = b.new_context(service_workers="block")
+            ctx.route("**/scripts/core/config.js", lambda r: r.fulfill(content_type="text/javascript", body='const QPEEG_SYNC = { url: "", key: "" };'))
+            pg = ctx.new_page()
             pg.goto(URL); pg.wait_for_timeout(600); pg.evaluate("enterApp(false); openSettings()"); pg.wait_for_timeout(400)
             r["oculta_sin_servidor"] = pg.locator(".settings-label", has_text="Cuenta").count() == 0
             ctx.close(); b.close()

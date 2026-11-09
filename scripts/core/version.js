@@ -5,9 +5,19 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.7.0";
 
 const CHANGELOG = [
+    {
+        v: "1.7.0",
+        items: [
+            "Nuevo en Ajustes → Cuenta: crea tu código de cuenta y usa tus datos en varios teléfonos, sin correo ni contraseña.",
+            "Los datos se cifran en tu teléfono antes de subirse: nadie más puede leerlos.",
+            "La app sigue funcionando sin internet y se sincroniza sola cuando hay conexión.",
+            "Para pasar tus datos a otro teléfono: Ajustes → Cuenta → Vincular otro teléfono, y en el otro escribe el código temporal.",
+            "Guarda tu código de cuenta en un lugar seguro: sin él no se puede recuperar la cuenta."
+        ]
+    },
     {
         v: "1.6.0",
         items: [
