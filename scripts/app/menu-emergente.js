@@ -51,7 +51,8 @@ let pickerOverlay = null;
 
 /* options: { title, groups: [{ title?, items: [{ label, sub?, value }] }], searchable, createLabel, emptyText, onPick(value), onCreate(query),
               keepOpen (no se cierra al elegir; onPick recibe además refresh() para volver a pintar la lista),
-              itemClass(value) (clase extra para un elemento, p. ej. "picked") } */
+              itemClass(value) (clase extra para un elemento, p. ej. "picked"),
+              filters: [{ label, match(groupTitle) }] (fila de filtros bajo el buscador; el primero suele ser "Todos") } */
 function openPicker(options) {
     closePicker(true);
 
@@ -78,13 +79,47 @@ function openPicker(options) {
 
     let search = null;
     if (options.searchable) {
+        const row = document.createElement("div");
+        row.className = "picker-search-row";
         search = document.createElement("input");
         search.type = "search";
         search.className = "picker-search";
         search.placeholder = "Buscar…";
         search.autocomplete = "off";
         search.spellcheck = false;
-        sheet.appendChild(search);
+        search.enterKeyHint = "search";
+        /* Enter o la lupa cierran el teclado para ver los resultados */
+        search.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); search.blur(); } });
+        const lens = document.createElement("button");
+        lens.type = "button";
+        lens.className = "picker-lens";
+        lens.setAttribute("aria-label", "Buscar y cerrar el teclado");
+        lens.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>';
+        lens.onclick = () => search.blur();
+        row.append(search, lens);
+        sheet.appendChild(row);
+    }
+
+    /* Filtros por grupo */
+    let activeFilter = 0;
+    let filterRow = null;
+    if (options.filters && options.filters.length > 1) {
+        filterRow = document.createElement("div");
+        filterRow.className = "picker-filters";
+        options.filters.forEach((f, i) => {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "picker-filter" + (i === 0 ? " active" : "");
+            chip.textContent = f.label;
+            chip.onclick = () => {
+                activeFilter = i;
+                filterRow.querySelectorAll(".picker-filter").forEach((c, j) => c.classList.toggle("active", j === i));
+                list.scrollTop = 0;
+                renderList();
+            };
+            filterRow.appendChild(chip);
+        });
+        sheet.appendChild(filterRow);
     }
 
     const list = document.createElement("div");
@@ -108,7 +143,9 @@ function openPicker(options) {
         list.innerHTML = "";
         let count = 0;
 
+        const filter = options.filters && options.filters[activeFilter];
         options.groups.forEach(group => {
+            if (filter && filter.match && !filter.match(group.title || "")) return;
             const items = group.items.filter(item => !query || normalizeText(item.label).includes(query));
             if (!items.length) return;
 

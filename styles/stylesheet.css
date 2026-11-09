@@ -704,8 +704,9 @@ main { overflow-x: hidden; }
 
 .picker-sheet {
     width: min(100%, 380px);
-    max-height: 72vh;
-    max-height: min(72dvh, 560px);
+    /* Más alto que antes: deja arriba y abajo el 75 % del margen que quedaba (empieza más arriba y termina más abajo) */
+    max-height: 79vh;
+    max-height: min(79dvh, calc(25dvh + 420px));
     display: flex;
     flex-direction: column;
     background: var(--sheet-bg);
@@ -1576,3 +1577,28 @@ main { overflow-x: hidden; }
 .header-sub .week-date { padding: 0 64px 0 44px; display: block; text-align: center; line-height: 1.25; overflow: hidden; }
 /* Día que se está viendo en el calendario */
 .history-grid .viewing { outline: 2px solid var(--ui); outline-offset: -2px; }
+
+/* Buscador con lupa (cierra el teclado) */
+.picker-search-row { position: relative; margin: 4px 16px 8px; flex-shrink: 0; display: flex; }
+.picker-search-row .picker-search { margin: 0; flex: 1; padding-right: 46px; }
+.picker-lens {
+    position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 34px; border-radius: 9px; padding: 0; cursor: pointer;
+    display: grid; place-items: center; color: var(--text);
+    background: rgba(var(--ui-rgb), .16); border: 1px solid var(--ui);
+}
+.picker-lens svg { width: 18px; height: 18px; }
+.picker-lens:active { background: rgba(var(--ui-rgb), .32); }
+.picker-search::-webkit-search-cancel-button { margin-right: 4px; }
+
+/* Filtros por grupo bajo el buscador (se deslizan de lado) */
+.picker-filters {
+    display: flex; gap: 6px; padding: 0 16px 8px; flex-shrink: 0;
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.picker-filters::-webkit-scrollbar { display: none; }
+.picker-filter {
+    flex-shrink: 0; padding: 6px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    font-size: 13px; color: var(--text-2); background: var(--glass-bg); border: 1px solid var(--glass-border);
+}
+.picker-filter.active { color: var(--text); font-weight: bold; background: rgba(var(--ui-rgb), .2); border-color: var(--ui); }

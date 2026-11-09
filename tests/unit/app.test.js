@@ -273,6 +273,8 @@ test("flechas de 1 en 1; las medias se escriben y se respetan", () => {
     assert.equal(call("stepByOne", 1.5, -1), 0.5);
     assert.equal(call("stepByOne", 0.5, 1), 1.5);
     assert.equal(call("stepByOne", 0.5, -1), 0.5);
+    assert.equal(call("stepByOne", 1, -1, true), 0, "al corregir algo ya agregado se puede bajar a 0");
+    assert.equal(call("stepByOne", 0, 1, true), 1);
 });
 
 test("alimento calibrado registrado: calorías reales y porciones en varios grupos", () => {

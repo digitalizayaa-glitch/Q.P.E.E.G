@@ -5,9 +5,19 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.5.6";
+const APP_VERSION = "1.6.0";
 
 const CHANGELOG = [
+    {
+        v: "1.6.0",
+        items: [
+            "Historial de comida: la franja más reciente sale arriba. Al mediodía, Mediodía va primero y Mañana debajo; dentro de cada franja, lo último primero.",
+            "Los menús emergentes son más altos: empiezan más arriba y terminan más abajo.",
+            "Agregar comida: filtros por grupo debajo del buscador (Frecuentes, Harinas, Proteínas, Grasas… y Comida rápida).",
+            "El buscador tiene una lupa, y Enter cierra el teclado para ver los resultados.",
+            "Si vuelves a tocar algo que ya agregaste en el menú, se abre con esa cantidad para subirla o bajarla. Si la dejas en 0, se quita."
+        ]
+    },
     {
         v: "1.5.6",
         items: [

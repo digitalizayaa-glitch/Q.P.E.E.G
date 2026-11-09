@@ -154,7 +154,7 @@ function sanitizeState(src) {
             .map(f => {
                 const out = { ...f, id: String(f.id ?? ""), n: str(f.n, 80), t: str(f.t, 80) };
                 /* Comida rápida y "dar el día": calorías y macros propios por unidad */
-                for (const k of ["k", "mc", "mp", "mf"]) {
+                for (const k of ["k", "mc", "mp", "mf", "q"]) {
                     if (k in out) out[k] = Math.min(20000, Math.max(0, Number(out[k]) || 0));
                 }
                 /* Equivalencia en porciones por unidad (comida rápida y alimentos calibrados) */

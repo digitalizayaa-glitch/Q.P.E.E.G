@@ -278,6 +278,13 @@ function addFoodEntry(entry) {
     saveState();
 }
 
+function updateFoodEntry(id, patch) {
+    const entry = foodEntries().find(e => e.id === id);
+    if (!entry) return;
+    Object.assign(entry, patch);
+    saveState();
+}
+
 function removeFoodEntry(id) {
     const key = foodKey();
     if (!state.food?.log?.[key]) return;
@@ -338,7 +345,11 @@ function unitPortions(e) {
 }
 const entryPortions = e => Object.fromEntries(Object.entries(unitPortions(e)).map(([k, v]) => [k, v * e.p]));
 /* Flechas de 1 en 1; las medias porciones se escriben (0,5 · 1,5 · 2,5…) */
-const stepByOne = (q, dir) => { const n = Math.round((q + dir) * 100) / 100; return n >= 0.5 ? n : q; };
+const stepByOne = (q, dir, allowZero = false) => {
+    const n = Math.round((q + dir) * 100) / 100;
+    if (n >= 0.5) return n;
+    return allowZero ? 0 : q;      /* al corregir algo ya agregado se puede bajar a 0 para quitarlo */
+};
 /* "2,5 harinas · 1 prot. MG · 1 grasa" */
 const PORTION_SHORT = {
     h: ["harina", "harinas"], bg: ["prot. BG", "prot. BG"], mg: ["prot. MG", "prot. MG"], g: ["grasa", "grasas"],
@@ -478,8 +489,9 @@ function openFoodHistory() {
             const sorted = all.slice().sort((a, b) => desc ? kcalOf(b) - kcalOf(a) : kcalOf(a) - kcalOf(b));
             list = sorted.map(rowHtml).join("");
         } else {
-            list = TIME_BANDS.map(b => {
-                const items = all.filter(e => bandOf(e.ts)?.k === b.k).sort((x, y) => x.ts - y.ts);
+            /* La franja más reciente arriba (al mediodía: mediodía y luego mañana), y dentro, lo último primero */
+            list = TIME_BANDS.slice().reverse().map(b => {
+                const items = all.filter(e => bandOf(e.ts)?.k === b.k).sort((x, y) => y.ts - x.ts);
                 if (!items.length) return "";
                 const kc = items.reduce((s, e) => s + kcalOf(e), 0);
                 return `<div class="picker-group">${b.name} · ${b.hint} <span>${fmtNum(kc, 0)} kcal</span></div>${items.map(rowHtml).join("")}`;
@@ -588,7 +600,7 @@ function frequentFoods(now = Date.now()) {
 
 function openFoodPicker(groupKey) {
     const keys = groupKey ? [groupKey] : FOOD_GROUPS.map(g => g.k);
-    const picked = new Set();                 /* lo agregado sin cerrar el menú: se pinta con el color de la app */
+    const picked = new Map();                 /* lo agregado en este menú (clave → { id, qty }): se pinta con el color de la app */
     const keyOf = v => v.g + "|" + (v.fk || v.item[0]);
     const asItem = (g, item) => ({ label: item[0], sub: item[1], value: { g, item } });
     const fastItem = key => {
@@ -615,11 +627,24 @@ function openFoodPicker(groupKey) {
         keepOpen: true,
         itemClass: v => picked.has(keyOf(v)) ? "picked" : "",
         groups,
+        filters: [
+            { label: "Todos" },
+            ...(frequent.length ? [{ label: "Frecuentes", match: t => t === "Frecuentes" }] : []),
+            ...(groupKey ? [] : FOOD_GROUPS.map(g => ({ label: g.name, match: t => t === g.name }))),
+            ...(groupKey ? [] : [{ label: "Comida rápida", match: t => t.startsWith("Comida rápida") }])
+        ],
         createLabel: "Porciones sueltas",
         onPick: (v, refresh) => {
-            const done = () => { picked.add(keyOf(v)); refresh(); };
-            if (v.g === FAST_GROUP) askFastFood(v.fk, done);
-            else askFoodAmount(v.g, v.item, done);
+            const key = keyOf(v);
+            /* Si ya se agregó en este menú (y sigue registrado), se abre en esa cantidad para corregirla */
+            let existing = picked.get(key) || null;
+            if (existing && !foodEntries().some(e => e.id === existing.id)) { picked.delete(key); existing = null; }
+            const done = res => {
+                if (res) picked.set(key, res); else picked.delete(key);
+                refresh();
+            };
+            if (v.g === FAST_GROUP) askFastFood(v.fk, done, existing);
+            else askFoodAmount(v.g, v.item, done, existing);
         },
         onCreate: query => {
             const loose = g => askFoodAmount(g, [query || FOOD_GROUP[g].name, "1 porción"]);
@@ -634,74 +659,80 @@ function openFoodPicker(groupKey) {
     });
 }
 
-function askFoodAmount(groupKey, item, onAdded) {
-    const [name, equiv, unit, per] = item;
-    const perUnit = per || 1;
-    const unitName = unit || "porciones";
-    const cal = FOOD_CALIBRATION[name] || null;    /* alimentos calibrados: calorías reales y porciones en varios grupos */
-    let qty = 1;
-
+/* Cuadro de cantidad común. Con "existing" ({ id, qty }) abre en la cantidad ya agregada en este menú:
+   se puede subir, bajar o dejar en 0 para quitarla. done({ id, qty }) al guardar, done(null) al quitar. */
+function amountStepper({ title, subtitle, unit, existing, makeEntry, done }) {
+    let qty = existing ? existing.qty : 1;
+    const allowZero = !!existing;
     openStepper({
-        title: name,
-        subtitle: (unit ? equiv : `1 porción = ${equiv}`) + (cal ? `\n= ${fmtNum(cal.k, 0)} kcal · ${portionsText(cal.pt)}` : ""),
-        unit: unitName,
-        doneLabel: "Agregar",
+        title,
+        subtitle,
+        unit,
+        doneLabel: existing ? "Guardar" : "Agregar",
         cancelLabel: "Cancelar",
         read: () => fmtNum(qty, 2),
-        step: dir => { qty = stepByOne(qty, dir); },
+        step: dir => { qty = stepByOne(qty, dir, allowZero); },
         onEdit: text => {
             const n = parseAmount(text, { max: 99 });
-            if (n === null || n <= 0) return "x";
+            if (n === null || n < 0 || (n === 0 && !allowZero)) return "x";
             qty = n;
             return "";
         },
         onClose: confirmed => {
             if (!confirmed) return;
-            addFoodEntry({
-                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-                n: name,
-                g: groupKey,
-                p: qty * perUnit,
-                t: `${fmtNum(qty, 2)} ${qty === 1 ? unitName.replace(/(ciones|s)$/, m => m === "ciones" ? "ción" : "") : unitName}`,
-                ...(cal ? { k: cal.k, mc: cal.c, mp: cal.p, mf: cal.f, pt: cal.pt } : {})
-            });
+            if (existing && qty === 0) {
+                removeFoodEntry(existing.id);
+                renderFood();
+                if (done) done(null);
+                return;
+            }
+            const entry = makeEntry(qty);
+            if (existing) updateFoodEntry(existing.id, entry);
+            else addFoodEntry(Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6) }, entry));
             renderFood();
-            if (onAdded) onAdded();
+            if (done) done({ id: existing ? existing.id : foodEntries().at(-1).id, qty });
         }
+    });
+}
+
+function askFoodAmount(groupKey, item, done, existing) {
+    const [name, equiv, unit, per] = item;
+    const perUnit = per || 1;
+    const unitName = unit || "porciones";
+    const cal = FOOD_CALIBRATION[name] || null;    /* alimentos calibrados: calorías reales y porciones en varios grupos */
+    amountStepper({
+        title: name,
+        subtitle: (unit ? equiv : `1 porción = ${equiv}`) + (cal ? `\n= ${fmtNum(cal.k, 0)} kcal · ${portionsText(cal.pt)}` : ""),
+        unit: unitName,
+        existing,
+        done,
+        makeEntry: qty => ({
+            n: name,
+            g: groupKey,
+            p: qty * perUnit,
+            q: qty,
+            t: `${fmtNum(qty, 2)} ${qty === 1 ? unitName.replace(/(ciones|s)$/, m => m === "ciones" ? "ción" : "") : unitName}`,
+            ...(cal ? { k: cal.k, mc: cal.c, mp: cal.p, mf: cal.f, pt: cal.pt } : {})
+        })
     });
 }
 
 /* ---------- comida rápida ---------- */
 
-function askFastFood(key, onAdded) {
+function askFastFood(key, done, existing) {
     const { item } = FAST_FOOD_BY_KEY.get(key);
     const [name, unit, plural, kcal, c, p, f] = item;
     const pt = item[7] || fastPortions(c, p, f);
-    let qty = 1;
-    openStepper({
+    amountStepper({
         title: name,
         subtitle: `1 ${unit} = ${fmtNum(kcal, 0)} kcal\n= ${portionsText(pt)}`,
         unit: plural,
-        doneLabel: "Agregar",
-        cancelLabel: "Cancelar",
-        read: () => fmtNum(qty, 2),
-        step: dir => { qty = stepByOne(qty, dir); },
-        onEdit: text => {
-            const n = parseAmount(text, { max: 99 });
-            if (n === null || n <= 0) return "x";
-            qty = n;
-            return "";
-        },
-        onClose: confirmed => {
-            if (!confirmed) return;
-            addFoodEntry({
-                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-                n: key, g: FAST_GROUP, p: qty, k: kcal, mc: c, mp: p, mf: f, pt,
-                t: `${fmtNum(qty, 2)} ${qty === 1 ? unit : plural}`
-            });
-            renderFood();
-            if (onAdded) onAdded();
-        }
+        existing,
+        done,
+        makeEntry: qty => ({
+            n: key, g: FAST_GROUP, p: qty, q: qty, k: kcal, mc: c, mp: p, mf: f, pt,
+            t: `${fmtNum(qty, 2)} ${qty === 1 ? unit : plural}`
+        })
     });
 }
 

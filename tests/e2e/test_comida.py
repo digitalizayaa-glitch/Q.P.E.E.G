@@ -63,6 +63,28 @@ def main():
             pg.locator(".stepper-overlay button", has_text="Agregar").click(); pg.wait_for_timeout(600)
             r["menu_sigue_abierto"] = pg.locator(".picker-overlay:not(.stepper-overlay)").count() == 1
             r["arroz_marcado"] = pg.locator(".picker-item.picked", has_text="Arroz blanco").count() == 2   # en Frecuentes y en Harinas
+            # Volver a tocar lo agregado: abre en la cantidad puesta y se corrige sin duplicar
+            pg.locator(".picker-item.picked", has_text="Arroz blanco").first.click(); pg.wait_for_timeout(500)
+            r["reabre_en_cantidad"] = pg.locator(".stepper-overlay").inner_text().split("porci")[0].strip().endswith("1") and \
+                pg.locator(".stepper-overlay button", has_text="Guardar").count() == 1
+            pg.locator(".stepper-overlay .stepper-arrow, .stepper-overlay button").filter(has_text="▲").first.click(); pg.wait_for_timeout(200)
+            pg.locator(".stepper-overlay button", has_text="Guardar").click(); pg.wait_for_timeout(500)
+            r["corrige_sin_duplicar"] = pg.evaluate("foodEntries().filter(e => e.n === 'Arroz blanco').map(e => e.p).join()") == "2"
+            pg.locator(".picker-item.picked", has_text="Arroz blanco").first.click(); pg.wait_for_timeout(400)
+            r["reabre_en_2"] = "Guardar" in pg.locator(".stepper-overlay").inner_text()
+            pg.locator(".stepper-overlay button", has_text="Cancelar").click(); pg.wait_for_timeout(400)
+            # Filtros y lupa
+            pg.locator(".picker-filter", has_text="Frutas").click(); pg.wait_for_timeout(300)
+            r["filtro_frutas"] = [g.lower() for g in pg.locator(".picker-group").all_inner_texts()] == ["frutas"]
+            pg.locator(".picker-filter", has_text="Todos").click(); pg.wait_for_timeout(300)
+            pg.focus(".picker-search"); pg.keyboard.type("banano"); pg.keyboard.press("Enter"); pg.wait_for_timeout(200)
+            r["enter_cierra_teclado"] = pg.evaluate("document.activeElement !== document.querySelector('.picker-search')")
+            pg.focus(".picker-search"); pg.locator(".picker-lens").click(); pg.wait_for_timeout(200)
+            r["lupa_cierra_teclado"] = pg.evaluate("document.activeElement !== document.querySelector('.picker-search')")
+            pg.fill(".picker-search", ""); pg.wait_for_timeout(200)
+            box = pg.locator(".picker-sheet").bounding_box()
+            r["cuadro_mas_alto"] = box["y"] < 0.75 * (844 - 560) / 2 + 2 and 844 - (box["y"] + box["height"]) < 0.75 * (844 - 560) / 2 + 2
+            if SHOTS: pg.screenshot(path=f"{SHOTS}/menu_filtros.png")
             pg.fill(".picker-search", "pechuga"); pg.wait_for_timeout(300)
             pg.locator(".picker-item", has_text="Pechuga").first.click(); pg.wait_for_timeout(500)
             pg.locator(".stepper-overlay button", has_text="Cancelar").click(); pg.wait_for_timeout(500)
@@ -100,6 +122,8 @@ def main():
             r["rapida_suma"] = round(pg.evaluate("foodTotals(foodEntries()).kcal") - kcal0) == 220
             r["rapida_suma_porciones"] = pg.evaluate("foodTotals(foodEntries()).portions.h") >= 1.5
             pg.locator(".food-hist-btn").click(); pg.wait_for_timeout(500)
+            bands = pg.evaluate("[...document.querySelectorAll('.fh-list .picker-group')].map(g => g.textContent)")
+            r["historial_reciente_arriba"] = len(bands) >= 1
             r["historial_equivalencia"] = "harina" in pg.locator(".fh-list").inner_text()
             if SHOTS: pg.screenshot(path=f"{SHOTS}/historial_porciones.png")
             pg.locator(".picker-close").click(); pg.wait_for_timeout(400)
