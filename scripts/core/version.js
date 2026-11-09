@@ -5,9 +5,13 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.7.0";
+const APP_VERSION = "1.7.1";
 
 const CHANGELOG = [
+    {
+        v: "1.7.1",
+        items: ["Semana: con más de 4 días, los días se ven en dos columnas. Si son impares, el último va abajo y centrado."]
+    },
     {
         v: "1.7.0",
         items: [

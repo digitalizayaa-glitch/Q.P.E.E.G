@@ -61,10 +61,14 @@ function renderWeekSection() {
 
     const picker = document.createElement("div");
     picker.className = "split-picker";
+    /* Más de 4 días: dos columnas; si sobra uno, va abajo centrado con el mismo ancho */
+    const twoCols = routine.days.length > 4;
+    if (twoCols) picker.classList.add("two-cols");
 
-    routine.days.forEach(day => {
+    routine.days.forEach((day, i) => {
         const btn = document.createElement("button");
         btn.className = "split-card";
+        if (twoCols && routine.days.length % 2 === 1 && i === routine.days.length - 1) btn.classList.add("odd-last");
         btn.textContent = day.name;
         btn.onclick = () => navFade(() => startWorkoutDay(routine.id, day.id));
         picker.appendChild(btn);
