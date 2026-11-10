@@ -152,6 +152,20 @@ test("figuras: todas las poses generan un SVG", () => {
     assert.match(call("exerciseFigure", "Sentadilla"), /^<svg/);
 });
 
+test("figuras: los ejercicios de la rutina de 5 días tienen su dibujo", () => {
+    const expected = {"Jalón agarre cerrado": "pulldown", "Remo agarre neutro": "cablerow", "Pullover acostado": "dbpullover", "Press militar máq.": "ohpseated", "Curl polea baja": "cablecurl", "Bíceps martillo": "curl", "Face pull": "facepull", "Sentadilla goblet": "goblet", "Desplantes caminando": "lunge", "Prensa vertical": "legpress", "Extensión rodillas": "legext", "Femoral acostado": "legcurl", "Aducción": "hipadd", "Pantorrillas prensa": "calfpress", "Press plano unilat.": "chestmachine", "Press inclin. manc.": "incline", "Extensión tríceps V": "pushdown", "Copa con mancuerna": "overhead", "Laterales mancuernas": "lateral", "Remo alto posterior": "facepull", "Hip thrust máquina": "hipthrust", "Desplante búlgaro": "bulgarian", "Sentadilla sumo": "sumo", "Patada glúteo polea": "cablekick", "Femoral sentado": "seatedlegcurl", "Abducción": "hipabd", "Pantorrillas máquina": "calf", "Jalón agarre medio": "pulldown", "Remo agarre cerrado": "cablerow", "Pullover en polea": "pullover", "Remo con barra Z": "uprightrow", "Frontales mancuernas": "frontraise", "Elevación laterales": "lateral", "Posterior en máquina": "revpecdeck"};
+    for (const [name, pose] of Object.entries(expected)) {
+        assert.ok(name.length <= 20, `${name}: máx. 20 caracteres`);
+        assert.equal(call("figureMoveFor", name), pose, name);
+    }
+    /* los de siempre no cambian */
+    for (const [name, pose] of [["Sentadilla búlgara", "bulgarian"], ["Elev. laterales", "lateral"], ["Abductores", "abduct"], ["Pullover polea", "pullover"], ["Press banca", "bench"], ["Sentadilla frontal", "frontsquat"], ["Curl femoral", "legcurl"], ["Gemelos", "calf"], ["Prensa", "legpress"]])
+        assert.equal(call("figureMoveFor", name), pose, name);
+    const svg = Object.keys(ev("FIGURE_POSES")).map(k => call("exerciseFigure", "x", k)).join("");
+    assert.ok(!/NaN|undefined/.test(svg));
+    for (const list of Object.values(ev("EXERCISE_CATALOG"))) for (const n of list) assert.ok(n.length <= 20, n);
+});
+
 test("figuras: la imagen elegida en la galería manda sobre el nombre", () => {
     const eq = [...ev("Object.keys(EQUIPMENT_FIGURES)")];
     assert.deepEqual(eq, ["eq-mancuerna", "eq-barra", "eq-dominadas"]);

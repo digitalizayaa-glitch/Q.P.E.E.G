@@ -275,6 +275,62 @@ const FIGURE_POSES = {
         j: { h: [50, 22], n: [50, 31], p: [50, 62], e: [52, 48], w: [67, 47], k: [51, 85], f: [49, 108] },
         kit: [["handle", 67, 47]], arrows: [[78, 40, 64, 26, 80, 26]]
     },
+    /* ---------- Añadidas en 1.10 ---------- */
+    goblet: {   /* sentadilla con una mancuerna sujeta frente al pecho */
+        props: FLOOR,
+        j: { h: [50, 37], n: [47, 46], p: [35, 73], e: [52, 61], w: [57, 49], k: [58, 86], f: [48, 108] },
+        kit: [["db", 58, 48]], arrows: [[76, 70, 76, 48]]
+    },
+    sumo: {   /* de frente: piernas muy abiertas y la mancuerna colgando entre ellas */
+        front: true, props: FLOOR,
+        j: { h: [50, 32], n: [50, 42], p: [50, 71], e: [44, 57], w: [48, 72], e2: [56, 57], w2: [52, 72], k: [31, 84], f: [27, 108], k2: [69, 84], f2: [73, 108] },
+        kit: [["db", 50, 75]], arrows: [[90, 80, 90, 58]]
+    },
+    hipadd: {   /* de frente, sentado en la máquina: las rodillas se cierran */
+        front: true, props: `M30 70 H70 M34 70 V110 M66 70 V110 M30 70 V34 M70 70 V34 ${FLOOR}`,
+        j: { h: [50, 24], n: [50, 34], p: [50, 68], e: [40, 52], w: [36, 66], e2: [60, 52], w2: [64, 66], k: [26, 80], f: [26, 106], k2: [74, 80], f2: [74, 106] },
+        kit: [["pad", 31, 82], ["pad", 69, 82]], arrows: [[6, 94, 18, 94], [94, 94, 82, 94]]
+    },
+    hipabd: {   /* de frente, sentado en la máquina: las rodillas se abren */
+        front: true, props: `M30 70 H70 M34 70 V110 M66 70 V110 M30 70 V34 M70 70 V34 ${FLOOR}`,
+        j: { h: [50, 24], n: [50, 34], p: [50, 68], e: [40, 52], w: [36, 66], e2: [60, 52], w2: [64, 66], k: [40, 82], f: [40, 106], k2: [60, 82], f2: [60, 106] },
+        kit: [["pad", 34, 82], ["pad", 66, 82]], arrows: [[22, 94, 8, 94], [78, 94, 92, 94]]
+    },
+    chestmachine: {   /* press de pecho sentado en máquina: empuja al frente */
+        props: `M22 84 H52 M26 84 V110 M48 84 V110 M22 84 L18 42 M90 110 V26 M90 40 L64 50 ${FLOOR}`,
+        j: { h: [30, 38], n: [29, 48], p: [34, 80], e: [44, 55], w: [61, 51], k: [56, 80], f: [58, 108] },
+        kit: [["handle", 62, 51]], arrows: [[60, 36, 80, 36]]
+    },
+    uprightrow: {   /* remo al mentón (barra Z), de frente: los codos suben por encima de la barra */
+        front: true, props: `M26 47 H74 ${FLOOR}`,
+        j: { h: [50, 21], n: [50, 31], p: [50, 63], e: [32, 34], w: [43, 47], e2: [68, 34], w2: [57, 47], k: [45, 86], f: [43, 108], k2: [55, 86], f2: [57, 108] },
+        arrows: [[86, 66, 86, 42]]
+    },
+    seatedlegcurl: {   /* femoral sentado: la pierna baja y va hacia atrás */
+        props: `M26 84 H58 M30 84 V110 M54 84 V110 M26 84 L22 42 M50 70 H70 ${FLOOR}`,
+        j: { h: [34, 39], n: [35, 48], p: [40, 80], e: [46, 62], w: [52, 72], k: [64, 80], f: [62, 103] },
+        kit: [["pad", 66, 104]], arrows: [[84, 84, 74, 106, 86, 100]]
+    },
+    dbpullover: {   /* acostado en el banco: la mancuerna pasa de detrás de la cabeza a encima del pecho */
+        props: `M24 80 H86 M30 80 V110 M80 80 V110 ${FLOOR}`,
+        j: { h: [27, 72], n: [37, 76], p: [68, 77], e: [22, 66], w: [9, 61], k: [86, 80], f: [90, 108] },
+        kit: [["db", 8, 60]], arrows: [[10, 46, 34, 38, 14, 32]]
+    },
+    revpecdeck: {   /* posterior en máquina (pec deck invertido), de frente: los brazos se abren */
+        front: true, props: `M50 12 V42 M34 76 H66 M50 76 V110 ${FLOOR}`,
+        j: { h: [50, 26], n: [50, 36], p: [50, 72], e: [32, 39], w: [15, 41], e2: [68, 39], w2: [85, 41], k: [42, 80], f: [42, 108], k2: [58, 80], f2: [58, 108] },
+        kit: [["handle", 14, 41], ["handle", 86, 41]], arrows: [[34, 56, 14, 56], [66, 56, 86, 56]]
+    },
+    calfpress: {   /* pantorrillas en la prensa: piernas estiradas, empujan solo con la punta del pie */
+        props: `M10 64 L28 96 H50 M30 96 V110 M70 34 L92 56 ${FLOOR}`,
+        j: { h: [14, 62], n: [19, 71], p: [33, 92], e: [26, 84], w: [34, 92], k: [55, 70], f: [75, 50], t: [81, 45] },
+        arrows: [[70, 30, 86, 24, 76, 22]]
+    },
+    cablekick: {   /* patada de glúteo de pie en polea baja: la pierna va hacia atrás */
+        props: `M90 110 V20 M90 104 L16 94 ${FLOOR}`,
+        j: { h: [64, 30], n: [59, 38], p: [46, 64], e: [72, 46], w: [86, 50], k: [32, 80], f: [16, 92], k2: [49, 86], f2: [49, 108] },
+        kit: [["handle", 15, 92]], arrows: [[24, 72, 6, 66, 12, 76]]
+    },
     plank: {   /* se mantiene: sin flecha */
         props: FLOOR,
         j: { h: [82, 88], n: [72, 92], p: [42, 96], e: [72, 108], w: [84, 108], k: [27, 101], f: [12, 107] },
@@ -284,6 +340,30 @@ const FIGURE_POSES = {
 
 /* Ejercicio → postura (por palabras del nombre; lo más específico primero) */
 const FIGURE_RULES = [
+    [/goblet/, "goblet"],
+    [/sumo/, "sumo"],
+    [/aduccion|aductor/, "hipadd"],
+    [/abduccion/, "hipabd"],
+    [/press militar maq|press hombro maq/, "ohpseated"],
+    [/press plano|press pecho maq|press (de pecho )?en maq/, "chestmachine"],
+    [/barra z|al menton/, "uprightrow"],
+    [/femoral sentad|rodillas? sentad/, "seatedlegcurl"],
+    [/femoral acostad|rodillas? acostad/, "legcurl"],
+    [/pull ?over acostad|pull ?over (con )?mancuerna/, "dbpullover"],
+    [/pull ?over/, "pullover"],
+    [/posterior (en )?maq|pec deck invertido/, "revpecdeck"],
+    [/remo alto|remo a la altura|remo altura/, "facepull"],
+    [/(pantorrilla|gemelo).*prensa/, "calfpress"],
+    [/pantorrilla/, "calf"],
+    [/patada.*polea/, "cablekick"],
+    [/extension (de )?rodilla/, "legext"],
+    [/extension (de )?triceps|triceps polea/, "pushdown"],
+    [/copa/, "overhead"],
+    [/martillo/, "curl"],
+    [/remo agarre/, "cablerow"],
+    [/desplante.*bulgar|bulgar/, "bulgarian"],
+    [/desplante/, "lunge"],
+    [/press inclin/, "incline"],
     [/fondos triceps/, "benchdip"],
     [/patada triceps/, "kickback"],
     [/curl femoral/, "legcurl"],
@@ -316,11 +396,12 @@ const FIGURE_RULES = [
     [/peso muerto/, "hinge"],
     [/elev\.? de piernas/, "legraise"],
     [/elev\.? lateral/, "lateral"],
+    [/lateral/, "lateral"],
     [/elev\.? frontal/, "frontraise"],
+    [/frontal/, "frontraise"],
     [/pajaro/, "reardelt"],
     [/face pull/, "facepull"],
     [/encogimiento/, "shrug"],
-    [/bulgara/, "bulgarian"],
     [/zancada/, "lunge"],
     [/sentadilla/, "squat"],
     [/prensa/, "legpress"],

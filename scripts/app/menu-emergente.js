@@ -15,13 +15,13 @@ const GENERIC_DAYS = ["Push", "Pull", "Legs", "Torso", "Pierna", "Full Body"];
 
 /* Todos los nombres caben en EXERCISE_NAME_MAX caracteres */
 const EXERCISE_CATALOG = {
-    "Pecho": ["Press banca", "Press inclinado", "Press declinado", "Press mancuernas", "Aperturas", "Cruce de poleas", "Pec deck", "Fondos", "Flexiones"],
-    "Espalda": ["Dominadas", "Jalón al pecho", "Remo con barra", "Remo mancuerna", "Remo T", "Remo polea baja", "Pullover polea", "Peso muerto"],
-    "Hombro": ["Press militar", "Press hombro", "Elev. laterales", "Elev. frontales", "Pájaros", "Face pull", "Encogimientos"],
+    "Pecho": ["Press banca", "Press inclinado", "Press declinado", "Press mancuernas", "Aperturas", "Cruce de poleas", "Pec deck", "Fondos", "Flexiones", "Press plano unilat."],
+    "Espalda": ["Dominadas", "Jalón al pecho", "Remo con barra", "Remo mancuerna", "Remo T", "Remo polea baja", "Pullover polea", "Peso muerto", "Jalón agarre cerrado", "Jalón agarre medio", "Remo agarre neutro", "Remo agarre cerrado", "Pullover acostado"],
+    "Hombro": ["Press militar", "Press hombro", "Elev. laterales", "Elev. frontales", "Pájaros", "Face pull", "Encogimientos", "Press militar máq.", "Remo con barra Z", "Remo alto posterior", "Posterior en máquina"],
     "Bíceps": ["Curl barra", "Curl mancuernas", "Curl martillo", "Curl predicador", "Curl inclinado", "Curl polea"],
     "Tríceps": ["Press francés", "Extensión polea", "Ext. sobre cabeza", "Press cerrado", "Fondos tríceps", "Patada tríceps"],
-    "Pierna": ["Sentadilla", "Sentadilla frontal", "Prensa", "Zancadas", "Sentadilla búlgara", "Ext. cuádriceps", "Curl femoral", "Peso muerto rumano", "Gemelos"],
-    "Glúteo": ["Hip thrust", "Puente de glúteo", "Patada de glúteo", "Abductores"],
+    "Pierna": ["Sentadilla", "Sentadilla frontal", "Prensa", "Zancadas", "Sentadilla búlgara", "Ext. cuádriceps", "Curl femoral", "Peso muerto rumano", "Gemelos", "Sentadilla goblet", "Sentadilla sumo", "Desplantes caminando", "Prensa vertical", "Femoral sentado", "Pantorrillas prensa"],
+    "Glúteo": ["Hip thrust", "Puente de glúteo", "Patada de glúteo", "Abductores", "Patada glúteo polea", "Aducción", "Abducción"],
     "Core": ["Plancha", "Crunch", "Elev. de piernas", "Rueda abdominal", "Russian twist"]
 };
 

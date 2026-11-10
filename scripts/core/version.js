@@ -5,9 +5,16 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.9.2";
+const APP_VERSION = "1.10.0";
 
 const CHANGELOG = [
+    {
+        v: "1.10.0",
+        items: [
+            "Nuevos dibujos de ejercicios: sentadilla goblet y sumo, aductores y abductores en máquina, press de pecho en máquina, remo con barra Z, femoral sentado, pullover acostado, posterior en máquina, pantorrillas en prensa y patada de glúteo en polea.",
+            "Más ejercicios en el catálogo (jalón y remo por agarre, prensa vertical, desplantes caminando y más) y mejor reconocimiento de nombres como \"Desplante búlgaro\", \"Laterales\" o \"Copa con mancuerna\"."
+        ]
+    },
     {
         v: "1.9.2",
         items: ["Comida: se añadió el chimichurri tico (en Vegetales) y el chimichurri argentino con aceite (en Grasas)."]
