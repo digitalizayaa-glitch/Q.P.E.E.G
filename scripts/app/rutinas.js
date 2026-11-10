@@ -420,7 +420,10 @@ function buildRoutineExerciseCard(routineId, dayId, exerciseId) {
     xBtn.textContent = "✕";
     keyButton(xBtn, "Borrar ejercicio");
     xBtn.onclick = event => { event.stopPropagation(); deleteRoutineExercise(routineId, dayId, exerciseId); };
-    head.append(name, xBtn);
+    const nameRow = document.createElement("div");
+    nameRow.className = "ex-name-row";
+    nameRow.append(name, exerciseGear(routineId, dayId, exerciseId, () => renderDaySheet()));
+    head.append(nameRow, xBtn);
 
     const field = (cls, caption) => {
         const wrap = document.createElement("div");
@@ -763,4 +766,76 @@ function editInBox(box, { read, onEdit, editMode }) {
     });
     input.addEventListener("input", () => input.classList.remove("bad"));
     input.addEventListener("blur", () => finish(true, true));
+}
+
+/* ---------- Ajustes de un ejercicio (tuerca junto al nombre) ----------
+   Cambiar el nombre y elegir la imagen en una galería. onChange(ejercicio) actualiza la tarjeta. */
+const GEAR_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
+
+function exerciseGear(routineId, dayId, exerciseId, onChange) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ex-gear";
+    btn.setAttribute("aria-label", "Ajustes del ejercicio");
+    btn.innerHTML = GEAR_SVG;
+    btn.addEventListener("pointerdown", e => e.stopPropagation());
+    btn.onclick = e => { e.stopPropagation(); openExerciseSettings(routineId, dayId, exerciseId, onChange); };
+    return btn;
+}
+
+function openExerciseSettings(routineId, dayId, exerciseId, onChange) {
+    const ex = () => routineExercise(routineId, dayId, exerciseId);
+    if (!ex()) return;
+    const { sheet } = openSheet("ex-settings-sheet", "Ejercicio");
+    const body = document.createElement("div");
+    body.className = "ex-settings";
+    sheet.appendChild(body);
+
+    const changed = () => { saveState(); if (onChange) onChange(ex()); };
+
+    const label = text => { const l = document.createElement("div"); l.className = "settings-label"; l.textContent = text; return l; };
+    const nameBtn = document.createElement("button");
+    nameBtn.type = "button";
+    nameBtn.className = "ex-rename";
+    const paintName = () => { nameBtn.innerHTML = `<span>${esc(ex().name)}</span><small>Cambiar nombre</small>`; };
+    paintName();
+    nameBtn.onclick = async () => {
+        const value = await askText({ title: "Cambiar nombre", label: `Nombre del ejercicio (máx. ${EXERCISE_NAME_MAX} caracteres)`, value: ex().name, maxLength: EXERCISE_NAME_MAX });
+        if (!value || value === ex().name) return;
+        ex().name = value;
+        paintName();
+        paintGallery();
+        changed();
+    };
+
+    const note = document.createElement("p");
+    note.className = "settings-note";
+    note.textContent = "Elige la imagen del ejercicio. \"Automática\" la elige según el nombre.";
+    const gallery = document.createElement("div");
+    gallery.className = "ex-gallery";
+    const options = [
+        { key: "", label: "Automática" },
+        ...Object.entries(EQUIPMENT_FIGURES).map(([key, f]) => ({ key, label: f.label })),
+        ...Object.keys(FIGURE_POSES).map(key => ({ key, label: "" }))
+    ];
+    const paintGallery = () => {
+        const current = ex().fig || "";
+        gallery.innerHTML = "";
+        options.forEach(o => {
+            const tile = document.createElement("button");
+            tile.type = "button";
+            tile.className = "ex-tile" + (o.key === current ? " selected" : "");
+            tile.setAttribute("aria-label", o.label || "Pose");
+            tile.innerHTML = exerciseFigure(ex().name, o.key || undefined) + (o.label ? `<small>${esc(o.label)}</small>` : "");
+            tile.onclick = () => {
+                if (o.key) ex().fig = o.key; else delete ex().fig;
+                paintGallery();
+                changed();
+            };
+            gallery.appendChild(tile);
+        });
+    };
+    paintGallery();
+
+    body.append(label("Nombre"), nameBtn, label("Imagen"), note, gallery);
 }

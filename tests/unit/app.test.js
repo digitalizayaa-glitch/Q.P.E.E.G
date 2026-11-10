@@ -152,6 +152,27 @@ test("figuras: todas las poses generan un SVG", () => {
     assert.match(call("exerciseFigure", "Sentadilla"), /^<svg/);
 });
 
+test("figuras: la imagen elegida en la galería manda sobre el nombre", () => {
+    const eq = [...ev("Object.keys(EQUIPMENT_FIGURES)")];
+    assert.deepEqual(eq, ["eq-mancuerna", "eq-barra", "eq-dominadas"]);
+    for (const k of eq) {
+        const svg = call("exerciseFigure", "Press banca", k);
+        assert.match(svg, /^<svg[\s\S]*<\/svg>$/, k);
+        assert.ok(!/NaN|undefined/.test(svg), k);
+    }
+    const norm = s => s.replace(/fg\d+/g, "fg");
+    const pose = call("figureMoveFor", "Sentadilla");
+    assert.equal(norm(call("exerciseFigure", "Press banca", pose)), norm(call("exerciseFigure", "Sentadilla")));
+    assert.equal(norm(call("exerciseFigure", "Press banca", "no-existe")), norm(call("exerciseFigure", "Press banca")), "una imagen desconocida usa la automática");
+});
+
+test("ejercicio: la imagen elegida se guarda y se limpia si no es válida", () => {
+    const mk = fig => call("stateFrom", { routines: [{ id: "r", name: "R", days: [{ id: "d", name: "D", exercises: [{ id: "e", name: "X", series: [], fig }] }] }] }).routines[0].days[0].exercises[0].fig;
+    assert.equal(mk("eq-barra"), "eq-barra");
+    assert.equal(mk("<b>x</b>"), undefined);
+    assert.equal(mk(42), undefined);
+});
+
 test("versión: package.json y la app dicen lo mismo, y hay novedades de la versión actual", () => {
     const pkg = require("../../package.json");
     const { APP_VERSION, CHANGELOG } = require("../../scripts/core/version.js");

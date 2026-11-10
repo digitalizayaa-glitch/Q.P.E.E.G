@@ -119,7 +119,9 @@ function sanitizeState(src) {
                 name: str(ex.name, 20),   /* = EXERCISE_NAME_MAX (aún no existe al cargar) */
                 kg: num(ex.kg),
                 unit: ex.unit === "lb" ? "lb" : "kg",
-                series: seriesOf(ex.series, num, isObj)
+                series: seriesOf(ex.series, num, isObj),
+                /* imagen elegida en la galería (si no, se elige por el nombre) */
+                fig: typeof ex.fig === "string" && /^[a-z0-9-]{1,24}$/.test(ex.fig) ? ex.fig : undefined
             }))
         }))
     }));

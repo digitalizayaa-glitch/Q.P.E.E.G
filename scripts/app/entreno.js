@@ -119,7 +119,14 @@ function buildExerciseCard(routineId, dayId, exerciseId) {
     badge.className = "wb-badge";
     badge.id = `badge-${exerciseId}`;
     badge.innerHTML = `<i></i><span></span>`;
-    head.append(name, badge);
+    const nameRow = document.createElement("div");
+    nameRow.className = "ex-name-row";
+    nameRow.append(name, exerciseGear(routineId, dayId, exerciseId, ex => {
+        name.textContent = ex.name;
+        figure.innerHTML = exerciseFigure(ex.name, ex.fig);
+        renderSeriesPanel();
+    }));
+    head.append(nameRow, badge);
 
     /* Plan del día: peso (editable) × series × reps */
     const plan = document.createElement("div");
@@ -198,7 +205,7 @@ function buildExerciseCard(routineId, dayId, exerciseId) {
     left.append(plan, seriesRow);
     const figure = document.createElement("div");
     figure.className = "wb-figure";
-    figure.innerHTML = exerciseFigure(e0.name);
+    figure.innerHTML = exerciseFigure(e0.name, e0.fig);
     const body = document.createElement("div");
     body.className = "wb-body";
     body.append(left, figure);

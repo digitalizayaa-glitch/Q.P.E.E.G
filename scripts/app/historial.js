@@ -237,7 +237,7 @@ function renderHistoryChart(box, animate) {
         });
         const goal = planKcal();
         dotPanel(box, {
-            buckets, points, H: 375, goal, animate, aria: "Calorías",
+            buckets, points, goal, animate, aria: "Calorías",
             styleOf: () => ({ color: "var(--ui)", shape: 0 }),
             summary: () => `Promedio <b>${fmt(points.reduce((a, p) => a + p.value, 0) / points.length)} kcal</b>${perDay ? "" : " al día"} · meta ${fmt(goal)}`,
             detail: p => `${buckets[p.i].title} · <b>${fmt(p.value)} kcal</b>${perDay ? "" : ` al día (${p.n} ${p.n === 1 ? "día" : "días"})`}`,
@@ -263,7 +263,7 @@ function renderHistoryChart(box, animate) {
         const colors = glowVariants(groups.length);
         const total = buckets.reduce((a, b) => a + b.keys.reduce((s2, k) => s2 + daySessions(k).reduce((t, x) => t + x.volume, 0), 0), 0);
         dotPanel(box, {
-            buckets, points, groups, H: 375, animate, aria: "Peso levantado",
+            buckets, points, groups, animate, aria: "Peso levantado",
             styleOf: group => { const k = Math.max(0, groups.findIndex(g => g.group === group)); return { color: colors[k], shape: k }; },
             summary: () => `Total <b>${fmt(total)} kg</b> levantados${perDay ? "" : " · puntos = promedio por sesión"}`,
             detail: p => `${p.name} · ${buckets[p.i].title} · <b>${fmt(p.value)} kg</b>${p.n > 1 ? ` (promedio de ${p.n} sesiones)` : ""}`,
@@ -294,17 +294,19 @@ function renderHistoryChart(box, animate) {
     }
     const colors = glowVariants(groups.length);
     const styleOf = group => { const k = Math.max(0, groups.findIndex(g => g.group === group)); return { color: colors[k], shape: k }; };
-    const both = byUnit.km.length && byUnit.min.length;
-    [["km", "Distancia", "km"], ["min", "Tiempo", "min"]].forEach(([u, title, unit]) => {
-        const points = byUnit[u];
-        if (!points.length) return;
-        const used = groups.filter(g => points.some(p => p.group === g.group));
-        const total = points.reduce((a, p) => a + p.value, 0);
+    /* primero se crean los paneles (para que cada uno sepa su alto), luego se dibujan */
+    const panels = [["km", "Distancia", "km"], ["min", "Tiempo", "min"]].filter(([u]) => byUnit[u].length).map(spec => {
         const wrap = document.createElement("div");
         wrap.className = "chart-panel";
         box.appendChild(wrap);
+        return [spec, wrap];
+    });
+    panels.forEach(([[u, title, unit], wrap]) => {
+        const points = byUnit[u];
+        const used = groups.filter(g => points.some(p => p.group === g.group));
+        const total = points.reduce((a, p) => a + p.value, 0);
         dotPanel(wrap, {
-            buckets, points, groups: used, H: both ? 128 : 340, animate, aria: `${title} en deportes`, heading: `${title} (${unit})`,
+            buckets, points, groups: used, animate, aria: `${title} en deportes`, heading: `${title} (${unit})`,
             styleOf,
             summary: () => `Total <b>${fmtNum(total, 1)} ${unit}</b>`,
             detail: p => `${p.name} · ${buckets[p.i].title} · <b>${fmtNum(p.value, 1)} ${unit}</b>${p.n > 1 ? ` (${p.n} veces)` : ""}`
@@ -314,7 +316,7 @@ function renderHistoryChart(box, animate) {
 
 /* Un panel de puntos: resumen arriba, leyenda (si hay grupos), una sola escala, halo del color de cada punto,
    línea fina que une los puntos de un mismo grupo y detalle al tocar un punto */
-function dotPanel(box, { buckets, points, groups = [], H = 375, goal = null, animate, aria = "", heading, styleOf, summary, detail, empty }) {
+function dotPanel(box, { buckets, points, groups = [], H, goal = null, animate, aria = "", heading, styleOf, summary, detail, empty }) {
     if (heading) {
         const h = document.createElement("div");
         h.className = "chart-heading";
@@ -348,6 +350,13 @@ function dotPanel(box, { buckets, points, groups = [], H = 375, goal = null, ani
     }
 
     const W = Math.max(260, box.clientWidth || 340);
+    /* El alto de la gráfica es el que queda libre en su caja (la caja tiene alto fijo: todas las gráficas
+       miden lo mismo y los botones de abajo no se mueven) */
+    if (!H) {
+        const used = [...box.children].reduce((a, c) => a + c.offsetHeight, 0);
+        const gaps = Math.max(0, box.children.length) * (parseFloat(getComputedStyle(box).rowGap) || 0);
+        H = Math.max(110, Math.floor((box.clientHeight || 375) - used - gaps));
+    }
     const m = { l: 40, r: 10, t: 14, b: 22 };
     const pw = W - m.l - m.r, ph = H - m.t - m.b;
     const top = Math.max(goal || 0, ...points.map(p => p.value)) * 1.12;

@@ -5,9 +5,18 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.7.1";
+const APP_VERSION = "1.8.0";
 
 const CHANGELOG = [
+    {
+        v: "1.8.0",
+        items: [
+            "Historial: las 3 gráficas tienen siempre el mismo tamaño y los botones ya no se mueven al cambiar de gráfica o de periodo.",
+            "Las flechas ▲ ▼ de todos los cuadros de cantidad llevan el color de la app.",
+            "Nueva tuerca ⚙ junto al nombre de cada ejercicio (en Entreno y en el editor de rutinas): cambia el nombre o elige su imagen en una galería.",
+            "Imágenes nuevas en la galería: mancuerna, barra y barra de dominadas."
+        ]
+    },
     {
         v: "1.7.1",
         items: ["Semana: con más de 4 días, los días se ven en dos columnas. Si son impares, el último va abajo y centrado."]

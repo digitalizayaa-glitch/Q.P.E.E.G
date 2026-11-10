@@ -344,9 +344,45 @@ function figureMoveFor(name) {
 
 let figureSeq = 0;
 
-/* SVG de la figura del ejercicio */
-function exerciseFigure(name) {
-    const pose = FIGURE_POSES[figureMoveFor(name)];
+/* Imágenes de equipo (para elegir en la galería del ejercicio), con el mismo estilo de cristal */
+const EQUIPMENT_FIGURES = {
+    "eq-mancuerna": { label: "Mancuerna",
+        draw: `<path class="fig-limb" d="M32,60 H68"/>
+               <rect class="fig-eq" x="18" y="44" width="9" height="32" rx="3"/><rect class="fig-eq" x="27" y="49" width="6" height="22" rx="2"/>
+               <rect class="fig-eq" x="73" y="44" width="9" height="32" rx="3"/><rect class="fig-eq" x="67" y="49" width="6" height="22" rx="2"/>` },
+    "eq-barra": { label: "Barra",
+        draw: `<path class="fig-limb fig-thin" d="M6,60 H94"/>
+               <rect class="fig-eq" x="13" y="38" width="7" height="44" rx="2.5"/><rect class="fig-eq" x="21" y="44" width="6" height="32" rx="2"/>
+               <rect class="fig-eq" x="80" y="38" width="7" height="44" rx="2.5"/><rect class="fig-eq" x="73" y="44" width="6" height="32" rx="2"/>
+               <path class="fig-bar" d="M29,56 V64 M71,56 V64"/>` },
+    "eq-dominadas": { label: "Barra de dominadas",
+        draw: `<path class="fig-prop" d="M20,112 V24 M80,112 V24 M12,112 H28 M72,112 H88"/>
+               <path class="fig-limb" d="M14,24 H86"/>
+               <path class="fig-bar" d="M34,20 V28 M66,20 V28"/>` }
+};
+
+function equipmentFigure(kind) {
+    const u = `fg${++figureSeq}`;
+    const draw = EQUIPMENT_FIGURES[kind].draw.replace(/class="(fig-limb[^"]*|fig-eq)"/g, `class="$1" stroke="url(#${u}l)"`);
+    return `<svg class="fig-svg" viewBox="0 0 100 120" aria-hidden="true">
+        <defs>
+            <linearGradient id="${u}l" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="120">
+                <stop offset="0" style="stop-color:#fff;stop-opacity:.9"/>
+                <stop offset=".45" style="stop-color:rgb(var(--glow1));stop-opacity:.85"/>
+                <stop offset="1" style="stop-color:rgb(var(--glow2));stop-opacity:.75"/>
+            </linearGradient>
+            <filter id="${u}b" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>
+        </defs>
+        <g filter="url(#${u}b)" class="fig-glow">${draw}</g>
+        ${draw}
+    </svg>`;
+}
+
+/* SVG de la figura del ejercicio. "fig" (opcional) es la imagen elegida en la galería:
+   una pose de FIGURE_POSES o un equipo de EQUIPMENT_FIGURES; si no, se elige por el nombre. */
+function exerciseFigure(name, fig) {
+    if (fig && EQUIPMENT_FIGURES[fig]) return equipmentFigure(fig);
+    const pose = FIGURE_POSES[fig && FIGURE_POSES[fig] ? fig : figureMoveFor(name)];
     const u = `fg${++figureSeq}`;
     const j = pose.j;
     const twoSided = pose.front || pose.top;
