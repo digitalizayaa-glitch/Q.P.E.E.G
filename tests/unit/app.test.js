@@ -164,6 +164,9 @@ test("figuras: los ejercicios de la rutina de 5 días tienen su dibujo", () => {
     const svg = Object.keys(ev("FIGURE_POSES")).map(k => call("exerciseFigure", "x", k)).join("");
     assert.ok(!/NaN|undefined/.test(svg));
     for (const list of Object.values(ev("EXERCISE_CATALOG"))) for (const n of list) assert.ok(n.length <= 20, n);
+    const catalog = Object.values(ev("EXERCISE_CATALOG")).flat();
+    for (const name of Object.keys(expected)) assert.ok(catalog.includes(name), `${name} está en el catálogo`);
+    assert.equal(new Set(catalog).size, catalog.length, "sin repetidos");
 });
 
 test("figuras: la imagen elegida en la galería manda sobre el nombre", () => {

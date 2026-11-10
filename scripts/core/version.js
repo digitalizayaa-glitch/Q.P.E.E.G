@@ -5,9 +5,13 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.10.0";
+const APP_VERSION = "1.10.1";
 
 const CHANGELOG = [
+    {
+        v: "1.10.1",
+        items: ["Catálogo de ejercicios: se añadieron curl polea baja, bíceps martillo, extensión de rodillas, femoral acostado, press inclinado con mancuernas, extensión de tríceps V, copa con mancuerna, laterales y frontales con mancuernas, elevación laterales, pullover en polea, hip thrust máquina, desplante búlgaro y pantorrillas en máquina."]
+    },
     {
         v: "1.10.0",
         items: [
