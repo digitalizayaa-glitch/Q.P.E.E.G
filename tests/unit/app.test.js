@@ -212,6 +212,12 @@ test("comida rápida: catálogo coherente (calorías ≈ macros) y pizzas por sl
     }
 });
 
+test("supermercado: galletas y snacks pedidos están en el catálogo", () => {
+    const names = [...ev("FAST_FOOD.filter(c => c.super).flatMap(c => c.items.map(i => i[0]))")].join(" | ");
+    for (const want of ["Chiky", "Yipy", "Oreo", "Sponch", "Ranchitas", "Picaritas", "Papiolas", "Pringles"]) assert.match(names, new RegExp(want), want);
+    assert.ok(ev("FAST_FOOD.filter(c => !c.super).length") >= 8, "la comida rápida sigue aparte");
+});
+
 test("comida rápida: cada pizzería tiene pizza de jamón y queso", () => {
     const pizzerias = ev("FAST_FOOD").filter(c => c.items.some(i => /^Pizza /.test(i[0]) && i[1] === "slice"));
     assert.ok(pizzerias.length >= 5);
@@ -268,7 +274,7 @@ test("comida rápida → porciones calibradas: cada producto cuadra con sus calo
         for (const v of Object.values(pt)) assert.equal(v * 2, Math.round(v * 2), `${name}: porciones de 0,5 en 0,5`);
         const fromPortions = Object.entries(pt).reduce((s, [k, v]) => s + v * G[k], 0);
         const diff = Math.abs(fromPortions - kcal);
-        errs.push(diff / kcal);
+        if (kcal >= 60) errs.push(diff / kcal);   /* una galleta suelta (< 60 kcal) está por debajo de la resolución de media porción */
         /* el límite es media porción del grupo más pequeño (~20 kcal) o el 6 %, lo que sea mayor */
         assert.ok(diff <= Math.max(0.06 * kcal, 21), `${chain} · ${name}: ${kcal} kcal vs porciones ${fromPortions}`);
     }

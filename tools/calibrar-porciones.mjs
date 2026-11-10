@@ -18,8 +18,9 @@ const src = readFileSync(FILE, "utf8");
 const G = { h: [15, 3, 1], bg: [0, 7, 1], mg: [0, 7, 5], g: [0, 0, 5], l: [12, 8, 3] };
 const kcalOf = ([c, p, f]) => 4 * c + 4 * p + 9 * f;
 
-/* Qué grupos puede usar cada tipo de producto */
-function groupsFor(name) {
+/* Qué grupos puede usar cada tipo de producto (super = sección de supermercado) */
+function groupsFor(name, isSuper) {
+    if (isSuper) return /Maní/i.test(name) ? ["h", "bg", "g"] : ["h", "g"];   /* galletas, snacks y chocolates: harinas y grasas */
     if (/Refresco|Crazy Sauce/i.test(name)) return ["h"];                                   /* azúcar → harinas, como la miel */
     if (/Salsa de ajo/i.test(name)) return ["g"];
     if (/Sundae|McFlurry|Frosty/i.test(name)) return ["h", "l", "g"];                        /* postres lácteos */
@@ -72,12 +73,14 @@ export const portionsKcal = pt => Object.entries(pt).reduce((s, [k, v]) => s + v
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const lines = src.split("\n");
     let changed = 0, worst = [];
-    const re = /^(\s+)\["([^"\\]*(?:\\.[^"\\]*)*)", "([^"]+)", "([^"]+)", (\d+), (\d+), (\d+), (\d+)(?:, \{[^}]*\})?\](,?)$/;
+    const re = /^(\s+)\["([^"\\]*(?:\\.[^"\\]*)*)", "([^"]+)", "([^"]+)", (\d+), ([\d.]+), ([\d.]+), ([\d.]+)(?:, \{[^}]*\})?\](,?)$/;
+    let isSuper = false;
     const out = lines.map(line => {
+        if (/^\s+\{ chain:/.test(line)) isSuper = /super: true/.test(line);
         const m = line.match(re);
         if (!m) return line;
         const [, ind, name, unit, plural, k, c, p, f, comma] = m;
-        const pt = calibrate(+k, +c, +p, +f, groupsFor(name.replace(/\\"/g, '"')));
+        const pt = calibrate(+k, +c, +p, +f, groupsFor(name.replace(/\\"/g, '"'), isSuper));
         worst.push([Math.round((portionsKcal(pt) - k) / k * 1000) / 10, name, +k]);
         const lit = "{ " + Object.entries(pt).map(([g, v]) => `${g}: ${v}`).join(", ") + " }";
         const next = `${ind}["${name}", "${unit}", "${plural}", ${k}, ${c}, ${p}, ${f}, ${lit}]${comma}`;

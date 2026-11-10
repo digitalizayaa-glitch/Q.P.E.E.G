@@ -1,5 +1,5 @@
 /* =========================================================
-    CATÁLOGO DE COMIDA RÁPIDA
+    CATÁLOGO DE COMIDA RÁPIDA Y DE SUPERMERCADO
     Cada alimento: [nombre, unidad, unidad en plural, kcal, carbohidratos g, proteína g, grasa g]
     por UNA unidad (las pizzas, por slice = 1/8 de pizza).
     Valores aproximados según la información nutricional publicada por cada cadena
@@ -198,6 +198,51 @@ const FAST_FOOD = [
         ["Cheesy Gordita Crunch", "unidad", "unidades", 500, 40, 20, 28, { h: 2.5, mg: 2.5, g: 2.5 }],
         ["Chalupa Supreme de res", "unidad", "unidades", 350, 30, 12, 21, { h: 2, mg: 1, g: 2.5 }],
         ["Nachos BellGrande", "orden", "órdenes", 740, 79, 16, 39, { h: 5.5, g: 6.5 }]
+    ] },
+    /* ---------- SUPERMERCADO (super: true) ----------
+       Calorías y macros de la etiqueta (Costa Rica cuando existe; si no, la de EE. UU.).
+       Si la etiqueta solo publica calorías (Ranchitas, Picaritas, Papiolas, Zambos, Maní Yummies),
+       los carbohidratos, proteína y grasa se estimaron con productos del mismo tipo. */
+    { chain: "Galletas", super: true, items: [
+        ["Chiky (Pozuelo)", "galleta", "galletas", 35, 5, 0.4, 1.6, { h: 0.5 }],
+        ["Yipy (Pozuelo)", "unidad", "unidades", 145, 18, 1, 8, { h: 1, g: 1.5 }],
+        ["Oreo", "galleta", "galletas", 54, 8, 0.6, 2.2, { h: 0.5, g: 0.5 }],
+        ["Sponch fresa / piña (Marinela)", "galleta", "galletas", 57, 11, 1, 1, { h: 0.5, g: 0.5 }],
+        ["Sponch chocolate (Marinela)", "galleta", "galletas", 62, 11, 1, 1.5, { h: 0.5, g: 0.5 }],
+        ["Chips Ahoy! original", "galleta", "galletas", 53, 7.5, 0.7, 2.7, { h: 0.5, g: 0.5 }],
+        ["Cremas (Pozuelo)", "galleta", "galletas", 38, 5.5, 0.2, 1.5, { h: 0.5 }],
+        ["Club Extra (Pozuelo)", "galleta", "galletas", 58, 8, 1, 2.5, { h: 0.5, g: 0.5 }],
+        ["Merendina (Pozuelo)", "unidad", "unidades", 80, 11, 1, 3, { h: 1 }],
+        ["María (Pozuelo)", "porción (5 galletas)", "porciones (5 galletas)", 90, 16, 1, 2.5, { h: 1 }],
+        ["Soda (Pozuelo)", "porción (4 galletas)", "porciones (4 galletas)", 90, 16, 2, 2, { h: 1 }],
+        ["Soda integral (Pozuelo)", "porción (4 galletas)", "porciones (4 galletas)", 85, 14, 3, 2, { h: 1 }],
+        ["Integrales con ajonjolí (Pozuelo)", "galleta", "galletas", 35, 5.5, 1, 1, { h: 0.5 }],
+        ["Ritz", "porción (5 galletas)", "porciones (5 galletas)", 80, 10, 1, 4.5, { h: 0.5, g: 1 }]
+    ] },
+    { chain: "Snacks y paquetes", super: true, items: [
+        ["Ranchitas naturales (Yummies)", "porción de 28 g", "porciones de 28 g", 140, 18, 2, 7, { h: 1, g: 1.5 }],
+        ["Ranchitas nacho (Yummies)", "porción de 28 g", "porciones de 28 g", 150, 17, 2, 8, { h: 1, g: 1.5 }],
+        ["Picaritas jalapeñas (Jack's)", "porción de 25 g", "porciones de 25 g", 130, 15, 2, 7, { h: 1, g: 1 }],
+        ["Papiolas clásicas (Tosty)", "porción de 25 g", "porciones de 25 g", 147, 14, 1.5, 9.5, { h: 1, g: 1.5 }],
+        ["Papiolas queso deluxe (Tosty)", "porción de 25 g", "porciones de 25 g", 150, 14, 2, 9.5, { h: 1, g: 1.5 }],
+        ["Pringles original (≈15 chips)", "porción de 28 g", "porciones de 28 g", 150, 16, 1, 9, { h: 1, g: 1.5 }],
+        ["Pringles crema y cebolla (≈15 chips)", "porción de 28 g", "porciones de 28 g", 150, 15, 1, 9, { h: 1, g: 1.5 }],
+        ["Doritos nacho queso", "porción de 28 g", "porciones de 28 g", 150, 18, 2, 8, { h: 1, g: 1.5 }],
+        ["Cheetos crunchy", "porción de 28 g", "porciones de 28 g", 160, 15, 2, 10, { h: 1, g: 2 }],
+        ["Lay's clásicas", "porción de 28 g", "porciones de 28 g", 160, 15, 2, 10, { h: 1, g: 2 }],
+        ["Ruffles original", "porción de 28 g", "porciones de 28 g", 160, 14, 2, 10, { h: 1, g: 2 }],
+        ["Zambos de plátano (Yummies)", "porción de 28 g", "porciones de 28 g", 140, 20.5, 0.5, 6, { h: 1.5, g: 0.5 }],
+        ["Zambos picositas (Yummies)", "porción de 28 g", "porciones de 28 g", 140, 19, 0.5, 6.5, { h: 1.5, g: 0.5 }],
+        ["Bolitas de queso (Tosty)", "porción de 28 g", "porciones de 28 g", 146, 14.5, 1.1, 8, { h: 1, g: 1.5 }],
+        ["Quesitos (Tosty)", "porción de 28 g", "porciones de 28 g", 146, 14.5, 3.5, 8, { h: 1, g: 1.5 }],
+        ["Palitos de queso (Nutri Snacks)", "porción de 28 g", "porciones de 28 g", 150, 16, 2, 9, { h: 1, g: 1.5 }],
+        ["Maní con limón y chile (Yummies)", "porción de 25 g", "porciones de 25 g", 155, 3, 6, 13, { bg: 1, g: 2.5 }]
+    ] },
+    { chain: "Chocolates", super: true, items: [
+        ["Milka (4 cuadritos, 25 g)", "porción", "porciones", 131, 15, 1.8, 7, { h: 1, g: 1 }],
+        ["M&M's de chocolate (bolsita 48 g)", "bolsita", "bolsitas", 240, 34, 2, 10, { h: 2, g: 1.5 }],
+        ["Snickers (52 g)", "barra", "barras", 250, 33, 4, 12, { h: 2, g: 2 }],
+        ["Kit Kat (4 barritas, 42 g)", "unidad", "unidades", 210, 27, 3, 11, { h: 1.5, g: 2 }]
     ] }
 ];
 

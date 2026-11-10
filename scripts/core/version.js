@@ -5,9 +5,18 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.8.0";
+const APP_VERSION = "1.9.0";
 
 const CHANGELOG = [
+    {
+        v: "1.9.0",
+        items: [
+            "Nuevo en Agregar comida → Supermercado: galletas (Chiky, Yipy, Oreo, Sponch, Pozuelo y más), snacks (Ranchitas, Picaritas, Papiolas, Pringles, Doritos, Zambos y más) y chocolates.",
+            "Historial: arriba del calendario se indica cuál estás viendo (Entrenos, Calorías o Deportes).",
+            "Calendario con verde, amarillo y rojo más vivos, con un toque del color de la app.",
+            "El día de hoy se marca con un pulso del color de la app."
+        ]
+    },
     {
         v: "1.8.0",
         items: [

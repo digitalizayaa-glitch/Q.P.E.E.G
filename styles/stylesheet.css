@@ -579,7 +579,6 @@ button.primary {
 .history-cell.green { background: var(--accent); color: #111; border-color: var(--accent); }
 .history-cell.red { background: var(--accent-red); border-color: var(--accent-red); }
 .history-cell.gold { background: var(--accent-gold); color: #111; border-color: var(--accent-gold); }
-.history-cell.today { outline: 2px solid var(--text-2); }
 .history-cell.future { opacity: .35; cursor: default; }
 .history-cell.blank { visibility: hidden; }
 
@@ -1647,3 +1646,35 @@ main { overflow-x: hidden; }
 .ex-tile.selected { background: rgba(var(--ui-rgb), .2); border: 2px solid var(--ui); }
 .fig-eq { fill: rgba(255, 255, 255, .12); stroke-width: 3.5; }
 .fig-thin { stroke-width: 3.5; }
+
+/* =========================================================
+    CALENDARIO DEL HISTORIAL: título del tipo, colores vivos y día de hoy con pulso
+========================================================= */
+.history-kind {
+    align-self: center; margin-bottom: 4px; padding: 4px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text); background: rgba(var(--ui-rgb), .16); border: 1px solid var(--ui);
+}
+.history-kind[hidden] { display: none; }
+
+/* Verde, amarillo y rojo más vivos y con más contraste; brillo arriba y un filtro del color de la app */
+:root { --cal-green: #19d35c; --cal-gold: #ffc81a; --cal-red: #ff3b3b; }
+.history-cell.green, .history-cell.gold, .history-cell.red {
+    --cal: var(--cal-green);
+    color: #0b0b0b; border: 1.5px solid color-mix(in srgb, var(--cal) 70%, #000);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 48%),
+        linear-gradient(135deg, rgba(var(--ui-rgb), .26), rgba(var(--ui-rgb), 0) 75%),
+        var(--cal);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+}
+.history-cell.gold { --cal: var(--cal-gold); }
+.history-cell.red { --cal: var(--cal-red); color: #fff; text-shadow: 0 1px 1px rgba(0, 0, 0, .35); }
+
+/* Hoy: en vez del borde negro, un contorno con pulso del color de la app (el doble del de los botones) */
+@keyframes today-pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(var(--ui-rgb), .55), 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 0 2px var(--ui), 0 0 22px 2px rgba(var(--ui-rgb), .66); }
+}
+.history-cell.today { outline: none; position: relative; z-index: 1; animation: today-pulse 3.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .history-cell.today { animation: none; box-shadow: 0 0 0 2px var(--ui); } }

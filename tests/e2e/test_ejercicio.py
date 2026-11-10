@@ -1,4 +1,4 @@
-"""Tuerca del ejercicio (nombre e imagen) y gráficas del historial con tamaño fijo.
+"""Tuerca del ejercicio, historial (gráficas de tamaño fijo, título del calendario, pulso de hoy) y supermercado.
 
 Uso:  python3 tests/e2e/test_ejercicio.py     (desde la raíz del repositorio)
 Variables opcionales: CHROME=/ruta/a/chrome  PORT=8807  SHOTS=carpeta
@@ -43,6 +43,11 @@ def main():
             pos = lambda: pg.evaluate("['histModeBtn','histMonthsBtn','histChartBtn'].map(i => Math.round(document.getElementById(i).getBoundingClientRect().top))")
             box = lambda: round(pg.evaluate("document.getElementById('historyChart').getBoundingClientRect().height"))
             first, sizes, places = pos(), set(), set()
+            kinds = []
+            for _ in range(3):
+                kinds.append(pg.inner_text("#historyKind")); pg.click("#histModeBtn"); pg.wait_for_timeout(300)
+            r["titulo_calendario"] = kinds == ["ENTRENOS", "CALORÍAS", "DEPORTES"]
+            r["hoy_con_pulso"] = pg.evaluate("getComputedStyle(document.querySelector('.history-cell.today')).animationName") == "today-pulse"
             pg.click("#histChartBtn"); pg.wait_for_timeout(500)
             for _ in range(3):
                 for _ in range(3):
@@ -50,8 +55,17 @@ def main():
                     pg.click("#histMonthsBtn"); pg.wait_for_timeout(300)
                 pg.click("#histModeBtn"); pg.wait_for_timeout(300)
             r["botones_quietos"] = places == {tuple(first)}
+            r["sin_titulo_en_grafica"] = pg.evaluate("document.getElementById('historyKind').hidden")
             r["graficas_mismo_alto"] = len(sizes) == 1
             pg.click("#histChartBtn"); pg.wait_for_timeout(300)
+
+            # Supermercado: las galletas y snacks aparecen en Agregar comida
+            pg.evaluate("showSection('food'); openFoodPicker()"); pg.wait_for_timeout(500)
+            titles = pg.evaluate("[...document.querySelectorAll('.picker-overlay:last-child .picker-group')].map(t => t.textContent)")
+            r["supermercado"] = "Supermercado · Galletas" in titles and "Supermercado · Snacks y paquetes" in titles
+            pg.locator(".picker-overlay:last-child .picker-search").fill("chiky"); pg.wait_for_timeout(300)
+            r["busca_chiky"] = pg.locator(".picker-overlay:last-child .picker-item:visible").count() >= 1
+            pg.evaluate("document.querySelectorAll('.picker-overlay').forEach(o => o.remove())")
 
             # Entreno: tuerca junto al nombre → galería y nombre
             pg.evaluate("showSection('week')"); pg.wait_for_timeout(300)

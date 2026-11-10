@@ -11,6 +11,8 @@ function foodDayStatus(key) {
     return entries.length ? kcalStatus(foodTotals(entries).kcal) : "empty";
 }
 
+const HISTORY_KIND = { workout: "Entrenos", food: "Calorías", sport: "Deportes" };
+
 let historyView = "calendar";   /* "calendar" o "chart" */
 let chartPeriod = "day";        /* "day", "week" o "month" */
 
@@ -42,6 +44,11 @@ function renderHistory(animate) {
     const chart = document.getElementById("historyChart");
     grid.hidden = isChart;
     chart.hidden = !isChart;
+
+    /* Arriba del calendario: en qué calendario se está (en la gráfica ya lo dice su título) */
+    const kind = document.getElementById("historyKind");
+    kind.textContent = HISTORY_KIND[historyMode];
+    kind.hidden = isChart;
 
     if (isChart) {
         document.getElementById("historyTitle").textContent = `${{ workout: "Peso levantado", food: "Calorías", sport: "Deportes" }[historyMode]} por ${CHART_PERIODS[chartPeriod].unit}`;
@@ -120,7 +127,7 @@ function renderHistory(animate) {
 /* Aparición del calendario al cambiar de uno a otro: cada elemento surge un poco más pequeño y transparente */
 /* Calendario <-> gráfica: el contenido se desvanece y aparece el otro */
 async function fadeHistoryView(next) {
-    const parts = ["historyTitle", "historyGrid", "historyChart"].map(id => document.getElementById(id));
+    const parts = ["historyKind", "historyTitle", "historyGrid", "historyChart"].map(id => document.getElementById(id));
     await Promise.all(parts.map(p => p.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).finished.catch(() => {})));
     historyView = next;
     renderHistory(false);
@@ -461,7 +468,7 @@ function openMonthPicker() {
     }
 
     openPicker({
-        title: "Calendario completo",
+        title: `Calendario completo · ${HISTORY_KIND[historyMode]}`,
         groups,
         onPick: offset => { historyOffset = offset; renderHistory(); }
     });

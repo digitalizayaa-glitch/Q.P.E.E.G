@@ -614,8 +614,8 @@ function openFoodPicker(groupKey) {
         items: FOOD_CATALOG[k].map(item => asItem(k, item))
     }));
     if (!groupKey) {
-        FAST_FOOD.forEach(({ chain, items }) => groups.push({
-            title: `Comida rápida · ${chain}`,
+        FAST_FOOD.forEach(({ chain, items, super: market }) => groups.push({
+            title: `${market ? "Supermercado" : "Comida rápida"} · ${chain}`,
             items: items.map(it => fastItem(`${chain} · ${it[0]}`))
         }));
     }
@@ -631,7 +631,10 @@ function openFoodPicker(groupKey) {
             { label: "Todos" },
             ...(frequent.length ? [{ label: "Frecuentes", match: t => t === "Frecuentes" }] : []),
             ...(groupKey ? [] : FOOD_GROUPS.map(g => ({ label: g.name, match: t => t === g.name }))),
-            ...(groupKey ? [] : [{ label: "Comida rápida", match: t => t.startsWith("Comida rápida") }])
+            ...(groupKey ? [] : [
+                { label: "Comida rápida", match: t => t.startsWith("Comida rápida") },
+                { label: "Supermercado", match: t => t.startsWith("Supermercado") }
+            ])
         ],
         createLabel: "Porciones sueltas",
         onPick: (v, refresh) => {
