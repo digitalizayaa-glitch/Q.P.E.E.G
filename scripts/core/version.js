@@ -5,9 +5,13 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.9.1";
+const APP_VERSION = "1.9.2";
 
 const CHANGELOG = [
+    {
+        v: "1.9.2",
+        items: ["Comida: se añadió el chimichurri tico (en Vegetales) y el chimichurri argentino con aceite (en Grasas)."]
+    },
     {
         v: "1.9.1",
         items: [

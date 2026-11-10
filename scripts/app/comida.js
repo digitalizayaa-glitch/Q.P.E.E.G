@@ -150,11 +150,13 @@ const FOOD_CATALOG = {
         ["Leche de coco de cartón (sin azúcar)", "1 taza (240 ml)"],
         ["Leche de coco de cartón (con azúcar)", "1 taza (240 ml)"],
         ["Leche de coco de lata", "2 cdas (30 ml)"],
-        ["Leche de coco de lata light", "1/4 taza (60 ml)"]
+        ["Leche de coco de lata light", "1/4 taza (60 ml)"],
+        ["Chimichurri argentino (con aceite)", "1/2 cda (8 g)"]
     ],
     v: [
         ["Vegetales frescos (ensalada)", "1 taza"],
-        ["Vegetales hervidos / cocidos", "1/2 taza"]
+        ["Vegetales hervidos / cocidos", "1/2 taza"],
+        ["Chimichurri tico (tomate, cebolla, culantro, limón)", "1/2 taza (80 g)"]
     ],
     fr: [
         ["Banano", "1 pequeño (70 g)"],
