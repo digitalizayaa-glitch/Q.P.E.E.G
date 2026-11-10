@@ -45,7 +45,7 @@ function renderHistory(animate) {
     grid.hidden = isChart;
     chart.hidden = !isChart;
 
-    /* Arriba del calendario: en qué calendario se está (en la gráfica ya lo dice su título) */
+    /* Entre el calendario y los botones: en qué calendario se está (en la gráfica ya lo dice su título) */
     const kind = document.getElementById("historyKind");
     kind.textContent = HISTORY_KIND[historyMode];
     kind.hidden = isChart;

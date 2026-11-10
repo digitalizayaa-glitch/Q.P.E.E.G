@@ -1452,6 +1452,8 @@ main { overflow-x: hidden; }
 .workout-track .wb-serie .reps-value { padding: 10px 0; font-size: 19px; }
 .workout-track .fig-svg { max-height: 150px; }
 .wb-add-serie .serie-label { color: var(--muted); font-weight: normal; font-size: 11px !important; }
+/* Los cuadros de las series quedan siempre a la misma altura, aunque "Extra" use letra más pequeña que I, II, III */
+.wb-serie { justify-content: flex-end; }
 .wb-add-btn {
     width: 100%; margin: 0; cursor: pointer; font-weight: bold; color: var(--text);
     background: rgba(var(--ui-rgb), .18); border: 1px dashed var(--ui); border-radius: 8px;
@@ -1611,7 +1613,7 @@ main { overflow-x: hidden; }
    todas las gráficas y periodos), así los botones de abajo quedan siempre en su sitio */
 .history-chart { flex: 1 1 0; min-height: 250px; overflow: hidden; }
 .history-chart .chart-panel { flex: 1 1 0; min-height: 0; }
-.history-grid { flex: 1 0 auto; align-content: start; }
+.history-grid { flex: 0 0 auto; align-content: start; }
 
 /* Flechas ▲ ▼ de todos los cuadros de cantidad, con el color de la app */
 .stepper-btn { background: rgba(var(--ui-rgb), .14); border-color: var(--ui); color: var(--text); }
@@ -1651,7 +1653,7 @@ main { overflow-x: hidden; }
     CALENDARIO DEL HISTORIAL: título del tipo, colores vivos y día de hoy con pulso
 ========================================================= */
 .history-kind {
-    align-self: center; margin-bottom: 4px; padding: 4px 14px; border-radius: 999px;
+    align-self: center; margin: auto; padding: 4px 14px; border-radius: 999px;   /* centrado en el espacio libre bajo el calendario */
     font-size: 12px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;
     color: var(--text); background: rgba(var(--ui-rgb), .16); border: 1px solid var(--ui);
 }
