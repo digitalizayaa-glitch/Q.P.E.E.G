@@ -177,3 +177,17 @@ test("limpieza diaria: se borran las cuentas sin uso en 2 meses y medio, con sus
         assert.equal(await cleanup(db, t), 2);
     } finally { Date.now = realNow; }
 });
+
+test("errores: los repetidos suman, con tope y sin datos raros", async () => {
+    const db = fakeD1();
+    const e = { p_msg: "x is not a function", p_stack: "TypeError\n at render (scripts/app/comida.js:10:5)", p_ver: "1.13.0", p_ua: "iOS 17 · Safari 17" };
+    await handlers.qpeeg_error(db, e);
+    await handlers.qpeeg_error(db, e);
+    await handlers.qpeeg_error(db, { ...e, p_ver: "1.13.1" });
+    const rows = await db.prepare("SELECT ver, count FROM app_errors ORDER BY ver").all();
+    assert.deepEqual(rows.results.map(r => [r.ver, r.count]), [["1.13.0", 2], ["1.13.1", 1]]);
+    await assert.rejects(handlers.qpeeg_error(db, { p_msg: "" }), /mensaje/);
+    await assert.rejects(handlers.qpeeg_error(db, { p_msg: "x".repeat(301) }), /mensaje/);
+    for (let i = 0; i < 310; i++) await handlers.qpeeg_error(db, { ...e, p_msg: "error " + i });
+    assert.equal((await db.prepare("SELECT COUNT(*) AS n FROM app_errors").first()).n, 300);
+});

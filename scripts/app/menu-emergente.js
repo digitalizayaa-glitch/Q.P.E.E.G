@@ -84,6 +84,7 @@ function openPicker(options) {
         search = document.createElement("input");
         search.type = "search";
         search.className = "picker-search";
+        search.setAttribute("aria-label", "Buscar");
         search.placeholder = "Buscar…";
         search.autocomplete = "off";
         search.spellcheck = false;

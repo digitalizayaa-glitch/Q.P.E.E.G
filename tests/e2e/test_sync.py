@@ -18,6 +18,7 @@ SHOTS = os.environ.get("SHOTS")
 SERVER = "https://sync.prueba"
 
 vaults, pairs, history, retired = {}, {}, {}, set()
+app_errors = []
 calls = []
 
 
@@ -53,9 +54,11 @@ def rpc(route):
     elif name == "qpeeg_snapshot":
         v = vaults.get(a["p_id"])
         if v: history.setdefault(a["p_id"], {})[v["rev"]] = {"blob": v["blob"], "saved_at": int(time.time() * 1000)}
+    elif name == "qpeeg_error":
+        app_errors.append(a)
     elif name == "qpeeg_retire":
         vaults.pop(a["p_id"], None); history.pop(a["p_id"], None); retired.add(a["p_id"])
-    empty = name in ("qpeeg_pair_put", "qpeeg_snapshot", "qpeeg_retire")
+    empty = name in ("qpeeg_pair_put", "qpeeg_snapshot", "qpeeg_retire", "qpeeg_error")
     route.fulfill(status=200, content_type="application/json", body="" if empty else json.dumps(out))
 
 
@@ -89,9 +92,11 @@ def main():
     routine = lambda i, n: {"id": i, "name": n, "days": []}
     try:
         with sync_playwright() as p:
-            opts = {"args": ["--no-sandbox", "--no-proxy-server"]}
-            if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
-            b = p.chromium.launch(**opts)
+            # BROWSER=webkit prueba con el motor de Safari (iPhone); por defecto Chromium
+            engine = os.environ.get("BROWSER", "chromium")
+            opts = {"args": ["--no-sandbox", "--no-proxy-server"]} if engine == "chromium" else {}
+            if os.environ.get("CHROME") and engine == "chromium": opts["executable_path"] = os.environ["CHROME"]
+            b = getattr(p, engine).launch(**opts)
 
             # Teléfono A: tiene datos y crea la cuenta
             ctxA, A = phone(b, {"routines": [routine("r1", "Push")], "logs": {}, "food": {"log": {}}, "achievements": []}, errors)
@@ -211,6 +216,16 @@ def main():
             click(B, "Entrar"); B.wait_for_timeout(1200); click(B, "Entendido")
             r["b_con_codigo_nuevo"] = snap(A) == snap(B)
             for c in (ctxA, ctxB, ctxC): c.close()
+
+            # Registro de errores: un fallo se envía sin textos del usuario
+            ctxE, E = phone(b, None, errors)
+            E.evaluate("""setTimeout(() => { throw new Error('No se pudo guardar "Press banca" 75 kg id 1794349511116') }, 0)"""); E.wait_for_timeout(1500)
+            errors[:] = [e for e in errors if "No se pudo guardar" not in e]
+            sent = app_errors[-1] if app_errors else {}
+            r["error_enviado"] = "No se pudo guardar" in sent.get("p_msg", ""); print("ENVIADO", json.dumps(sent, ensure_ascii=False)[:400])
+            r["error_sin_datos"] = bool(sent) and "Press banca" not in json.dumps(sent) and "1794349511116" not in json.dumps(sent)
+            r["error_con_version"] = sent.get("p_ver") == _VER and "·" in sent.get("p_ua", "")
+            ctxE.close()
 
             # Sin servidor configurado la sección no aparece
             ctx = b.new_context(service_workers="block")

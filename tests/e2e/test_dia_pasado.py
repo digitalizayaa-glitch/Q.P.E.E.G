@@ -32,9 +32,11 @@ def main():
     r, errors = {}, []
     try:
         with sync_playwright() as p:
-            opts = {"args": ["--no-sandbox", "--no-proxy-server"]}
-            if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
-            b = p.chromium.launch(**opts)
+            # BROWSER=webkit prueba con el motor de Safari (iPhone); por defecto Chromium
+            engine = os.environ.get("BROWSER", "chromium")
+            opts = {"args": ["--no-sandbox", "--no-proxy-server"]} if engine == "chromium" else {}
+            if os.environ.get("CHROME") and engine == "chromium": opts["executable_path"] = os.environ["CHROME"]
+            b = getattr(p, engine).launch(**opts)
             ctx = b.new_context(viewport={"width": 360, "height": 780}, service_workers="block")
             ctx.add_init_script("localStorage.setItem('qpeeg_seen_version','%s');"
                                 "if(!localStorage.getItem('qpeeg_state_v1'))localStorage.setItem('qpeeg_state_v1',%s)" % (VER, json.dumps(json.dumps(STATE))))

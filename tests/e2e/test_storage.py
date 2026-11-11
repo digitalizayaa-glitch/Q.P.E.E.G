@@ -36,21 +36,24 @@ def main():
     results, errors = {}, []
     try:
         with sync_playwright() as p:
-            opts = {"args": ["--no-sandbox", "--no-proxy-server"]}
-            if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
-            b = p.chromium.launch(**opts)
+            # BROWSER=webkit prueba con el motor de Safari (iPhone); por defecto Chromium
+            engine = os.environ.get("BROWSER", "chromium")
+            opts = {"args": ["--no-sandbox", "--no-proxy-server"]} if engine == "chromium" else {}
+            if os.environ.get("CHROME") and engine == "chromium": opts["executable_path"] = os.environ["CHROME"]
+            b = getattr(p, engine).launch(**opts)
 
             # 1) Datos v1 en localStorage → se migran a v2 y se copian a IndexedDB
+            #    (los datos viejos se ponen ANTES de abrir la app, como en un teléfono que tenía la versión antigua)
             ctx = b.new_context(service_workers="block"); ctx.add_init_script(SEEN)
+            ctx.add_init_script("if (!sessionStorage.getItem('v1_puesto')) { sessionStorage.setItem('v1_puesto', '1'); localStorage.setItem('%s', %s); }" % (KEY, json.dumps(json.dumps(V1_STATE))))
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
-            pg.goto(URL); pg.evaluate(f"localStorage.setItem('{KEY}', {json.dumps(json.dumps(V1_STATE))})")
-            pg.reload(); pg.wait_for_function("document.readyState==='complete'"); pg.wait_for_timeout(600)
+            pg.goto(URL); pg.wait_for_function("document.readyState==='complete'"); pg.wait_for_timeout(600)
             idb = pg.evaluate(READ_IDB)
-            for _ in range(20):   # la copia a IndexedDB puede tardar un poco más que la carga
+            for _ in range(60):   # la copia a IndexedDB puede tardar un poco más que la carga (sobre todo en Safari)
                 if idb and "r1" in idb["state"].get("logs", {}): break
-                pg.wait_for_timeout(150); idb = pg.evaluate(READ_IDB)
+                pg.wait_for_timeout(200); idb = pg.evaluate(READ_IDB)
             results["migra_v1"] = bool(idb) and idb["state"]["meta"]["schema"] == 2 and len(idb["state"]["routines"]) == 1
-            results["conserva_registro"] = bool(idb) and idb["state"]["logs"]["r1"]["2026-11-02"]["exercises"]["e1"]["reps"] == [10, 9, 8]
+            results["conserva_registro"] = bool(idb) and "r1" in idb["state"].get("logs", {}) and idb["state"]["logs"]["r1"]["2026-11-02"]["exercises"]["e1"]["reps"] == [10, 9, 8]
             results["tema_claro"] = pg.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
 
             # 2) Se borra localStorage → los datos vuelven desde IndexedDB

@@ -10,6 +10,7 @@
       POST /rest/v1/rpc/qpeeg_history_get { p_id, p_rev }         → [{ blob, rev }] o []
       POST /rest/v1/rpc/qpeeg_snapshot   { p_id }                 → (vacío)   guarda ya una copia de la versión actual
       POST /rest/v1/rpc/qpeeg_retire     { p_id }                 → (vacío)   la cuenta cambió de código: se borra y queda dada de baja
+      POST /rest/v1/rpc/qpeeg_error      { p_msg, p_stack, p_ver, p_ua } → (vacío)   error anónimo de la app (sin datos de cuentas)
     Una cuenta dada de baja responde [{ gone: true }] a qpeeg_get y -2 a qpeeg_put (no se puede volver a crear).
     Límites: 1 MB por cuenta (413 si se pasa) y no se crean cuentas nuevas si los datos pasan de 400 MB (-3).
     Una vez al día (cron) se borran las cuentas sin uso en 76 días (2 meses y medio) con sus copias.
@@ -27,6 +28,8 @@ const MAX_PAYLOAD = 4000;
 const PAIR_TTL = 10 * 60 * 1000;
 const SNAP_EVERY = 3 * 3600 * 1000;  /* como mucho una copia cada 3 horas… */
 const SNAP_KEEP = 20;                /* …y se guardan las últimas 20 */
+const ERRORS_KEEP = 300;             /* errores distintos guardados como mucho (los repetidos solo suman) */
+const ERRORS_DAYS = 60;              /* y se borran a los 60 días sin repetirse */
 const ALLOWED_ORIGINS = [
     "https://digitalizayaa-glitch.github.io",
     "http://localhost:8080"
@@ -122,6 +125,21 @@ export const handlers = {
         return undefined;
     },
 
+    async qpeeg_error(db, a) {
+        const msg = needText(a.p_msg, 300, "mensaje");
+        const stack = typeof a.p_stack === "string" ? a.p_stack.slice(0, 1500) : "";
+        const ver = typeof a.p_ver === "string" ? a.p_ver.slice(0, 20) : "?";
+        const ua = typeof a.p_ua === "string" ? a.p_ua.slice(0, 60) : "?";
+        const where = stack.split("\n").find(l => /:\d+/.test(l)) || "";
+        const key = (ver + "|" + msg + "|" + where).slice(0, 500);
+        const now = Date.now();
+        await db.batch([
+            db.prepare("INSERT INTO app_errors (key, msg, stack, ver, ua, count, first_at, last_at) VALUES (?, ?, ?, ?, ?, 1, ?, ?) ON CONFLICT (key) DO UPDATE SET count = count + 1, last_at = excluded.last_at, ua = excluded.ua").bind(key, msg, stack, ver, ua, now, now),
+            db.prepare("DELETE FROM app_errors WHERE key NOT IN (SELECT key FROM app_errors ORDER BY last_at DESC LIMIT ?)").bind(ERRORS_KEEP)
+        ]);
+        return undefined;
+    },
+
     async qpeeg_pair_put(db, a) {
         const id = needId(a.p_id);
         const payload = needText(a.p_payload, MAX_PAYLOAD, "payload");
@@ -150,7 +168,8 @@ export async function cleanup(db, now = Date.now()) {
     await db.batch([
         db.prepare(`DELETE FROM vault_history WHERE id IN (${old})`).bind(limit),
         db.prepare("DELETE FROM vaults WHERE COALESCE(seen_at, updated_at) < ?").bind(limit),
-        db.prepare("DELETE FROM pairs WHERE expires_at < ?").bind(now)
+        db.prepare("DELETE FROM pairs WHERE expires_at < ?").bind(now),
+        db.prepare("DELETE FROM app_errors WHERE last_at < ?").bind(now - ERRORS_DAYS * 86400 * 1000)
     ]);
     return gone ? gone.n : 0;
 }
