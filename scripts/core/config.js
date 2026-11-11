@@ -6,3 +6,10 @@ const QPEEG_SYNC = {
     url: "https://qpeeg-sync.digitalizayaa.workers.dev",
     key: "publica"
 };
+
+/* Mudanza de la app: abierta desde un dominio que termina en "from" (el viejo) enseña cómo pasarse a "to";
+   abierta en "to", da la bienvenida (poner el código y cómo instalarla). to vacío = sin mudanza. */
+const QPEEG_MOVE = {
+    from: "github.io",
+    to: "https://qpeeg.digitalizayaa.workers.dev/"
+};

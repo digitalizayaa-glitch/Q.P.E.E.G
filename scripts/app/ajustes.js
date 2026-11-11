@@ -193,6 +193,18 @@ function openSettings() {
     const account = buildAccountSection(label);
     sheet.append(...account.nodes);
     sheet.append(...buildLegalSection(label));
+    const moving = moveMode() === "old";
+    if (moving || !isInstalled()) {
+        const inst = document.createElement("div");
+        inst.className = "settings-photo settings-account";
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "dialog-btn accept";
+        b.textContent = moving ? "Pasarme a la app nueva" : "Instalar la app";
+        b.onclick = moving ? openMoveGuide : openInstallGuide;
+        inst.appendChild(b);
+        sheet.append(label("App"), inst);
+    }
 
     overlay.appendChild(sheet);
 

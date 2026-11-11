@@ -17,7 +17,7 @@ def page(b, errors, data=None, seen=None, consent=True):
     ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
     pg = ctx.new_page()
     pg.on("pageerror", lambda e: errors.append(str(e)))
-    init = "localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false}));" if consent else ""
+    init = "localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false}));localStorage.setItem('qpeeg_install_seen','1');" if consent else ""
     if data: init += "if(!localStorage.getItem('qpeeg_state_v1'))localStorage.setItem('qpeeg_state_v1',%s);" % json.dumps(json.dumps(data))
     if seen: init += "if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.setItem('qpeeg_seen_version','%s');}" % seen
     if init: pg.add_init_script(init)

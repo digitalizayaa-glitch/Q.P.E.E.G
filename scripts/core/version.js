@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.15.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "1.16.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "1.16.0",
+        items: [
+            "Guía para instalar la app en tu teléfono o computadora (iPhone, Android y computadora), paso a paso. También en Ajustes → Instalar la app.",
+            "La app se muda a una dirección nueva: la de siempre te enseña cómo pasarte con tu cuenta, y la nueva te da la bienvenida con un espacio para tu código y cómo instalarla.",
+            "Los botones ya no se pintan de azul al tocarlos."
+        ]
+    },
     {
         v: "1.15.0",
         items: [

@@ -1783,3 +1783,91 @@ main { overflow-x: hidden; }
 .agree-form .dialog-btn:disabled { opacity: .45; animation: none; }
 @media (prefers-reduced-motion: reduce) { .agree-check { animation: none; } }
 .picker-close[hidden] { display: none; }
+
+/* Sin el destello azul del navegador al tocar, ni el contorno al tocar con el dedo (sí con teclado) */
+html, body, button, a, input, [role="button"] { -webkit-tap-highlight-color: transparent; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* =========================================================
+    INSTALAR LA APP: guía paso a paso
+========================================================= */
+.install-body { display: flex; flex-direction: column; gap: 12px; padding: 0 16px 16px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.install-body > * { flex-shrink: 0; }
+.install-body svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.install-hero {
+    display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px;
+    background: linear-gradient(135deg, rgba(var(--ui-rgb), .26), rgba(var(--ui-rgb), .06));
+    border: 1px solid rgba(var(--ui-rgb), .55);
+}
+.install-logo { width: 58px; height: 58px; border-radius: 14px; flex-shrink: 0; box-shadow: 0 6px 18px rgba(0, 0, 0, .35), 0 0 0 1px rgba(255, 255, 255, .08); }
+.install-hero b { display: block; font-size: 17px; line-height: 1.25; }
+.install-hero small { display: block; margin-top: 3px; font-size: 12.5px; line-height: 1.35; color: var(--text-2); }
+.install-perks { display: flex; gap: 6px; }
+.install-perks span {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 9px 4px;
+    border-radius: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border);
+    font-size: 11px; font-weight: bold; text-align: center; color: var(--text-2);
+}
+.install-perks svg { width: 20px; height: 20px; color: var(--ui); }
+.install-warn {
+    display: flex; gap: 10px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 12px;
+    background: rgba(var(--ui-rgb), .1); border: 1px solid rgba(var(--ui-rgb), .45); font-size: 12.5px; line-height: 1.4; color: var(--text);
+}
+.install-warn svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.install-tabs { margin: 0; }
+.install-tabs .seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 13px; padding-left: 4px; padding-right: 4px; }
+.install-tabs .seg-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.install-now { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.install-now svg { width: 18px; height: 18px; }
+.install-or { margin: -4px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+.install-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; position: relative; }
+.install-step { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.install-step + .install-step::before {      /* línea que une los pasos */
+    content: ""; position: absolute; left: 13px; top: -10px; height: 20px; width: 2px; background: rgba(var(--ui-rgb), .45);
+}
+.install-num {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--ui); color: #fff; font-size: 14px; font-weight: bold; box-shadow: 0 0 0 4px rgba(var(--ui-rgb), .18);
+}
+.install-ico {
+    flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+    background: var(--inset); border: 1px solid var(--glass-border); color: var(--text);
+}
+.install-ico svg { width: 22px; height: 22px; }
+.install-ico circle { fill: currentColor; }
+.install-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.install-txt b { font-size: 14px; font-weight: normal; line-height: 1.3; }
+.install-txt b b { font-weight: bold; }
+.install-txt small { font-size: 12px; line-height: 1.35; color: var(--muted); }
+.install-txt small b { font-size: inherit; font-weight: bold; color: var(--text-2); }
+.install-body .dialog-actions { margin-top: 0; }
+
+/* Mudanza (app vieja) y bienvenida (app nueva) */
+.move-hero { background: linear-gradient(135deg, rgba(var(--ui-rgb), .34), rgba(var(--ui-rgb), .08)); }
+.move-link {
+    display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 12px; border-radius: 12px;
+    background: var(--inset); border: 1px dashed rgba(var(--ui-rgb), .7);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 14px; color: var(--text);
+}
+.move-link svg { width: 18px; height: 18px; color: var(--ui); flex-shrink: 0; }
+.move-sheet .install-step { align-items: flex-start; }
+.move-sheet .install-step + .install-step::before { top: -6px; height: 16px; }
+.move-code {
+    align-self: flex-start; margin-top: 6px; padding: 5px 10px; border-radius: 9px; background: var(--inset); border: 1px solid var(--glass-border);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; letter-spacing: .5px; color: var(--text);
+}
+.dialog-btn.move-mini { align-self: flex-start; margin-top: 8px; padding: 8px 14px; min-height: 0; font-size: 13px; width: auto; flex: none; }
+.welcome-h { display: flex; align-items: center; gap: 10px; margin: 4px 0 -2px; font-size: 15px; }
+.welcome-h .install-num { width: 24px; height: 24px; font-size: 13px; box-shadow: none; }
+.welcome-box { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 14px; background: var(--glass-bg); border: 1px solid var(--glass-border); }
+.welcome-label { font-size: 13px; font-weight: bold; line-height: 1.35; }
+.welcome-code { display: flex; gap: 8px; }
+.welcome-code .dialog-input { flex: 1; min-width: 0; padding: 10px 10px; font-size: 13.5px; letter-spacing: 0; text-transform: uppercase; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.welcome-code .dialog-btn { flex: none; width: auto; padding: 0 16px; }
+.welcome-err { margin: 0; font-size: 12px; color: var(--accent-red); }
+.welcome-err:empty { display: none; }
+.welcome-hint { font-size: 12px; line-height: 1.4; color: var(--muted); }
+.welcome-ok { display: flex; align-items: center; gap: 12px; }
+.welcome-ok svg { width: 30px; height: 30px; padding: 5px; border-radius: 50%; background: var(--ui); stroke: #fff; stroke-width: 3; flex-shrink: 0; }
+.welcome-ok b { display: block; font-size: 14px; }
+.welcome-ok small { display: block; font-size: 12px; color: var(--muted); }

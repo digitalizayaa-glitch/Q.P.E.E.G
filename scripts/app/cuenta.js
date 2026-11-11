@@ -142,10 +142,11 @@ async function flushAccount() {
 }
 
 /* Entrar con un código. No se mezcla nada: este teléfono pasa a usar la cuenta del código,
-   con sus datos. Si era la cuenta de otra persona, la tuya queda guardada con tu código. */
-async function enterCode() {
+   con sus datos. Si era la cuenta de otra persona, la tuya queda guardada con tu código.
+   given: código ya escrito (bienvenida de la app nueva); sin él, se pide. Devuelve true si entró. */
+async function enterCode(given) {
     const current = await loadAccount();
-    const text = await askText({
+    const text = given || await askText({
         title: "Entrar con un código",
         label: "Escribe el código de la cuenta (20 caracteres) o el código temporal que te dio el otro teléfono (8).",
         placeholder: "XXXX-XXXX-XXXX-XXXX-XXXX",
@@ -153,8 +154,8 @@ async function enterCode() {
         confirmLabel: "Seguir",
         validate: t => { const p = QSync.parseCode(t); return p.kind ? "" : CODE_ERRORS[p.error]; }
     });
-    if (!text) return;
-    if (!navigator.onLine) { await offlineMsg("entrar en una cuenta"); return; }
+    if (!text) return false;
+    if (!navigator.onLine) { await offlineMsg("entrar en una cuenta"); return false; }
 
     syncStatus = "syncing"; syncListeners.forEach(fn => fn(syncStatus));
     try {
@@ -165,7 +166,7 @@ async function enterCode() {
             if (!code) { await showMessage({ title: "Código temporal no válido", message: "Ese código temporal no existe, ya se usó o caducó (dura 10 minutos). Pide uno nuevo en el otro teléfono." }); return; }
         }
         const acc = await QSync.accountFromCode(code);
-        if (current && !current.gone && current.id === acc.id) { await showMessage({ title: "Ya estás en esa cuenta", message: "Este teléfono ya usa la cuenta de ese código." }); return; }
+        if (current && !current.gone && current.id === acc.id) { await showMessage({ title: "Ya estás en esa cuenta", message: "Este teléfono ya usa la cuenta de ese código." }); return true; }
         const rows = await syncRpc("qpeeg_get", { p_id: acc.id });
         const row = Array.isArray(rows) ? rows[0] : null;
         if (row && row.gone) { await showMessage({ title: "Código antiguo", message: "Ese código ya no funciona: la cuenta se borró o cambió de código. Si cambió, pide el código nuevo." }); return; }
@@ -203,6 +204,7 @@ async function enterCode() {
             await syncNow();
         } finally { syncForce = false; }
         await showMessage({ title: "Listo", message: "Este teléfono ya usa esa cuenta. Los cambios se sincronizan solos con los demás teléfonos que tengan el mismo código." });
+        return true;
     } catch (e) {
         await showMessage({ title: "No se pudo entrar", message: e && e.offline ? "Revisa tu conexión e inténtalo de nuevo." : "El código no corresponde a esa cuenta o los datos están dañados." });
     } finally {

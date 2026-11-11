@@ -29,13 +29,21 @@ function showWhatsNew(entries) {
     });
 }
 
+/* Se resuelve cuando ya se cerraron (o no hacían falta) las novedades: después va la guía para instalar */
+let whatsNewDoneResolve;
+const whatsNewDone = new Promise(r => { whatsNewDoneResolve = r; });
+
+document.addEventListener("DOMContentLoaded", () => showStartupNews().finally(whatsNewDoneResolve));
+
 document.addEventListener("DOMContentLoaded", async () => {
     const btn = document.getElementById("versionBtn");
     if (btn) {
         btn.textContent = `Versión ${APP_VERSION}`;
         btn.onclick = () => showWhatsNew(currentNotes());
     }
+});
 
+async function showStartupNews() {
     await stateReady;
     await consentReady;             /* primero el formulario de acuerdos, si falta */
     let seen = null;
@@ -48,5 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let entries;
     if (seen) entries = CHANGELOG.filter(e => compareVersions(e.v, seen) > 0);
     else entries = (state.meta.savedAt > 0 || hasUserData()) ? currentNotes() : [];
-    if (entries.length) setTimeout(() => showWhatsNew(entries), 700);
-});
+    if (!entries.length) return;
+    await new Promise(r => setTimeout(r, 700));
+    await showWhatsNew(entries);
+}
