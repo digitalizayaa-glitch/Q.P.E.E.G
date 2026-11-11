@@ -1,0 +1,11 @@
+// App en Cloudflare (Workers con archivos estáticos). Se publica sola en cada push a main.
+// html_handling "none": /index.html se sirve tal cual (sin redirigir a /), igual que en GitHub Pages.
+{
+  "name": "qpeeg",
+  "compatibility_date": "2026-11-10",
+  "assets": {
+    "directory": ".",
+    "html_handling": "none",
+    "not_found_handling": "none"
+  }
+}

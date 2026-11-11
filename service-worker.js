@@ -4,7 +4,7 @@
    el nombre lleva un hash del contenido, así cada cambio publica una caché nueva sola. */
 
 /* <generado> */
-const CACHE_NAME = "qpeeg-0964ed9aa2";
+const CACHE_NAME = "qpeeg-92e9fe1c50";
 const CORE_ASSETS = [
     "./",
     "./icons/apple-touch-icon.png",
@@ -66,10 +66,16 @@ self.addEventListener("fetch", (event) => {
     if (event.request.method !== "GET") return;
     if (new URL(event.request.url).origin !== self.location.origin) return;   /* el futuro servidor de sincronización va directo a la red */
 
+    /* Una respuesta que vino de una redirección no se puede dar a una página (Chrome: ERR_FAILED):
+       se copia sin la marca de redirección */
+    const clean = (r) => (r && r.redirected
+        ? r.blob().then((body) => new Response(body, { status: r.status, statusText: r.statusText, headers: r.headers }))
+        : r);
     event.respondWith(
-        caches.match(event.request, { ignoreSearch: true }).then((cached) => {
+        caches.match(event.request, { ignoreSearch: true }).then(clean).then((cached) => {
             if (cached) return cached;
             return fetch(event.request)
+                .then(clean)
                 .then((response) => {
                     if (response.ok) {
                         const copy = response.clone();
@@ -78,7 +84,7 @@ self.addEventListener("fetch", (event) => {
                     return response;
                 })
                 /* sin red: las páginas caen en la app; el resto simplemente falla */
-                .catch(() => (event.request.mode === "navigate" ? caches.match("./index.html") : Response.error()));
+                .catch(() => (event.request.mode === "navigate" ? caches.match("./index.html").then(clean) : Response.error()));
         })
     );
 });
