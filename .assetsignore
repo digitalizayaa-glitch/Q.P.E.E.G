@@ -3,7 +3,6 @@
 .githooks
 tests
 tools
-supabase
 cloudflare
 node_modules
 wrangler.jsonc

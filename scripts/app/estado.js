@@ -32,8 +32,8 @@ const THEME_KEY = "qpeeg_theme";   /* solo el tema, para pintar el fondo correct
 
 const DEFAULT_STATE = {
     photo: null,
-    avatar: null,
-    sports: {},          /* { "2026-11-07": [{ id, k, n, u: "km" | "min", v }] } */        /* avatar elegido en lugar de foto (Ajustes) */
+    avatar: null,        /* avatar elegido en lugar de foto (Ajustes) */
+    sports: {},          /* { "2026-11-07": [{ id, k, n, min?, km?, up? }] } (ver deportes.js) */
     achievements: [],
     routines: [],
     activeRoutineId: null,

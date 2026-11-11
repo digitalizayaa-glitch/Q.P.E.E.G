@@ -161,7 +161,7 @@ const QSync = (() => {
         return theirsWins ? theirs : mine;        /* un mismo valor cambiado en los dos: gana el más reciente */
     }
 
-    /* ---------- Servidor (funciones de Supabase vía su API REST) ---------- */
+    /* ---------- Servidor (funciones /rest/v1/rpc/qpeeg_* del Worker) ---------- */
     function client(config, fetchImpl) {
         const doFetch = fetchImpl || ((...a) => globalThis.fetch(...a));
         return async function rpc(name, args) {

@@ -1,7 +1,10 @@
 {
   "name": "Q.P.E.E.G",
   "short_name": "Q.P.E.E.G",
-  "description": "Rutinas de entrenamiento, series y progreso, 100% local.",
+  "description": "Rutinas de gimnasio, series, progreso, deportes y plan de comida. Funciona sin conexión.",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["health", "fitness", "sports"],
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

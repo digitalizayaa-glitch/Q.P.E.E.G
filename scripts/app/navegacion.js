@@ -85,6 +85,8 @@ function renderDots(container, total, index) {
 
 /* Botón de la casita (siempre visible en el encabezado): vuelve a la pantalla de inicio de toda la app,
    la del perfil. Al volver a entrar, la app empieza en Semana. */
+document.addEventListener("DOMContentLoaded", () => { document.getElementById("homeBtn").addEventListener("click", goHome); });
+
 function goHome() {
     if (SWIPE.busy) return;
 

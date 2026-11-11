@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <title>Q.P.E.E.G</title>
+    <meta name="description" content="Q.P.E.E.G: rutinas de gimnasio, series, progreso, deportes y plan de comida. Funciona sin conexión y se instala en el teléfono.">
+    <!-- Solo se carga código y contenido de la propia app; fuera, solo su servidor de sincronización -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://qpeeg.digitalizayaa.workers.dev https://qpeeg-sync.digitalizayaa.workers.dev; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
@@ -19,10 +22,11 @@
     <link rel="stylesheet" href="styles/stylesheet.css">
 
     <!-- evita el parpadeo del tema claro al abrir -->
-    <script>try{var _t=localStorage.getItem("qpeeg_theme");if(!_t){var _s=JSON.parse(localStorage.getItem("qpeeg_state_v1")||"{}").settings;_t=_s&&_s.theme}if(_t==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
+    <script src="scripts/core/tema.js"></script>
 </head>
 
 <body>
+<noscript><p style="padding:24px;color:#eee;background:#181818;font-family:system-ui,sans-serif">Q.P.E.E.G necesita JavaScript para funcionar. Actívalo en tu navegador y recarga.</p></noscript>
 
 <!-- =========================
     PANTALLA DE INICIO
@@ -87,7 +91,7 @@
         <div class="tab-dots" id="tabDots"></div>
 
         <div class="header-sub">
-            <button class="home-btn" id="homeBtn" onclick="goHome()" aria-label="Ir al inicio">
+            <button class="home-btn" id="homeBtn" aria-label="Ir al inicio">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 11.5 12 4l9 7.5"/>
                     <path d="M5.5 10v9.5h5v-6h3v6h5V10"/>
@@ -170,6 +174,7 @@
 <script src="scripts/app/comida-rapida.js"></script>
 <script src="scripts/app/comida.js"></script>
 <script src="scripts/app/cuenta.js"></script>
+<script src="scripts/app/legal-textos.js"></script>
 <script src="scripts/app/legal.js"></script>
 <script src="scripts/app/novedades.js"></script>
 <script src="scripts/app/instalar.js"></script>

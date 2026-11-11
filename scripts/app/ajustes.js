@@ -196,7 +196,7 @@ function openSettings() {
     const moving = moveMode() === "old";
     if (moving || !isInstalled()) {
         const inst = document.createElement("div");
-        inst.className = "settings-photo settings-account";
+        inst.className = "settings-photo settings-install";
         const b = document.createElement("button");
         b.type = "button";
         b.className = "dialog-btn accept";

@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.16.1";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "2.0.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "2.0.0",
+        items: [
+            "Versión 2.0: Q.P.E.E.G estrena casa propia en qpeeg.digitalizayaa.workers.dev, con la app y la sincronización en el mismo lugar.",
+            "Más segura: la app solo carga su propio código y el servidor tiene protección contra abusos.",
+            "Si vienes de la dirección anterior, la app te guía para pasarte con tu cuenta en un toque."
+        ]
+    },
     {
         v: "1.16.0",
         items: [

@@ -1,5 +1,5 @@
 """Sincronización entre teléfonos, en el navegador real, con un servidor simulado
-que se comporta como supabase/esquema.sql.
+que se comporta como cloudflare/worker.js.
 
 Uso:  python3 tests/e2e/test_sync.py            (desde la raíz del repositorio)
 Variables opcionales: CHROME=/ruta/a/chrome  PORT=8803  SHOTS=carpeta (capturas)
@@ -63,7 +63,7 @@ def rpc(route):
 
 
 def phone(browser, data, errors):
-    ctx = browser.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
+    ctx = browser.new_context(viewport={"width": 390, "height": 844}, service_workers="block", bypass_csp=True)  # el servidor de prueba está en otro puerto
     ctx.add_init_script(SEEN)
     ctx.route("**/scripts/core/config.js", lambda r: r.fulfill(
         content_type="text/javascript", body=f'const QPEEG_SYNC = {{ url: "{SERVER}", key: "clave-publica" }};'))

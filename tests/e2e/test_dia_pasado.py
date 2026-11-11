@@ -37,7 +37,7 @@ def main():
             opts = {"args": ["--no-sandbox", "--no-proxy-server"]} if engine == "chromium" else {}
             if os.environ.get("CHROME") and engine == "chromium": opts["executable_path"] = os.environ["CHROME"]
             b = getattr(p, engine).launch(**opts)
-            ctx = b.new_context(viewport={"width": 360, "height": 780}, service_workers="block")
+            ctx = b.new_context(viewport={"width": 360, "height": 780}, service_workers="block", bypass_csp=True)  # wait_for_function evalúa texto
             ctx.add_init_script("localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false}));localStorage.setItem('qpeeg_install_seen','1');" "localStorage.setItem('qpeeg_seen_version','%s');"
                                 "if(!localStorage.getItem('qpeeg_state_v1'))localStorage.setItem('qpeeg_state_v1',%s)" % (VER, json.dumps(json.dumps(STATE))))
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))

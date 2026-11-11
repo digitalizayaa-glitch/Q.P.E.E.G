@@ -24,7 +24,7 @@ const ID = "a".repeat(64), ID2 = "b".repeat(64);
 const call = (env, name, body, origin = "https://digitalizayaa-glitch.github.io") =>
     worker.fetch(new Request("https://x.workers.dev/rest/v1/rpc/" + name, { method: "POST", headers: { "Content-Type": "application/json", Origin: origin }, body: JSON.stringify(body) }), env);
 
-test("misma lógica que el SQL de Supabase: versiones y conflictos", async () => {
+test("versiones y conflictos", async () => {
     const db = fakeD1();
     assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "x1", p_rev: 0 }), 1);
     assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "x2", p_rev: 0 }), -1, "crear dos veces = conflicto");
@@ -41,7 +41,7 @@ test("código temporal: un solo uso", async () => {
     assert.equal(await handlers.qpeeg_pair_take(db, { p_id: ID }), null);
 });
 
-test("HTTP: respuestas como Supabase, CORS y validación", async () => {
+test("HTTP: respuestas, CORS y validación", async () => {
     const env = { DB: fakeD1() };
     let r = await call(env, "qpeeg_put", { p_id: ID, p_blob: "z", p_rev: 0 });
     assert.equal(r.status, 200); assert.equal(await r.json(), 1);

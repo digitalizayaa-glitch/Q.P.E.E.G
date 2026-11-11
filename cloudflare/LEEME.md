@@ -1,23 +1,35 @@
-# Servidor de sincronización (Cloudflare Worker + D1)
+# Servidor (Cloudflare Worker + D1)
 
-Publicado en **https://qpeeg-sync.digitalizayaa.workers.dev** (cuenta digitalizayaa@gmail.com).
+Desde la 2.0 hay **un solo Worker, `qpeeg`**, en https://qpeeg.digitalizayaa.workers.dev: sirve los archivos de la
+app y la sincronización. Se publica solo en cada push a `main` (Workers Builds ejecuta `npx wrangler deploy` con
+`wrangler.jsonc`). No hay que subir nada a mano.
 
-- `worker.js`: el servidor. Responde en las mismas rutas que Supabase (`/rest/v1/rpc/qpeeg_*`), así la app
-  no depende de qué servidor se use.
-- `esquema.sql`: tablas de la base D1 `qpeeg-sync` (id `825b350c-ea59-4235-ad1e-1b39195c15ee`).
+- `worker.js`: el servidor. Rutas `/rest/v1/rpc/qpeeg_*`; todo lo demás son archivos de la app (`/` = `index.html`).
+- `esquema.sql`: tablas de la base D1 `qpeeg-sync` (id `825b350c-ea59-4235-ad1e-1b39195c15ee`). Usa
+  `CREATE TABLE IF NOT EXISTS`: se puede volver a aplicar. Los cambios de esquema se aplican a mano antes de publicar.
+- El Worker `qpeeg-sync` (https://qpeeg-sync.digitalizayaa.workers.dev) es el servidor anterior, con la misma base.
+  Lo usa la dirección anterior de la app (GitHub Pages) mientras dura la mudanza; después se puede borrar.
 
-El servidor no puede leer los datos: recibe bloques cifrados en el teléfono con una llave que sale del
+El servidor no puede leer las cuentas: recibe bloques cifrados en el teléfono con una llave que sale del
 código de cuenta, identificados por una huella del código (no el código).
 
-| Tabla    | Contenido                                                      |
-|----------|----------------------------------------------------------------|
-| `vaults` | una fila por cuenta: huella, bloque cifrado, versión, fecha     |
-| `pairs`  | códigos temporales de vinculación (10 min, se borran al usarse) |
+| Tabla             | Contenido                                                                  |
+|-------------------|----------------------------------------------------------------------------|
+| `vaults`          | una fila por cuenta: huella, bloque cifrado, versión, fechas               |
+| `vault_history`   | copias anteriores de cada cuenta (una cada 3 h como mucho, las 20 últimas) |
+| `retired`         | cuentas dadas de baja (cambio de código o borrado): no se pueden recrear   |
+| `pairs`           | códigos temporales de vinculación (10 min, un solo uso)                    |
+| `app_errors`      | errores anónimos de la app                                                 |
+| `shared_training` | datos de entrenamiento de quien aceptó compartirlos (sin cifrar, id anónimo) |
 
-Solo se aceptan peticiones del navegador desde la app publicada (GitHub Pages, `*.workers.dev`, `*.pages.dev`);
-para otro dominio, añadirlo en `ALLOWED_ORIGINS` (o como variable de entorno `ALLOWED_ORIGINS`, separada por comas).
-
-Límites: hasta ~1,9 MB por cuenta (D1 admite filas de ~2 MB). En el plan gratuito de Cloudflare no se pausa.
+## Protección
+- **Orígenes:** solo la app (su propio origen, la dirección anterior y `localhost:8080`). Otro dominio: añadirlo en
+  `ALLOWED_ORIGINS` de `worker.js` o como variable de entorno `ALLOWED_ORIGINS` (separada por comas).
+- **Tope de peticiones:** 120 por minuto por IP (binding `RL` en `wrangler.jsonc`); responde 429.
+- **Cabeceras de seguridad** en los archivos (`_headers`) y política de contenido (CSP) en `index.html`.
+- **Registros:** activados (`observability`); los errores 500 quedan con su traza en el panel del Worker.
+- **Copias de la base:** D1 guarda sola el historial (Time Travel) para volver a un punto anterior:
+  `npx wrangler d1 time-travel restore qpeeg-sync --timestamp=<fecha>`.
 
 Pruebas: `node --test tests/unit/worker.test.mjs` (usa una D1 simulada sobre SQLite).
 

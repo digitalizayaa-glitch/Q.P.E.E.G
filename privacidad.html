@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; object-src 'none'; base-uri 'self'">
     <title>Q.P.E.E.G · Privacidad y salud</title>
     <link rel="icon" href="icons/icon-192.png">
     <style>
@@ -21,25 +22,9 @@
     <h1>Q.P.E.E.G</h1>
     <p class="muted" id="updated"></p>
     <div id="docs"></div>
-    <p class="muted"><a href="./">Abrir la app</a></p>
+    <p class="muted"><a href="./index.html">Abrir la app</a></p>
 </main>
-<script src="scripts/app/legal.js"></script>
-<script>
-    document.getElementById("updated").textContent = `Actualizado el ${LEGAL_UPDATED}`;
-    const docs = document.getElementById("docs");
-    for (const key of ["privacy", "health"]) {
-        const h2 = document.createElement("h2");
-        h2.id = key === "privacy" ? "privacidad" : "salud";
-        h2.textContent = LEGAL[key].title;
-        docs.appendChild(h2);
-        for (const [h, p] of LEGAL[key].sections) {
-            const h3 = document.createElement("h3");
-            h3.textContent = h;
-            const para = document.createElement("p");
-            para.textContent = p;
-            docs.append(h3, para);
-        }
-    }
-</script>
+<script src="scripts/app/legal-textos.js"></script>
+<script src="scripts/app/privacidad.js"></script>
 </body>
 </html>
