@@ -1708,3 +1708,21 @@ main { overflow-x: hidden; }
 .ex-gear::after, .food-done::after { content: ""; position: absolute; inset: -8px; }
 .picker-filter::after { content: ""; position: absolute; inset: -7px -3px; }
 .app-version::after { content: ""; position: absolute; inset: -11px -6px; }
+
+/* Añadir deporte: tiempo, distancia y desnivel (cada uno opcional) con la carga en vivo */
+.sport-form { display: flex; flex-direction: column; gap: 10px; padding: 0 16px 16px; }
+.sport-row { display: grid; grid-template-columns: 1fr 46px minmax(96px, auto) 46px; align-items: center; gap: 8px; }
+.sport-row-label { font-size: 15px; font-weight: bold; color: var(--text); line-height: 1.2; }
+.sport-row-label small { display: block; font-size: 12px; font-weight: normal; color: var(--muted); }
+.sport-step { height: 46px; width: 46px; padding: 0; font-size: 16px; }
+.sport-value {
+    height: 46px; padding: 0 8px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold;
+    color: var(--text); background: var(--inset); border: 1px solid var(--glass-border); white-space: nowrap;
+}
+.sport-load {
+    margin-top: 4px; padding: 10px 14px; border-radius: 12px; text-align: center; font-size: 15px; color: var(--text);
+    background: rgba(var(--ui-rgb), .14); border: 1px solid var(--ui);
+}
+.sport-load b { font-size: 22px; }
+.sport-load span { display: block; font-size: 12px; color: var(--muted); }
+.sport-form .dialog-btn:disabled { opacity: .4; }

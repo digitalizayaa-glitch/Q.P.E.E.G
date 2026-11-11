@@ -136,7 +136,7 @@ function weekActions() {
             const chip = document.createElement("span");
             chip.className = "sport-chip";
             const text = document.createElement("span");
-            text.innerHTML = `${esc(sp.n)} <b>${fmtNum(sp.v, 1)} ${sp.u}</b>`;
+            text.innerHTML = `${esc(sp.n)} <b>${esc(sportSummary(sp))}</b>`;
             const x = document.createElement("span");
             x.className = "day-delete-x sport-x";
             x.textContent = "✕";
@@ -150,69 +150,7 @@ function weekActions() {
     return wrap;
 }
 
-/* ---------- Deportes ---------- */
-const SPORTS = [
-    { k: "run",    name: "Correr",     u: "km" },
-    { k: "bike",   name: "Ciclismo",   u: "km" },
-    { k: "swim",   name: "Nadar",      u: "km" },
-    { k: "walk",   name: "Caminar",    u: "km" },
-    { k: "soccer", name: "Fútbol",     u: "min" },
-    { k: "basket", name: "Básquetbol", u: "min" },
-    { k: "volley", name: "Voleibol",   u: "min" },
-    { k: "tennis", name: "Tenis",      u: "min" }
-];
-
-function addSport() {
-    openPicker({
-        title: "Añadir deporte",
-        groups: [
-            { title: "Por distancia", items: SPORTS.filter(x => x.u === "km").map(x => ({ label: x.name, sub: "Kilómetros", value: x })) },
-            { title: "Por tiempo", items: SPORTS.filter(x => x.u === "min").map(x => ({ label: x.name, sub: "Minutos", value: x })) }
-        ],
-        createLabel: "Otro deporte (por tiempo)",
-        onPick: sport => askSportAmount(sport),
-        onCreate: async query => {
-            const name = await askText({ title: "Otro deporte", label: "Nombre del deporte", value: query || "", maxLength: 30 });
-            if (name) askSportAmount({ k: "custom", name, u: "min" });
-        }
-    });
-}
-
-/* Distancia (km) o tiempo (min): se ajusta con ▲▼, deslizando o escribiendo */
-function askSportAmount(sport) {
-    const km = sport.u === "km";
-    let value = km ? 5 : 60;
-    openStepper({
-        title: sport.name,
-        subtitle: km ? "Distancia recorrida" : "Tiempo jugado",
-        unit: km ? "km" : "min",
-        read: () => fmtNum(value, 1),
-        step: dir => { value = Math.max(0, Math.round((value + dir * (km ? 0.5 : 5)) * 10) / 10); },
-        editMode: km ? "decimal" : "numeric",
-        onEdit: text => {
-            const n = parseAmount(text, { max: km ? 500 : 1440 });
-            if (n === null || n <= 0) return "x";
-            value = n;
-            return "";
-        },
-        cancelLabel: "Cancelar",
-        doneLabel: "Añadir",
-        onClose: confirmed => {
-            if (!confirmed || value <= 0) return;
-            const key = getWorkoutDateKey();
-            (state.sports[key] ??= []).push({ id: newId("sp"), k: sport.k, n: sport.name, u: sport.u, v: value });
-            saveState();
-            renderWeekSection();
-        }
-    });
-}
-
-function removeSport(key, id) {
-    state.sports[key] = (state.sports[key] || []).filter(x => x.id !== id);
-    if (!state.sports[key].length) delete state.sports[key];
-    saveState();
-    renderWeekSection();
-}
+/* Deportes: ver deportes.js */
 
 /* Al elegir un día, entra a Entreno y crea/asocia el registro de esa fecha */
 function startWorkoutDay(routineId, dayId) {

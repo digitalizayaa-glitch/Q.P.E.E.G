@@ -185,8 +185,18 @@ function sanitizeState(src) {
     s.sports = {};
     for (const key in sports) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !Array.isArray(sports[key])) continue;
-        const list = sports[key].filter(x => isObj(x) && typeof x.n === "string" && (x.u === "km" || x.u === "min") && num(x.v) > 0)
-            .map(x => ({ id: String(x.id ?? ""), k: str(x.k, 20), n: str(x.n, 40), u: x.u, v: num(x.v) }));
+        /* min, km y up (desnivel en m): cada uno opcional, al menos uno. Los registros viejos { u, v } se convierten,
+           y se guarda también u/v para que un teléfono sin actualizar no los descarte al sincronizar */
+        const list = sports[key].filter(x => isObj(x) && typeof x.n === "string").map(x => {
+            const sp = { id: String(x.id ?? ""), k: str(x.k, 20), n: str(x.n, 40) };
+            const v = num(x.v);
+            const min = num(x.min) || (x.u === "min" ? v : 0), km = num(x.km) || (x.u === "km" ? v : 0), up = num(x.up);
+            if (min > 0) sp.min = Math.min(min, 1440);
+            if (km > 0) sp.km = Math.min(km, 500);
+            if (up > 0) sp.up = Math.min(up, 9000);
+            if (sp.km) { sp.u = "km"; sp.v = sp.km; } else if (sp.min) { sp.u = "min"; sp.v = sp.min; }
+            return sp;
+        }).filter(sp => sp.min || sp.km || sp.up);
         if (list.length) s.sports[key] = list;
     }
 

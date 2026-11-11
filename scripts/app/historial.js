@@ -293,20 +293,22 @@ function renderHistoryChart(box, animate) {
         return;
     }
 
-    /* Deportes: un panel por distancia (km) y otro por tiempo (min); cada deporte con su color y forma */
+    /* Deportes: una sola gráfica con la carga (100 = una salida normal para ti), cada deporte con su color y forma.
+       La carga junta tiempo, distancia y desnivel (ver deportes.js), así que todos los deportes se comparan */
     const groups = [];
-    const byUnit = { km: [], min: [] };
+    const points = [];
     buckets.forEach((b, i) => {
         const sums = new Map();
         b.keys.forEach(k => (state.sports[k] || []).forEach(sp => {
-            const group = `${sp.u}/${normalizeText(sp.n)}`;
-            const g = sums.get(group) || { name: sp.n, u: sp.u, total: 0, n: 0 };
-            g.total += sp.v; g.n += 1;
+            const group = normalizeText(sp.n);
+            const g = sums.get(group) || { name: sp.n, load: 0, n: 0, min: 0, km: 0, up: 0 };
+            g.load += sportLoad(sp); g.n += 1;
+            g.min += sp.min || 0; g.km += sp.km || 0; g.up += sp.up || 0;
             sums.set(group, g);
         }));
         sums.forEach((g, group) => {
             if (!groups.some(x => x.group === group)) groups.push({ group, name: g.name });
-            byUnit[g.u].push({ i, value: g.total, group, name: g.name, n: g.n });
+            points.push({ i, value: Math.round(g.load), group, name: g.name, n: g.n, raw: g });
         });
     });
     if (!groups.length) {
@@ -314,30 +316,21 @@ function renderHistoryChart(box, animate) {
         return;
     }
     const colors = glowVariants(groups.length);
-    const styleOf = group => { const k = Math.max(0, groups.findIndex(g => g.group === group)); return { color: colors[k], shape: k }; };
-    /* primero se crean los paneles (para que cada uno sepa su alto), luego se dibujan */
-    const panels = [["km", "Distancia", "km"], ["min", "Tiempo", "min"]].filter(([u]) => byUnit[u].length).map(spec => {
-        const wrap = document.createElement("div");
-        wrap.className = "chart-panel";
-        box.appendChild(wrap);
-        return [spec, wrap];
-    });
-    panels.forEach(([[u, title, unit], wrap]) => {
-        const points = byUnit[u];
-        const used = groups.filter(g => points.some(p => p.group === g.group));
-        const total = points.reduce((a, p) => a + p.value, 0);
-        dotPanel(wrap, {
-            buckets, points, groups: used, animate, aria: `${title} en deportes`, heading: `${title} (${unit})`,
-            styleOf,
-            summary: () => `Total <b>${fmtNum(total, 1)} ${unit}</b>`,
-            detail: p => `${p.name} · ${buckets[p.i].title} · <b>${fmtNum(p.value, 1)} ${unit}</b>${p.n > 1 ? ` (${p.n} veces)` : ""}`
-        });
+    const total = points.reduce((a, p) => a + p.value, 0);
+    const sessions = points.reduce((a, p) => a + p.n, 0);
+    dotPanel(box, {
+        buckets, points, groups, animate, aria: "Carga de deportes",
+        heading: "Carga (100 = una salida normal para ti)",
+        goal: chartPeriod === "day" ? 100 : null, goalLabel: "Normal",
+        styleOf: group => { const k = Math.max(0, groups.findIndex(g => g.group === group)); return { color: colors[k], shape: k }; },
+        summary: () => `Carga total <b>${fmtNum(total, 0)}</b> · ${sessions} ${sessions === 1 ? "salida" : "salidas"}${chartPeriod === "day" ? "" : " · cada punto suma las salidas"}`,
+        detail: p => `${p.name} · ${buckets[p.i].title} · carga <b>${p.value}</b>${sportSummary(p.raw) ? " · " + sportSummary(p.raw) : ""}${p.n > 1 ? ` (${p.n} veces)` : ""}`
     });
 }
 
 /* Un panel de puntos: resumen arriba, leyenda (si hay grupos), una sola escala, halo del color de cada punto,
    línea fina que une los puntos de un mismo grupo y detalle al tocar un punto */
-function dotPanel(box, { buckets, points, groups = [], H, goal = null, animate, aria = "", heading, styleOf, summary, detail, empty }) {
+function dotPanel(box, { buckets, points, groups = [], H, goal = null, goalLabel = "Meta", animate, aria = "", heading, styleOf, summary, detail, empty }) {
     if (heading) {
         const h = document.createElement("div");
         h.className = "chart-heading";
@@ -403,7 +396,7 @@ function dotPanel(box, { buckets, points, groups = [], H, goal = null, animate, 
         if ((buckets.length - 1 - i) % every === 0) svg += `<text class="chart-label" x="${m.l + slot * i + slot / 2}" y="${H - 6}" text-anchor="middle">${b.label}</text>`;
     });
     svg += `<line class="chart-base" x1="${m.l}" x2="${W - m.r}" y1="${m.t + ph}" y2="${m.t + ph}"/>`;
-    if (goal) svg += `<line class="chart-goal" x1="${m.l}" x2="${W - m.r}" y1="${y(goal)}" y2="${y(goal)}"/><text class="chart-goal-label" x="${W - m.r}" y="${y(goal) - 5}" text-anchor="end">Meta</text>`;
+    if (goal) svg += `<line class="chart-goal" x1="${m.l}" x2="${W - m.r}" y1="${y(goal)}" y2="${y(goal)}"/><text class="chart-goal-label" x="${W - m.r}" y="${y(goal) - 5}" text-anchor="end">${goalLabel}</text>`;
 
     [...new Set(points.map(p => p.group))].forEach(group => {
         const ps = points.filter(p => p.group === group).sort((a, b) => a.i - b.i);

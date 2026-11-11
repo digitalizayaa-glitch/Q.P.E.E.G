@@ -190,6 +190,39 @@ test("ejercicio: la imagen elegida se guarda y se limpia si no es válida", () =
     assert.equal(mk(42), undefined);
 });
 
+test("deportes: una salida normal da 100 con 1, 2 o 3 datos, y escala con el mantenimiento", () => {
+    app("state.nutrition = null");
+    const ref = ev("sportReference('bike')");
+    assert.deepEqual(ref, { min: 90, km: 35, up: 400 }, "sin plan: referencia de 2400 kcal");
+    const load = sp => Math.round(call("sportLoad", sp) * 1000) / 1000;
+    for (const sp of [{ k: "bike", min: 90 }, { k: "bike", km: 35 }, { k: "bike", up: 400 }, { k: "bike", min: 90, km: 35 }, { k: "bike", km: 35, up: 400 }, { k: "bike", min: 90, km: 35, up: 400 }])
+        assert.equal(load(sp), 100, JSON.stringify(sp));
+    assert.equal(load({ k: "bike", min: 135, km: 56, up: 600 }), Math.round((150 + 160 + 150) / 3 * 1000) / 1000, "promedio de los puntajes");
+    assert.equal(load({ k: "volley", min: 60, up: 500 }), 100, "un dato que no aplica al deporte no cuenta");
+    /* más mantenimiento → salida normal más larga */
+    app("state.nutrition = { profile: { sex: 'm', age: 30, height: 180, weight: 80, activity: 1.55, bf: null }, goal: 'bulk', diet: 'high' }");
+    const f = ev("calcTDEE(state.nutrition.profile).tdee") / 2400;
+    const ref2 = ev("sportReference('run')");
+    assert.ok(Math.abs(ref2.min - 45 * f) < 1e-9 && Math.abs(ref2.km - 7 * f) < 1e-9);
+    assert.equal(load({ k: "run", min: 45 * f, km: 7 * f }), 100, "su salida normal sigue dando 100");
+    assert.ok(load({ k: "run", min: 45, km: 7 }) < 100, "lo normal de 2400 kcal es menos para alguien con más mantenimiento");
+    app("state.nutrition = null");
+});
+
+test("deportes: los registros viejos { u, v } se convierten y guardan u/v para teléfonos sin actualizar", () => {
+    const s = call("stateFrom", { sports: { "2026-11-01": [
+        { id: "a", k: "run", n: "Correr", u: "km", v: 5 },
+        { id: "b", k: "bike", n: "Ciclismo", min: 90, km: 40, up: 450 },
+        { id: "c", k: "bike", n: "Ciclismo", up: 300 },
+        { id: "d", n: "Nada" }
+    ] } }).sports["2026-11-01"];
+    assert.deepEqual(s.map(x => x.id), ["a", "b", "c"]);
+    assert.deepEqual([s[0].km, s[0].u, s[0].v], [5, "km", 5]);
+    assert.deepEqual([s[1].min, s[1].km, s[1].up, s[1].u, s[1].v], [90, 40, 450, "km", 40]);
+    assert.equal(s[2].up, 300);
+    assert.equal(call("sportSummary", s[1]), "1 h 30 min · 40 km · +450 m");
+});
+
 test("versión: package.json y la app dicen lo mismo, y hay novedades de la versión actual", () => {
     const pkg = require("../../package.json");
     const { APP_VERSION, CHANGELOG } = require("../../scripts/core/version.js");

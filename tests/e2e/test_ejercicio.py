@@ -62,6 +62,19 @@ def main():
             r["graficas_mismo_alto"] = len(sizes) == 1
             pg.click("#histChartBtn"); pg.wait_for_timeout(300)
 
+            # Deportes: tiempo, distancia y desnivel (cada uno opcional) → carga, en una sola gráfica
+            pg.evaluate("showSection('week')"); pg.wait_for_timeout(300)
+            pg.locator("text=Añadir deporte").click(); pg.wait_for_timeout(400)
+            pg.locator(".picker-item", has_text="Ciclismo").click(); pg.wait_for_timeout(400)
+            r["deporte_tres_datos"] = pg.locator(".sport-row").count() == 3
+            r["deporte_normal_100"] = "Carga 100" in pg.inner_text(".sport-load").replace("\n", " ")
+            pg.locator(".sport-form .dialog-btn.accept").click(); pg.wait_for_timeout(400)
+            sp = pg.evaluate("state.sports[getWorkoutDateKey()].slice(-1)[0]")
+            r["deporte_guardado"] = sp.get("k") == "bike" and sp.get("km") == 35 and "min" not in sp
+            pg.evaluate("showSection('history'); historyMode = 'sport'; historyView = 'chart'; renderHistory()"); pg.wait_for_timeout(600)
+            r["deporte_grafica_carga"] = pg.locator("#historyChart .chart-heading").count() == 1 and pg.inner_text("#historyChart .chart-heading").upper().startswith("CARGA") and pg.locator("#historyChart svg.chart-svg").count() == 1
+            pg.evaluate("historyMode = 'workout'; historyView = 'calendar'; renderHistory()")
+
             # Supermercado: las galletas y snacks aparecen en Agregar comida
             pg.evaluate("showSection('food'); openFoodPicker()"); pg.wait_for_timeout(500)
             titles = pg.evaluate("[...document.querySelectorAll('.picker-overlay:last-child .picker-group')].map(t => t.textContent)")

@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.13.0";
+const APP_VERSION = "1.14.0";
 
 const CHANGELOG = [
+    {
+        v: "1.14.0",
+        items: [
+            "Deportes con tiempo, distancia y desnivel positivo: pon uno, dos o los tres datos.",
+            "Nueva \"carga\": 100 es una salida normal para ti (según las calorías de mantenimiento de tu plan). Más de 100, una salida más dura de lo normal.",
+            "Historial → Deportes: una sola gráfica con la carga de todos tus deportes y la línea de lo normal."
+        ]
+    },
     {
         v: "1.13.0",
         items: [
