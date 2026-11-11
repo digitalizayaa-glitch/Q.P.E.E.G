@@ -16,7 +16,7 @@ Lista de trabajo apuntado para más adelante (actualizada en la versión 1.13.0,
 - Pendiente (opcional): probar a mano en un iPhone real (instalar desde Safari → Compartir → "Añadir a pantalla de inicio").
 
 ## Fase D — Publicación
-- Textos legales: borrador listo en `scripts/app/legal.js` (Ajustes → Privacidad y salud, y página pública `privacidad.html`) y botón "Borrar mi cuenta". Falta: aprobar los textos y poner el correo de contacto.
+- Textos legales: publicados en 1.15.0 (formulario al abrir, Ajustes → Privacidad y salud, privacidad.html, Borrar mi cuenta, compartir datos opcional).
 - Servir la app desde Cloudflare (importar el repositorio desde el panel de Cloudflare; lo hace el dueño de la cuenta).
   Ojo: cambiar de dominio deja los datos del teléfono en el dominio viejo. Antes de mudarse, cada usuario necesita su código de cuenta.
 - Play Store: pospuesto.
