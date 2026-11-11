@@ -209,13 +209,14 @@ test("datos compartidos: solo con id anónimo, se reemplazan, se borran al retir
 
 test("un solo Worker: sirve la app (\"/\" = index.html) con cabeceras de seguridad, CORS exacto y tope de peticiones", async () => {
     const seen = [];
-    const env = { DB: fakeD1(), ASSETS: { fetch: async req => { seen.push(new URL(req.url).pathname); return new Response("<html>", { status: 200, headers: { "Content-Type": "text/html" } }); } } };
+    const env = { DB: fakeD1(), ASSETS: { fetch: async req => { const path = new URL(req.url).pathname; seen.push(path); return path === "/no-existe" ? new Response("", { status: 404 }) : new Response("<html>" + path, { status: 200, headers: { "Content-Type": "text/html" } }); } } };
     let r = await worker.fetch(new Request("https://qpeeg.digitalizayaa.workers.dev/"), env);
     assert.equal(r.status, 200); assert.deepEqual(seen, ["/index.html"]);
     for (const k in SECURITY_HEADERS) assert.equal(r.headers.get(k), SECURITY_HEADERS[k], k);
     assert.equal(r.headers.get("Cache-Control"), "no-cache");
     r = await worker.fetch(new Request("https://qpeeg.digitalizayaa.workers.dev/no-existe"), env);
-    assert.equal(seen[1], "/no-existe");
+    assert.deepEqual(seen.slice(1), ["/no-existe", "/404.html"]);
+    assert.equal(r.status, 404); assert.equal(await r.text(), "<html>/404.html", "página propia de no encontrado");
     /* mismo origen y la app anterior sí; cualquier otro workers.dev ya no */
     const post = (origin, e = env) => worker.fetch(new Request("https://qpeeg.digitalizayaa.workers.dev/rest/v1/rpc/qpeeg_get", { method: "POST", headers: { "Content-Type": "application/json", Origin: origin, "CF-Connecting-IP": "1.2.3.4" }, body: JSON.stringify({ p_id: ID }) }), e);
     assert.equal((await post("https://qpeeg.digitalizayaa.workers.dev")).headers.get("Access-Control-Allow-Origin"), "https://qpeeg.digitalizayaa.workers.dev");

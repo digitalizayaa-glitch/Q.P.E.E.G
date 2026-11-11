@@ -222,7 +222,11 @@ export default {
             if (!env.ASSETS) return json({ app: "qpeeg", ok: true }, 200, corsHeaders);
             /* La app. Aquí solo llega lo que no es un archivo tal cual: "/" (= index.html) y lo que no existe */
             const asset = url.pathname === "/" ? new Request(new URL("/index.html", url), request) : request;
-            const res = await env.ASSETS.fetch(asset);
+            let res = await env.ASSETS.fetch(asset);
+            if (res.status === 404 && request.method === "GET") {           /* página propia de "no encontrado" */
+                const page = await env.ASSETS.fetch(new Request(new URL("/404.html", url)));
+                if (page.ok) res = new Response(page.body, { status: 404, headers: page.headers });
+            }
             const headers = new Headers(res.headers);
             for (const k in SECURITY_HEADERS) headers.set(k, SECURITY_HEADERS[k]);
             if (url.pathname === "/") headers.set("Cache-Control", "no-cache");

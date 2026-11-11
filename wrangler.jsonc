@@ -9,7 +9,8 @@
     "binding": "ASSETS",
     // /index.html se sirve tal cual, sin redirigir a "/" (igual que GitHub Pages); "/" lo resuelve el Worker
     "html_handling": "none",
-    "not_found_handling": "404-page"
+    // "none": lo que no es un archivo llega siempre al Worker (también al navegar); él pone "/" y la página 404
+    "not_found_handling": "none"
   },
   "d1_databases": [
     { "binding": "DB", "database_name": "qpeeg-sync", "database_id": "825b350c-ea59-4235-ad1e-1b39195c15ee" }
