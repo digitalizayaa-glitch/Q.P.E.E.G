@@ -45,7 +45,7 @@ def main():
             ctx, pg = page(b, errors, DATA)
             version = pg.evaluate("APP_VERSION")
             r["muestra_version"] = pg.locator("#versionBtn").inner_text() == f"Versión {version}"
-            r["aviso_al_actualizar"] = dialog(pg) and version in pg.locator(".dialog-title").inner_text()
+            r["aviso_al_actualizar"] = dialog(pg) and pg.evaluate("notesVersion()") in pg.locator(".dialog-title").inner_text()
             if SHOTS: pg.screenshot(path=f"{SHOTS}/novedades_aviso.png")
             pg.locator(".dialog-btn", has_text="Entendido").click(); pg.wait_for_timeout(500)
             if SHOTS: pg.screenshot(path=f"{SHOTS}/novedades_inicio.png")

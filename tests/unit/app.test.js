@@ -192,23 +192,24 @@ test("ejercicio: la imagen elegida se guarda y se limpia si no es válida", () =
 
 test("deportes: la carga es el promedio de cada dato contra la salida normal; normal = 100 con 1, 2 o 3 datos", () => {
     app("state.nutrition = null");
-    assert.deepEqual(call("sportReference", "bike"), { min: 90, km: 35, up: 400 }, "sin plan: salida normal de 2400 kcal");
+    assert.deepEqual(call("sportReference", "bike"), { min: 67.5, km: 26.25, up: 300 }, "sin plan: tabla de 2400 kcal con 25 % menos");
     const load = sp => Math.round(call("sportLoad", sp) * 1000) / 1000;
     /* una salida normal da 100 pongas los datos que pongas */
-    for (const sp of [{ k: "bike", min: 90 }, { k: "bike", km: 35 }, { k: "bike", up: 400 }, { k: "bike", km: 35, up: 400 }, { k: "bike", min: 90, km: 35, up: 400 }])
+    for (const sp of [{ k: "bike", min: 67.5 }, { k: "bike", km: 26.25 }, { k: "bike", up: 300 }, { k: "bike", km: 26.25, up: 300 }, { k: "bike", min: 67.5, km: 26.25, up: 300 }])
         assert.equal(load(sp), 100, JSON.stringify(sp));
+    assert.equal(load({ k: "bike", min: 90, km: 35, up: 400 }), 133.333, "la salida de la tabla ahora pasa de 100");
     /* cada dato cuenta: 3 datos → ÷3, 2 datos → ÷2 */
-    assert.equal(load({ k: "bike", min: 180, km: 35, up: 400 }), 133.333, "el doble de tiempo sube un tercio");
-    assert.equal(load({ k: "bike", km: 70, up: 400 }), 150, "el doble de km con 2 datos sube la mitad");
-    assert.equal(load({ k: "bike", min: 90, km: 35, up: 1200 }), 166.667, "el desnivel cuenta aunque haya tiempo");
-    assert.equal(load({ k: "volley", min: 60, km: 5, up: 500 }), 100, "lo que no aplica al deporte no cuenta");
+    assert.equal(load({ k: "bike", min: 135, km: 26.25, up: 300 }), 133.333, "el doble de tiempo sube un tercio");
+    assert.equal(load({ k: "bike", km: 52.5, up: 300 }), 150, "el doble de km con 2 datos sube la mitad");
+    assert.equal(load({ k: "bike", min: 67.5, km: 26.25, up: 900 }), 166.667, "el desnivel cuenta aunque haya tiempo");
+    assert.equal(load({ k: "volley", min: 45, km: 5, up: 500 }), 100, "lo que no aplica al deporte no cuenta");
     assert.equal(load({ k: "volley", up: 500 }), 0);
     /* más mantenimiento → salida normal más larga */
     app("state.nutrition = { profile: { sex: 'm', age: 30, height: 180, weight: 80, activity: 1.55, bf: null }, goal: 'bulk', diet: 'high' }");
     const f = ev("calcTDEE(state.nutrition.profile).tdee") / 2400;
-    assert.ok(Math.abs(call("sportReference", "run").min - 45 * f) < 1e-9);
-    assert.equal(load({ k: "run", min: 45 * f, km: 7 * f, up: 60 * f }), 100, "su salida normal sigue dando 100");
-    assert.ok(load({ k: "run", min: 45 }) < 100);
+    assert.ok(Math.abs(call("sportReference", "run").min - 45 * 0.75 * f) < 1e-9);
+    assert.equal(load({ k: "run", min: 45 * 0.75 * f, km: 7 * 0.75 * f, up: 60 * 0.75 * f }), 100, "su salida normal sigue dando 100");
+    assert.ok(load({ k: "run", min: 30 }) < 100);
     app("state.nutrition = null");
 });
 
@@ -226,12 +227,14 @@ test("deportes: los registros viejos { u, v } se convierten y guardan u/v para t
     assert.equal(call("sportSummary", s[1]), "1 h 30 min · 40 km · +450 m");
 });
 
-test("versión: package.json y la app dicen lo mismo, y hay novedades de la versión actual", () => {
+test("versión: package.json y la app dicen lo mismo; hay notas de esta versión o, si es hotfix, de la que corrige", () => {
     const pkg = require("../../package.json");
     const { APP_VERSION, CHANGELOG } = require("../../scripts/core/version.js");
     assert.equal(pkg.version, APP_VERSION);
-    const cur = CHANGELOG.find(e => e.v === APP_VERSION);
+    assert.ok(CHANGELOG.every(e => call("compareVersions", e.v, APP_VERSION) <= 0), "no hay notas de una versión futura");
+    const cur = CHANGELOG.find(e => e.v === ev("notesVersion()"));
     assert.ok(cur && cur.items.length > 0);
+    assert.equal(cur.v.split(".").slice(0, 2).join("."), APP_VERSION.split(".").slice(0, 2).join("."), "un hotfix solo cambia el último número");
     assert.equal(call("compareVersions", "1.10.0", "1.9.2"), 1);
     assert.equal(call("compareVersions", "1.3", "1.3.0"), 0);
 });

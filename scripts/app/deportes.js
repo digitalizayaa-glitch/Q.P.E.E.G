@@ -9,6 +9,9 @@
 ========================================================= */
 
 const SPORT_BASE_KCAL = 2400;
+/* La salida normal es una que se hace en un día y aún queda para otra actividad: 25 % menos que la tabla.
+   Cambia la carga de todo lo registrado también (la carga se calcula al mostrarla, no se guarda). */
+const SPORT_REF_FACTOR = 0.75;
 
 /* ref: salida normal para 2400 kcal de mantenimiento. Sin "km" o "up" = ese dato no aplica a ese deporte */
 const SPORTS = [
@@ -48,7 +51,7 @@ function sportScale() {
 /* Salida normal de este usuario en un deporte */
 function sportReference(k) {
     const base = sportDef(k).ref;
-    const f = sportScale();
+    const f = sportScale() * SPORT_REF_FACTOR;
     const out = {};
     for (const key in base) out[key] = base[key] * f;
     return out;

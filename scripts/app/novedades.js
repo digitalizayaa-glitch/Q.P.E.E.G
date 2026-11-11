@@ -15,6 +15,10 @@ function compareVersions(a, b) {
     return 0;
 }
 
+/* Notas de la versión actual. Un hotfix (x.y.Z sin notas propias) muestra las de la versión que corrige */
+const notesVersion = () => (CHANGELOG.find(e => compareVersions(e.v, APP_VERSION) <= 0) || CHANGELOG[0]).v;
+const currentNotes = () => CHANGELOG.filter(e => e.v === notesVersion());
+
 function showWhatsNew(entries) {
     if (!entries.length) return Promise.resolve();
     const text = entries.map(e => (entries.length > 1 ? `Versión ${e.v}\n` : "") + e.items.map(i => "• " + i).join("\n")).join("\n\n");
@@ -29,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btn = document.getElementById("versionBtn");
     if (btn) {
         btn.textContent = `Versión ${APP_VERSION}`;
-        btn.onclick = () => showWhatsNew(CHANGELOG.filter(e => e.v === APP_VERSION));
+        btn.onclick = () => showWhatsNew(currentNotes());
     }
 
     await stateReady;
@@ -42,6 +46,6 @@ document.addEventListener("DOMContentLoaded", async () => {
        Quien ya usaba la app sin este aviso ve solo lo de la versión actual. */
     let entries;
     if (seen) entries = CHANGELOG.filter(e => compareVersions(e.v, seen) > 0);
-    else entries = (state.meta.savedAt > 0 || hasUserData()) ? CHANGELOG.filter(e => e.v === APP_VERSION) : [];
+    else entries = (state.meta.savedAt > 0 || hasUserData()) ? currentNotes() : [];
     if (entries.length) setTimeout(() => showWhatsNew(entries), 700);
 });
