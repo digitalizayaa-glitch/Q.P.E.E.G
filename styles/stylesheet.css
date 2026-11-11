@@ -1518,7 +1518,16 @@ main { overflow-x: hidden; }
 .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order, .food-hist-btn {
     animation: ui-pulse 3.4s ease-in-out infinite;
 }
+/* Pulso mínimo (25 % del de los botones): filas que se pueden tocar para cambiarlas */
+@keyframes ui-pulse-min {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 6px 0 rgba(var(--ui-rgb), .09); }
+}
+.food-row.editable { cursor: pointer; animation: ui-pulse-min 3.4s ease-in-out infinite; }
+.food-row.editable:active { background: rgba(var(--ui-rgb), .12); }
+.add-square.add-wide.fh-add { width: auto; height: auto; min-height: 0; aspect-ratio: auto; margin: 6px 16px 16px; padding: 10px; flex-shrink: 0; box-sizing: border-box; }
 @media (prefers-reduced-motion: reduce) {
+    .food-row.editable { animation: none; }
     .home-btn, .settings-btn, .profile-photo, .backup-btn, .achievements-edit,
     .square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
     .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order, .food-hist-btn { animation: none; }

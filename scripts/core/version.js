@@ -5,7 +5,7 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.14.2";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "1.14.3";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
     {
