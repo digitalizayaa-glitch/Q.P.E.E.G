@@ -11,12 +11,18 @@
       POST /rest/v1/rpc/qpeeg_snapshot   { p_id }                 → (vacío)   guarda ya una copia de la versión actual
       POST /rest/v1/rpc/qpeeg_retire     { p_id }                 → (vacío)   la cuenta cambió de código: se borra y queda dada de baja
     Una cuenta dada de baja responde [{ gone: true }] a qpeeg_get y -2 a qpeeg_put (no se puede volver a crear).
+    Límites: 1 MB por cuenta (413 si se pasa) y no se crean cuentas nuevas si los datos pasan de 400 MB (-3).
+    Una vez al día (cron) se borran las cuentas sin uso en 76 días (2 meses y medio) con sus copias.
+    Si el teléfono vuelve después, sube lo que tiene y la cuenta se crea de nuevo.
     Todo lo demás lo sirven los archivos de la app (si están publicados en este Worker).
     El servidor nunca ve los datos: solo bloques cifrados en el teléfono.
 ========================================================= */
 
 const ID_RE = /^[0-9a-f]{64}$/;
-const MAX_BLOB = 1_900_000;          /* D1 admite filas de hasta ~2 MB */
+const MAX_BLOB = 1_000_000;          /* tope por cuenta: una cuenta de 2 años con foto ronda 160 KB */
+export const LIMITS = { total: 400_000_000 };   /* el plan gratuito de D1 es de 500 MB: margen para copias e índices */
+const UNUSED_MS = 76 * 86400 * 1000; /* 2 meses y medio sin abrir la app */
+const SEEN_EVERY = 86400 * 1000;     /* "última vez usada" se anota como mucho una vez al día */
 const MAX_PAYLOAD = 4000;
 const PAIR_TTL = 10 * 60 * 1000;
 const SNAP_EVERY = 3 * 3600 * 1000;  /* como mucho una copia cada 3 horas… */
@@ -43,6 +49,7 @@ const json = (data, status, headers) => new Response(data === undefined ? "" : J
 });
 
 class BadRequest extends Error {}
+class TooLarge extends Error {}
 const needId = id => { if (typeof id !== "string" || !ID_RE.test(id)) throw new BadRequest("id no válido"); return id; };
 const needText = (t, max, name) => { if (typeof t !== "string" || !t || t.length > max) throw new BadRequest(name + " no válido"); return t; };
 
@@ -53,19 +60,26 @@ export const handlers = {
     async qpeeg_get(db, a) {
         const id = needId(a.p_id);
         const row = await db.prepare("SELECT blob, rev FROM vaults WHERE id = ?").bind(id).first();
-        if (row) return [{ blob: row.blob, rev: row.rev }];
+        if (row) {
+            const now = Date.now();
+            await db.prepare("UPDATE vaults SET seen_at = ? WHERE id = ? AND (seen_at IS NULL OR seen_at < ?)").bind(now, id, now - SEEN_EVERY).run();
+            return [{ blob: row.blob, rev: row.rev }];
+        }
         return (await isRetired(db, id)) ? [{ gone: true }] : [];
     },
 
     async qpeeg_put(db, a) {
         const id = needId(a.p_id);
+        if (typeof a.p_blob === "string" && a.p_blob.length > MAX_BLOB) throw new TooLarge("cuenta demasiado grande");
         const blob = needText(a.p_blob, MAX_BLOB, "blob");
         const rev = Number(a.p_rev);
         if (!Number.isInteger(rev) || rev < 0) throw new BadRequest("rev no válido");
         const now = Date.now();
         if (await isRetired(db, id)) return -2;
         if (rev === 0) {
-            const row = await db.prepare("INSERT INTO vaults (id, blob, rev, updated_at) VALUES (?, ?, 1, ?) ON CONFLICT (id) DO NOTHING RETURNING rev").bind(id, blob, now).first();
+            const used = await db.prepare("SELECT (SELECT COALESCE(SUM(length(blob)), 0) FROM vaults) + (SELECT COALESCE(SUM(length(blob)), 0) FROM vault_history) AS n").first();
+            if (used && used.n + blob.length > LIMITS.total) return -3;     /* servidor lleno: no se crean cuentas nuevas */
+            const row = await db.prepare("INSERT INTO vaults (id, blob, rev, updated_at, seen_at) VALUES (?, ?, 1, ?, ?) ON CONFLICT (id) DO NOTHING RETURNING rev").bind(id, blob, now, now).first();
             return row ? row.rev : -1;
         }
         /* antes de sobrescribir: copia de la versión actual si la última copia tiene más de 3 horas */
@@ -73,7 +87,7 @@ export const handlers = {
             db.prepare("INSERT OR IGNORE INTO vault_history (id, rev, blob, saved_at) SELECT id, rev, blob, updated_at FROM vaults WHERE id = ? AND rev = ? AND NOT EXISTS (SELECT 1 FROM vault_history WHERE id = ? AND saved_at > ?)").bind(id, rev, id, now - SNAP_EVERY),
             pruneHistory(db, id)
         ]);
-        const row = await db.prepare("UPDATE vaults SET blob = ?, rev = rev + 1, updated_at = ? WHERE id = ? AND rev = ? RETURNING rev").bind(blob, now, id, rev).first();
+        const row = await db.prepare("UPDATE vaults SET blob = ?, rev = rev + 1, updated_at = ?, seen_at = ? WHERE id = ? AND rev = ? RETURNING rev").bind(blob, now, now, id, rev).first();
         return row ? row.rev : -1;
     },
 
@@ -128,7 +142,24 @@ export const handlers = {
     }
 };
 
+/* Limpieza diaria: cuentas sin uso en 2 meses y medio (y sus copias), y códigos temporales caducados */
+export async function cleanup(db, now = Date.now()) {
+    const limit = now - UNUSED_MS;
+    const old = "SELECT id FROM vaults WHERE COALESCE(seen_at, updated_at) < ?";
+    const gone = await db.prepare(`SELECT COUNT(*) AS n FROM vaults WHERE COALESCE(seen_at, updated_at) < ?`).bind(limit).first();
+    await db.batch([
+        db.prepare(`DELETE FROM vault_history WHERE id IN (${old})`).bind(limit),
+        db.prepare("DELETE FROM vaults WHERE COALESCE(seen_at, updated_at) < ?").bind(limit),
+        db.prepare("DELETE FROM pairs WHERE expires_at < ?").bind(now)
+    ]);
+    return gone ? gone.n : 0;
+}
+
 export default {
+    async scheduled(event, env, ctx) {
+        ctx.waitUntil(cleanup(env.DB));
+    },
+
     async fetch(request, env) {
         const url = new URL(request.url);
         const origin = request.headers.get("Origin");
@@ -146,12 +177,13 @@ export default {
 
         try {
             const len = Number(request.headers.get("Content-Length") || 0);
-            if (len > MAX_BLOB + 10_000) return json({ error: "demasiado grande" }, 413, corsHeaders);
+            if (len > MAX_BLOB + 10_000) return json({ error: "cuenta demasiado grande" }, 413, corsHeaders);
             const args = await request.json();
             if (!args || typeof args !== "object") throw new BadRequest("cuerpo no válido");
             const out = await fn(env.DB, args);
             return out === undefined ? new Response("", { status: 200, headers: corsHeaders }) : json(out, 200, corsHeaders);
         } catch (e) {
+            if (e instanceof TooLarge) return json({ error: e.message }, 413, corsHeaders);
             if (e instanceof BadRequest || e instanceof SyntaxError) return json({ error: e.message }, 400, corsHeaders);
             return json({ error: "error del servidor" }, 500, corsHeaders);
         }

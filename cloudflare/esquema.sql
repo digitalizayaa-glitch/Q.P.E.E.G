@@ -6,8 +6,10 @@ CREATE TABLE IF NOT EXISTS vaults (
     id          TEXT PRIMARY KEY CHECK (length(id) = 64),
     blob        TEXT NOT NULL,
     rev         INTEGER NOT NULL DEFAULT 1,
-    updated_at  INTEGER NOT NULL
+    updated_at  INTEGER NOT NULL,
+    seen_at     INTEGER              -- última vez que un teléfono la abrió (se anota como mucho una vez al día)
 );
+-- Base creada antes de la 1.12.0:  ALTER TABLE vaults ADD COLUMN seen_at INTEGER;
 
 CREATE TABLE IF NOT EXISTS pairs (
     id          TEXT PRIMARY KEY CHECK (length(id) = 64),

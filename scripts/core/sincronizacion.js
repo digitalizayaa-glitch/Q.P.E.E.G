@@ -190,6 +190,7 @@ const QSync = (() => {
          loadAccount() / saveAccount(acc)   guarda { code, id, keyRaw, rev, base, lastSync }
          onStatus(status)         "idle" | "syncing" | "ok" | "offline" | "error" | "busy"
                                   | "gone" (la cuenta cambió de código en otro teléfono: este ya no sincroniza)
+                                  | "toolarge" (la cuenta pasa de 1 MB) | "full" (el servidor no admite cuentas nuevas)
        } */
     function engine(hooks) {
         let running = null, again = false;
@@ -228,6 +229,7 @@ const QSync = (() => {
                 const blob = await seal({ data: merged, savedAt }, acc.keyRaw, acc.id);
                 const newRev = Number(await hooks.rpc("qpeeg_put", { p_id: acc.id, p_blob: blob, p_rev: row ? remoteRev : 0 }));
                 if (newRev === -2) return "gone";
+                if (newRev === -3) return "full";
                 if (newRev > 0) {
                     Object.assign(acc, { rev: newRev, base: merged, lastSync: Date.now() });
                     await hooks.saveAccount(acc);
@@ -250,7 +252,7 @@ const QSync = (() => {
                     hooks.onStatus && hooks.onStatus("syncing");
                     try { status = await syncOnce(); }
                     catch (e) {
-                        status = e && e.offline ? "offline" : "error";
+                        status = e && e.offline ? "offline" : e && e.status === 413 ? "toolarge" : "error";
                         hooks.onError && hooks.onError(e);
                     }
                 } while (again && status === "ok");

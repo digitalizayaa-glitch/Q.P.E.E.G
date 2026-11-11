@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import worker, { handlers } from "../../cloudflare/worker.js";
+import worker, { handlers, cleanup, LIMITS } from "../../cloudflare/worker.js";
 
 function fakeD1() {
     const db = new DatabaseSync(":memory:");
@@ -134,4 +134,46 @@ test("cambio de código: la cuenta vieja queda dada de baja y no se puede recrea
     assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "otra", p_rev: 1 }), -2);
     assert.deepEqual(await handlers.qpeeg_history(db, { p_id: ID }), [], "el historial del código viejo también se borra");
     assert.deepEqual(await handlers.qpeeg_get(db, { p_id: ID2 }), [], "las demás cuentas no cambian");
+});
+
+test("tamaño: 1 MB por cuenta (413) y no se crean cuentas si el servidor está lleno", async () => {
+    const env = { DB: fakeD1() };
+    const big = "x".repeat(1_000_001);
+    let r = await call(env, "qpeeg_put", { p_id: ID, p_blob: big, p_rev: 0 });
+    assert.equal(r.status, 413);
+    r = await call(env, "qpeeg_put", { p_id: ID, p_blob: "x".repeat(900_000), p_rev: 0 });
+    assert.equal(await r.json(), 1, "menos de 1 MB sí entra");
+    const before = LIMITS.total;
+    LIMITS.total = 1_000_000;
+    try {
+        assert.equal(await handlers.qpeeg_put(env.DB, { p_id: ID2, p_blob: "y".repeat(200_000), p_rev: 0 }), -3, "lleno: cuenta nueva no");
+        assert.equal(await handlers.qpeeg_put(env.DB, { p_id: ID, p_blob: "z", p_rev: 1 }), 2, "lleno: las que existen siguen guardando");
+    } finally { LIMITS.total = before; }
+});
+
+test("limpieza diaria: se borran las cuentas sin uso en 2 meses y medio, con sus copias", async () => {
+    const db = fakeD1();
+    const realNow = Date.now;
+    const DAY = 86400 * 1000;
+    let t = 1_800_000_000_000;
+    Date.now = () => t;
+    try {
+        await handlers.qpeeg_put(db, { p_id: ID, p_blob: "vieja", p_rev: 0 });
+        await handlers.qpeeg_put(db, { p_id: ID, p_blob: "vieja2", p_rev: 1 });     /* deja una copia */
+        await handlers.qpeeg_put(db, { p_id: ID2, p_blob: "usada", p_rev: 0 });
+        t += 70 * DAY;
+        await handlers.qpeeg_get(db, { p_id: ID2 });                                  /* solo abrirla cuenta como uso */
+        t += 10 * DAY;                                                                /* ID: 80 días sin uso; ID2: 10 */
+        assert.equal(await cleanup(db, t), 1);
+        assert.deepEqual(await handlers.qpeeg_get(db, { p_id: ID }), []);
+        assert.deepEqual(await handlers.qpeeg_history(db, { p_id: ID }), [], "sus copias también");
+        assert.equal((await handlers.qpeeg_get(db, { p_id: ID2 }))[0].blob, "usada");
+        /* si el teléfono vuelve, sube lo que tiene y la cuenta se crea de nuevo */
+        assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "desde el teléfono", p_rev: 0 }), 1);
+        /* 75 días después nada se borra (la última apertura fue hace 75 días); a los 77 sí */
+        t += 75 * DAY;
+        assert.equal(await cleanup(db, t), 0);
+        t += 2 * DAY;
+        assert.equal(await cleanup(db, t), 2);
+    } finally { Date.now = realNow; }
 });

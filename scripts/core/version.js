@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.11.0";
+const APP_VERSION = "1.12.0";
 
 const CHANGELOG = [
+    {
+        v: "1.12.0",
+        items: [
+            "Sincronización más ligera: ya no consulta al servidor cada 90 segundos; sincroniza al abrir la app, al volver a ella y después de cada cambio.",
+            "Las cuentas que no se abren en 2 meses y medio se borran del servidor (si el teléfono vuelve después, sube lo que tiene).",
+            "Cada cuenta puede ocupar hasta 1 MB; si se pasa, Ajustes → Cuenta lo avisa."
+        ]
+    },
     {
         v: "1.11.0",
         items: [

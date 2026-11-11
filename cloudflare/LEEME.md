@@ -25,3 +25,9 @@ Pruebas: `node --test tests/unit/worker.test.mjs` (usa una D1 simulada sobre SQL
 - `vault_history`: antes de sobrescribir una cuenta se guarda una copia de la versión anterior, como mucho una cada 3 horas, y se conservan las 20 últimas. La app las lista en Ajustes → Cuenta → Versiones anteriores (`qpeeg_history`, `qpeeg_history_get`) y, antes de volver a una, guarda la actual (`qpeeg_snapshot`).
 - `retired`: al cambiar el código, la cuenta vieja se borra con su historial y queda dada de baja (`qpeeg_retire`). Su código responde `[{ gone: true }]` y no se puede volver a crear.
 - Si la base ya existía, crea las dos tablas nuevas con `esquema.sql` (usa `CREATE TABLE IF NOT EXISTS`).
+
+## Límites y limpieza (desde la 1.12.0)
+- 1 MB por cuenta (responde 413 y la app lo avisa). Si los datos del servidor pasan de 400 MB, no se crean cuentas nuevas (`qpeeg_put` → -3); las existentes siguen funcionando.
+- `seen_at`: última vez que un teléfono abrió la cuenta (se anota como mucho una vez al día). En una base anterior: `ALTER TABLE vaults ADD COLUMN seen_at INTEGER; UPDATE vaults SET seen_at = updated_at;`
+- Cron diario `23 9 * * *` (3:23 a. m. en Costa Rica): borra las cuentas sin uso en 76 días con sus copias, y los códigos temporales caducados. Si el teléfono vuelve después, sube lo que tiene y la cuenta se crea de nuevo.
+- La app ya no consulta cada 90 s: sincroniza al abrir, al volver a la app, al salir, al recuperar la red y unos segundos después de cada cambio.

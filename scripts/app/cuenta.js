@@ -84,8 +84,9 @@ function syncNow() {
 
 if (SYNC_ON) {
     window.addEventListener("online", () => syncNow());
-    document.addEventListener("visibilitychange", () => syncNow());   /* al volver a la app y al salir de ella */
-    setInterval(() => { if (document.visibilityState === "visible") syncNow(); }, 90000);
+    /* Sin consultas periódicas: se sincroniza al abrir la app, al volver a ella, al salir, al recuperar
+       la red y unos segundos después de cada cambio (así el servidor recibe muchas menos peticiones) */
+    document.addEventListener("visibilitychange", () => syncNow());
     document.addEventListener("DOMContentLoaded", () => { stateReady.then(() => setTimeout(syncNow, 400)); });
 }
 
@@ -330,6 +331,8 @@ function syncStatusText(status, acc) {
     if (status === "offline" || !navigator.onLine) return "Sin conexión: se sincroniza al volver.";
     if (status === "error") return "No se pudo sincronizar. Se reintentará solo.";
     if (status === "busy") return "Hay cambios de otro teléfono: se aplican al terminar lo que estás haciendo.";
+    if (status === "toolarge") return "Tu cuenta pasa de 1 MB y no se puede sincronizar. Prueba a quitar la foto de perfil.";
+    if (status === "full") return "El servidor está lleno y no admite cuentas nuevas por ahora. Tus datos siguen en este teléfono.";
     if (acc && acc.lastSync) {
         const min = Math.round((Date.now() - acc.lastSync) / 60000);
         return "Sincronizado " + (min < 1 ? "hace un momento." : min < 60 ? `hace ${min} min.` : `el ${new Date(acc.lastSync).toLocaleString("es-ES", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}.`);

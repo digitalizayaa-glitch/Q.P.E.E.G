@@ -42,7 +42,7 @@ function loadApp({ localStorageData } = {}) {
     const dom = stub();
     const ctx = {
         console, structuredClone, clearTimeout, clearInterval, URL, Blob: stub(),
-        /* Los temporizadores de la app (p. ej. la sincronización cada 90 s) no deben mantener viva la prueba */
+        /* Los temporizadores de la app (p. ej. los reintentos de sincronización) no deben mantener viva la prueba */
         setTimeout: (...a) => { const t = setTimeout(...a); t.unref?.(); return t; },
         setInterval: (...a) => { const t = setInterval(...a); t.unref?.(); return t; },
         localStorage: ls, document: dom, navigator: {}, location: stub(), matchMedia: () => ({ matches: false, addEventListener() {} }),
