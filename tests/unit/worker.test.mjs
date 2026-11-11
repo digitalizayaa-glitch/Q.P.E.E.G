@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import worker, { handlers, cleanup, LIMITS } from "../../cloudflare/worker.js";
+import worker, { handlers, cleanup, LIMITS, SECURITY_HEADERS } from "../../cloudflare/worker.js";
 
 function fakeD1() {
     const db = new DatabaseSync(":memory:");
@@ -205,4 +205,29 @@ test("datos compartidos: solo con id anónimo, se reemplazan, se borran al retir
     await handlers.qpeeg_share(db, { p_id: ID2, p_ver: "1", p_data: data });
     await cleanup(db, Date.now() + 77 * 86400 * 1000);
     assert.equal((await db.prepare("SELECT COUNT(*) AS n FROM shared_training").first()).n, 0, "76 días sin actualizar");
+});
+
+test("un solo Worker: sirve la app (\"/\" = index.html) con cabeceras de seguridad, CORS exacto y tope de peticiones", async () => {
+    const seen = [];
+    const env = { DB: fakeD1(), ASSETS: { fetch: async req => { seen.push(new URL(req.url).pathname); return new Response("<html>", { status: 200, headers: { "Content-Type": "text/html" } }); } } };
+    let r = await worker.fetch(new Request("https://qpeeg.digitalizayaa.workers.dev/"), env);
+    assert.equal(r.status, 200); assert.deepEqual(seen, ["/index.html"]);
+    for (const k in SECURITY_HEADERS) assert.equal(r.headers.get(k), SECURITY_HEADERS[k], k);
+    assert.equal(r.headers.get("Cache-Control"), "no-cache");
+    r = await worker.fetch(new Request("https://qpeeg.digitalizayaa.workers.dev/no-existe"), env);
+    assert.equal(seen[1], "/no-existe");
+    /* mismo origen y la app anterior sí; cualquier otro workers.dev ya no */
+    const post = (origin, e = env) => worker.fetch(new Request("https://qpeeg.digitalizayaa.workers.dev/rest/v1/rpc/qpeeg_get", { method: "POST", headers: { "Content-Type": "application/json", Origin: origin, "CF-Connecting-IP": "1.2.3.4" }, body: JSON.stringify({ p_id: ID }) }), e);
+    assert.equal((await post("https://qpeeg.digitalizayaa.workers.dev")).headers.get("Access-Control-Allow-Origin"), "https://qpeeg.digitalizayaa.workers.dev");
+    assert.equal((await post("https://digitalizayaa-glitch.github.io")).headers.get("Access-Control-Allow-Origin"), "https://digitalizayaa-glitch.github.io");
+    assert.equal((await post("https://otro.workers.dev")).headers.get("Access-Control-Allow-Origin"), null);
+    /* tope por IP */
+    let n = 0;
+    const limited = { ...env, RL: { limit: async ({ key }) => { assert.equal(key, "1.2.3.4"); return { success: ++n <= 2 }; } } };
+    assert.equal((await post("https://qpeeg.digitalizayaa.workers.dev", limited)).status, 200);
+    assert.equal((await post("https://qpeeg.digitalizayaa.workers.dev", limited)).status, 200);
+    r = await post("https://qpeeg.digitalizayaa.workers.dev", limited);
+    assert.equal(r.status, 429); assert.equal(r.headers.get("Retry-After"), "60");
+    const broken = { ...env, RL: { limit: async () => { throw new Error("x"); } } };
+    assert.equal((await post("https://qpeeg.digitalizayaa.workers.dev", broken)).status, 200, "si el contador falla no se bloquea a nadie");
 });

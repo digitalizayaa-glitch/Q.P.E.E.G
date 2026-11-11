@@ -1,11 +1,24 @@
-// App en Cloudflare (Workers con archivos estáticos). Se publica sola en cada push a main.
-// html_handling "none": /index.html se sirve tal cual (sin redirigir a /), igual que en GitHub Pages.
+// Q.P.E.E.G en Cloudflare: un solo Worker con la app (archivos) y la sincronización (cloudflare/worker.js + D1).
+// Se publica solo en cada push a main (Workers Builds: "npx wrangler deploy").
 {
   "name": "qpeeg",
+  "main": "cloudflare/worker.js",
   "compatibility_date": "2026-11-10",
   "assets": {
     "directory": ".",
+    "binding": "ASSETS",
+    // /index.html se sirve tal cual, sin redirigir a "/" (igual que GitHub Pages); "/" lo resuelve el Worker
     "html_handling": "none",
-    "not_found_handling": "none"
-  }
+    "not_found_handling": "404-page"
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "qpeeg-sync", "database_id": "825b350c-ea59-4235-ad1e-1b39195c15ee" }
+  ],
+  // limpieza diaria: cuentas sin uso en 76 días, códigos temporales, errores viejos
+  "triggers": { "crons": ["23 9 * * *"] },
+  // tope de peticiones de sincronización por IP
+  "ratelimits": [
+    { "name": "RL", "namespace_id": "1001", "simple": { "limit": 120, "period": 60 } }
+  ],
+  "observability": { "enabled": true }
 }

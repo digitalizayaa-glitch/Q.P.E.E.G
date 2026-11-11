@@ -1,7 +1,8 @@
 /* =========================================================
-    Q.P.E.E.G · servidor de sincronización (Cloudflare Worker + D1)
+    Q.P.E.E.G · servidor (Cloudflare Worker + D1 + archivos de la app)
 
-    Responde en las mismas rutas que usaba Supabase, así la app no cambia:
+    Un solo Worker ("qpeeg", ver wrangler.jsonc) sirve la app y la sincronización, y se publica
+    solo en cada push a main. Rutas de sincronización:
       POST /rest/v1/rpc/qpeeg_get        { p_id }                 → [{ blob, rev }] o []
       POST /rest/v1/rpc/qpeeg_put        { p_id, p_blob, p_rev }  → nueva versión, o -1 si otro teléfono guardó antes
       POST /rest/v1/rpc/qpeeg_pair_put   { p_id, p_payload }      → (vacío)   código temporal, 10 min
@@ -17,8 +18,9 @@
     Límites: 1 MB por cuenta (413 si se pasa) y no se crean cuentas nuevas si los datos pasan de 400 MB (-3).
     Una vez al día (cron) se borran las cuentas sin uso en 76 días (2 meses y medio) con sus copias.
     Si el teléfono vuelve después, sube lo que tiene y la cuenta se crea de nuevo.
-    Todo lo demás lo sirven los archivos de la app (si están publicados en este Worker).
-    El servidor nunca ve los datos: solo bloques cifrados en el teléfono.
+    Todo lo demás son los archivos de la app ("/" = index.html), con cabeceras de seguridad.
+    Protección: solo los orígenes de la app (CORS) y, si existe el binding RL, tope de peticiones por IP (429).
+    El servidor nunca ve los datos de las cuentas: solo bloques cifrados en el teléfono.
 ========================================================= */
 
 const ID_RE = /^[0-9a-f]{64}$/;
@@ -34,14 +36,23 @@ const ERRORS_KEEP = 300;             /* errores distintos guardados como mucho (
 const ERRORS_DAYS = 60;              /* y se borran a los 60 días sin repetirse */
 const MAX_SHARE = 300_000;           /* datos de entrenamiento compartidos: uno por teléfono, se reemplaza */
 const SHARE_TOTAL = 100_000_000;     /* tope de todo lo compartido */
+/* Orígenes exactos de la app (el propio origen del Worker siempre vale). Otros: variable ALLOWED_ORIGINS, con comas */
 const ALLOWED_ORIGINS = [
-    "https://digitalizayaa-glitch.github.io",
+    "https://qpeeg.digitalizayaa.workers.dev",
+    "https://digitalizayaa-glitch.github.io",       /* app anterior, mientras dure la mudanza */
     "http://localhost:8080"
 ];
+export const SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+    "Strict-Transport-Security": "max-age=31536000"
+};
 
-function cors(origin, env) {
+function cors(origin, env, self) {
     const extra = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
-    const ok = origin && (ALLOWED_ORIGINS.includes(origin) || extra.includes(origin) || /\.workers\.dev$|\.pages\.dev$/.test(new URL(origin).hostname));
+    const ok = origin && (origin === self || ALLOWED_ORIGINS.includes(origin) || extra.includes(origin));
     return ok ? {
         "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -204,17 +215,28 @@ export default {
     async fetch(request, env) {
         const url = new URL(request.url);
         const origin = request.headers.get("Origin");
-        const corsHeaders = cors(origin, env);
+        const corsHeaders = Object.assign(cors(origin, env, url.origin), { "X-Content-Type-Options": "nosniff" });
         const m = url.pathname.match(/^\/rest\/v1\/rpc\/([a-z_]+)$/);
 
         if (!m) {
-            if (env.ASSETS) return env.ASSETS.fetch(request);       /* la app */
-            return json({ app: "qpeeg-sync", ok: true }, 200, corsHeaders);
+            if (!env.ASSETS) return json({ app: "qpeeg", ok: true }, 200, corsHeaders);
+            /* La app. Aquí solo llega lo que no es un archivo tal cual: "/" (= index.html) y lo que no existe */
+            const asset = url.pathname === "/" ? new Request(new URL("/index.html", url), request) : request;
+            const res = await env.ASSETS.fetch(asset);
+            const headers = new Headers(res.headers);
+            for (const k in SECURITY_HEADERS) headers.set(k, SECURITY_HEADERS[k]);
+            if (url.pathname === "/") headers.set("Cache-Control", "no-cache");
+            return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
         }
         if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders });
         if (request.method !== "POST") return json({ error: "método" }, 405, corsHeaders);
         const fn = Object.hasOwn(handlers, m[1]) ? handlers[m[1]] : null;   /* solo las funciones propias */
         if (!fn) return json({ error: "función desconocida" }, 404, corsHeaders);
+        if (env.RL) {                                                       /* tope de peticiones por IP */
+            let ok = true;
+            try { ok = (await env.RL.limit({ key: request.headers.get("CF-Connecting-IP") || "sin-ip" })).success; } catch (e) { /* si el contador falla, se deja pasar */ }
+            if (!ok) return json({ error: "demasiadas peticiones" }, 429, Object.assign({ "Retry-After": "60" }, corsHeaders));
+        }
 
         try {
             const len = Number(request.headers.get("Content-Length") || 0);
@@ -226,6 +248,7 @@ export default {
         } catch (e) {
             if (e instanceof TooLarge) return json({ error: e.message }, 413, corsHeaders);
             if (e instanceof BadRequest || e instanceof SyntaxError) return json({ error: e.message }, 400, corsHeaders);
+            console.error("rpc", m[1], e && e.stack || e);                  /* queda en los registros del Worker */
             return json({ error: "error del servidor" }, 500, corsHeaders);
         }
     }

@@ -2,3 +2,4 @@ node_modules/
 __pycache__/
 *.png.tmp
 .DS_Store
+.wrangler/

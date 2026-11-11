@@ -1,0 +1,15 @@
+# Cabeceras de los archivos de la app en Cloudflare (la política de contenido va en index.html, así vale también sin conexión)
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000
+
+# Siempre se comprueba si hay versión nueva (el resto lo guarda el service worker por versión)
+/index.html
+  Cache-Control: no-cache
+/service-worker.js
+  Cache-Control: no-cache
+/manifest.json
+  Cache-Control: no-cache
