@@ -49,6 +49,7 @@ def main():
             for _ in range(3):
                 kinds.append(pg.inner_text("#historyKind")); pg.click("#histModeBtn"); pg.wait_for_timeout(300)
             r["titulo_calendario"] = kinds == ["ENTRENOS", "CALORÍAS", "DEPORTES"]
+            r["calendario_con_palabras"] = all(c for c in pg.evaluate("[...document.querySelectorAll('.history-cell:not(.blank)')].map(c => c.getAttribute('aria-label'))")) and "hoy" in pg.evaluate("document.querySelector('.history-cell.today').getAttribute('aria-label')")
             r["hoy_con_pulso"] = pg.evaluate("getComputedStyle(document.querySelector('.history-cell.today')).animationName") == "today-pulse"
             pg.click("#histChartBtn"); pg.wait_for_timeout(500)
             for _ in range(3):
@@ -64,6 +65,7 @@ def main():
             # Supermercado: las galletas y snacks aparecen en Agregar comida
             pg.evaluate("showSection('food'); openFoodPicker()"); pg.wait_for_timeout(500)
             titles = pg.evaluate("[...document.querySelectorAll('.picker-overlay:last-child .picker-group')].map(t => t.textContent)")
+            r["buscador_con_nombre"] = pg.locator(".picker-overlay:last-child .picker-search").get_attribute("aria-label") == "Buscar"
             r["supermercado"] = "Supermercado · Galletas" in titles and "Supermercado · Snacks y paquetes" in titles
             pg.locator(".picker-overlay:last-child .picker-search").fill("chiky"); pg.wait_for_timeout(300)
             r["busca_chiky"] = pg.locator(".picker-overlay:last-child .picker-item:visible").count() >= 1

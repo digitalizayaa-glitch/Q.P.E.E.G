@@ -5,9 +5,18 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.12.0";
+const APP_VERSION = "1.13.0";
 
 const CHANGELOG = [
+    {
+        v: "1.13.0",
+        items: [
+            "Si algo falla en tu teléfono, la app envía un aviso anónimo (sin tus datos) para poder arreglarlo.",
+            "Más fácil de leer y de tocar: textos grises con más contraste y botones pequeños con más área de toque.",
+            "Lectores de pantalla: el calendario dice cómo fue cada día (por ejemplo, \"calorías en meta\"), no solo con colores.",
+            "Probada también en Safari (iPhone)."
+        ]
+    },
     {
         v: "1.12.0",
         items: [

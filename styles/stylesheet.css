@@ -15,8 +15,8 @@
     --bg-outer: #111;
     --text: #fff;
     --text-2: #ddd;
-    --muted: #999;
-    --faint: #777;
+    --muted: #a8a8a8;                  /* contraste AA (4,5:1) sobre el fondo oscuro */
+    --faint: #828282;                  /* texto pequeño secundario: contraste AA */
     --inset: rgba(0, 0, 0, 0.3);       /* fondo de campos y cajas hundidas */
     --sheet-bg: rgba(30, 30, 30, 0.9);
     --primary-bg: rgba(255, 255, 255, 0.92);
@@ -43,8 +43,8 @@
     --bg-outer: #e6e6e2;
     --text: #1b1b1b;
     --text-2: #333;
-    --muted: #5f5f5f;
-    --faint: #767676;
+    --muted: #555;                     /* contraste AA sobre el fondo claro */
+    --faint: #696969;                  /* texto pequeño secundario: contraste AA */
     --inset: rgba(0, 0, 0, 0.06);
     --sheet-bg: rgba(250, 250, 247, 0.97);
     --primary-bg: #1f1f1f;
@@ -1181,9 +1181,10 @@ main { overflow-x: hidden; }
 .rx-card .rx-num, .rx-card .rx-kg .kg-value { width: 100%; padding: 10px 4px; font-size: 18px; }
 .rx-unit {
     flex: none; margin: 0; padding: 0 9px; border: none; border-left: 1px solid var(--glass-border);
-    background: rgba(var(--fg), .05); color: var(--faint); font-size: 12px; cursor: pointer;
+    background: rgba(var(--fg), .05); color: var(--muted); font-size: 12px; cursor: pointer;
 }
 .rx-unit span.on { color: var(--ui); font-weight: bold; }
+[data-theme="light"] .rx-unit span.on { color: rgb(var(--ui-rgb)); color: color-mix(in srgb, var(--ui) 55%, #000); }   /* legible en claro */
 .rx-unit:active { background: rgba(var(--fg), .12); }
 
 /* =========================================================
@@ -1663,7 +1664,8 @@ main { overflow-x: hidden; }
 :root { --cal-green: #19d35c; --cal-gold: #ffc81a; --cal-red: #ff3b3b; }
 .history-cell.green, .history-cell.gold, .history-cell.red {
     --cal: var(--cal-green);
-    color: #0b0b0b; border: 1.5px solid color-mix(in srgb, var(--cal) 70%, #000);
+    color: #0b0b0b; border: 1.5px solid rgba(0, 0, 0, .3);   /* iOS < 16.2 */
+    border-color: color-mix(in srgb, var(--cal) 70%, #000);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 48%),
         linear-gradient(135deg, rgba(var(--ui-rgb), .26), rgba(var(--ui-rgb), 0) 75%),
@@ -1697,3 +1699,12 @@ main { overflow-x: hidden; }
 
 /* Versiones anteriores de la cuenta */
 .versions-list .version-btn { width: 100%; text-transform: capitalize; }
+
+/* =========================================================
+    ACCESIBILIDAD
+========================================================= */
+/* Área de toque de al menos ~44 px sin cambiar el tamaño que se ve */
+.ex-gear, .food-done, .picker-filter, .app-version { position: relative; }
+.ex-gear::after, .food-done::after { content: ""; position: absolute; inset: -8px; }
+.picker-filter::after { content: ""; position: absolute; inset: -7px -3px; }
+.app-version::after { content: ""; position: absolute; inset: -11px -6px; }

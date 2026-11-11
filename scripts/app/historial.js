@@ -117,11 +117,25 @@ function renderHistory(animate) {
             cell.onclick = () => navFade(() => { setViewDate(key); showSection("food"); });
         }
         if (key === viewDate()) cell.classList.add("viewing");   /* el día que se está viendo */
+        cell.setAttribute("aria-label", dayAriaLabel(key, d, status));   /* el color también en palabras (lectores de pantalla) */
 
         grid.appendChild(cell);
     }
 
     if (animate) popIn(grid.children);
+}
+
+const DAY_STATUS_WORDS = {
+    workout: { green: "entreno en meta", gold: "entreno superado", red: "faltaron repeticiones", empty: "sin entreno" },
+    food: { green: "calorías en meta", gold: "calorías algo bajas", red: "calorías fuera de meta", empty: "sin comidas" },
+    sport: { sport: "con deporte", empty: "sin deporte" }
+};
+function dayAriaLabel(key, d, status) {
+    const month = parseKey(key).toLocaleDateString("es-ES", { month: "long" });
+    const words = [`${d} de ${month}`, (DAY_STATUS_WORDS[historyMode] || {})[status] || ""];
+    if (historyMode !== "sport" && state.sports[key]) words.push("con deporte");
+    if (key === dateKey(new Date())) words.push("hoy");
+    return words.filter(Boolean).join(", ");
 }
 
 /* Aparición del calendario al cambiar de uno a otro: cada elemento surge un poco más pequeño y transparente */

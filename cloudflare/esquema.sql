@@ -32,3 +32,16 @@ CREATE TABLE IF NOT EXISTS retired (
     id          TEXT PRIMARY KEY CHECK (length(id) = 64),
     retired_at  INTEGER NOT NULL
 );
+
+-- Errores anónimos de la app (mensaje técnico, versión y tipo de navegador; nada de las cuentas).
+-- Los repetidos suman en "count"; se guardan 300 distintos como mucho y se borran a los 60 días.
+CREATE TABLE IF NOT EXISTS app_errors (
+    key         TEXT PRIMARY KEY,
+    msg         TEXT NOT NULL,
+    stack       TEXT NOT NULL,
+    ver         TEXT NOT NULL,
+    ua          TEXT NOT NULL,
+    count       INTEGER NOT NULL DEFAULT 1,
+    first_at    INTEGER NOT NULL,
+    last_at     INTEGER NOT NULL
+);

@@ -31,3 +31,8 @@ Pruebas: `node --test tests/unit/worker.test.mjs` (usa una D1 simulada sobre SQL
 - `seen_at`: última vez que un teléfono abrió la cuenta (se anota como mucho una vez al día). En una base anterior: `ALTER TABLE vaults ADD COLUMN seen_at INTEGER; UPDATE vaults SET seen_at = updated_at;`
 - Cron diario `23 9 * * *` (3:23 a. m. en Costa Rica): borra las cuentas sin uso en 76 días con sus copias, y los códigos temporales caducados. Si el teléfono vuelve después, sube lo que tiene y la cuenta se crea de nuevo.
 - La app ya no consulta cada 90 s: sincroniza al abrir, al volver a la app, al salir, al recuperar la red y unos segundos después de cada cambio.
+
+## Registro de errores (desde la 1.13.0)
+- `qpeeg_error`: la app envía errores anónimos (mensaje técnico sin textos entre comillas ni números largos, versión y "iOS 17 · Safari 17"). Nada de cuentas ni datos.
+- Tabla `app_errors`: los repetidos suman en `count`; 300 distintos como mucho; el cron borra los que llevan 60 días sin repetirse.
+- Para verlos: `SELECT ver, count, msg, ua, datetime(last_at/1000,'unixepoch') FROM app_errors ORDER BY last_at DESC;`
