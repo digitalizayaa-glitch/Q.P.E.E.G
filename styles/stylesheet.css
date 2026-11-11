@@ -1327,7 +1327,7 @@ main { overflow-x: hidden; }
 .history-chart-btn { width: 100%; flex: none; margin-top: 10px; }
 .history-chart { display: flex; flex-direction: column; gap: 8px; min-height: 250px; }
 .history-chart[hidden] { display: none; }
-.chart-caption { min-height: 20px; text-align: center; font-size: 13px; color: var(--muted); }
+.chart-caption { min-height: 20px; text-align: center; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; }
 .chart-caption b { color: var(--text); }
 .chart-svg { display: block; width: 100%; height: auto; overflow: visible; }
 .chart-grid { stroke: rgba(var(--fg), .08); stroke-width: 1; }
@@ -1576,7 +1576,9 @@ main { overflow-x: hidden; }
 .today-btn[hidden] { display: none; }
 .today-btn:active { background: rgba(var(--ui-rgb), .32); }
 @media (prefers-reduced-motion: reduce) { .today-btn { animation: none; } }
-.header-sub .week-date { padding: 0 64px 0 44px; display: block; text-align: center; line-height: 1.25; overflow: hidden; }
+.header-sub .week-date { padding: 0 44px; display: block; text-align: center; line-height: 1.25; overflow: hidden; }
+/* con el botón "Hoy" visible el título deja su espacio a la derecha; sin él queda centrado */
+.header-sub:has(.today-btn:not([hidden])) .week-date { padding-right: 64px; }
 /* Día que se está viendo en el calendario */
 .history-grid .viewing { outline: 2px solid var(--ui); outline-offset: -2px; }
 
@@ -1654,9 +1656,9 @@ main { overflow-x: hidden; }
     CALENDARIO DEL HISTORIAL: título del tipo, colores vivos y día de hoy con pulso
 ========================================================= */
 .history-kind {
-    align-self: center; margin: auto; padding: 4px 14px; border-radius: 999px;   /* centrado en el espacio libre bajo el calendario */
+    align-self: center; margin: auto; padding: 4px 0;   /* centrado en el espacio libre bajo el calendario; texto, no botón */
     font-size: 12px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--text); background: rgba(var(--ui-rgb), .16); border: 1px solid var(--ui);
+    color: var(--text-2);
 }
 .history-kind[hidden] { display: none; }
 
@@ -1709,20 +1711,26 @@ main { overflow-x: hidden; }
 .picker-filter::after { content: ""; position: absolute; inset: -7px -3px; }
 .app-version::after { content: ""; position: absolute; inset: -11px -6px; }
 
-/* Añadir deporte: tiempo, distancia y desnivel (cada uno opcional) con la carga en vivo */
-.sport-form { display: flex; flex-direction: column; gap: 10px; padding: 0 16px 16px; }
-.sport-row { display: grid; grid-template-columns: 1fr 46px minmax(96px, auto) 46px; align-items: center; gap: 8px; }
-.sport-row-label { font-size: 15px; font-weight: bold; color: var(--text); line-height: 1.2; }
-.sport-row-label small { display: block; font-size: 12px; font-weight: normal; color: var(--muted); }
-.sport-step { height: 46px; width: 46px; padding: 0; font-size: 16px; }
+/* Añadir / cambiar deporte: tiempo, distancia y desnivel en columnas; ▲ arriba y ▼ abajo de cada campo,
+   del mismo ancho; el campo se desliza o se toca para escribir. Carga en vivo debajo */
+.sport-form { display: flex; flex-direction: column; gap: 12px; padding: 0 16px 16px; overflow-y: auto; min-height: 0; }
+.sport-fields { display: grid; gap: 10px; }
+.sport-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sport-col-label { text-align: center; font-size: 15px; font-weight: bold; color: var(--text); }
+.sport-col-hint { text-align: center; font-size: 12px; color: var(--muted); min-height: 15px; white-space: nowrap; overflow: hidden; }
+.sport-step { width: 100%; height: 46px; padding: 0; font-size: 16px; }
 .sport-value {
-    height: 46px; padding: 0 8px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: bold;
-    color: var(--text); background: var(--inset); border: 1px solid var(--glass-border); white-space: nowrap;
+    height: 86px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+    padding: 0 4px; border-radius: 14px; cursor: ns-resize; touch-action: none; user-select: none;
+    font-size: 19px; font-weight: bold; color: var(--text); text-align: center; line-height: 1.15; white-space: nowrap;
+    background: var(--inset); border: 1px solid var(--glass-border);
 }
+.sport-value .stepper-input { width: 100%; font-size: 20px; text-align: center; }
 .sport-load {
-    margin-top: 4px; padding: 10px 14px; border-radius: 12px; text-align: center; font-size: 15px; color: var(--text);
+    padding: 10px 14px; border-radius: 12px; text-align: center; font-size: 15px; color: var(--text);
     background: rgba(var(--ui-rgb), .14); border: 1px solid var(--ui);
 }
-.sport-load b { font-size: 22px; }
+.sport-load b { font-size: 24px; margin-left: 4px; }
 .sport-load span { display: block; font-size: 12px; color: var(--muted); }
 .sport-form .dialog-btn:disabled { opacity: .4; }
+.sport-chip-text { cursor: pointer; }

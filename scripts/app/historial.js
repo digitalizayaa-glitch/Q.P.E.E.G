@@ -169,7 +169,7 @@ function chartBuckets(period) {
     for (let i = CHART_PERIODS[period].count - 1; i >= 0; i--) {
         if (period === "day") {
             const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
-            out.push({ label: String(d.getDate()), title: d.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" }), keys: [dateKey(d)] });
+            out.push({ label: String(d.getDate()), title: d.toLocaleDateString("es-ES", { day: "numeric", month: "long" }), keys: [dateKey(d)] });
         } else if (period === "week") {
             const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - ((today.getDay() + 6) % 7) - i * 7);
             out.push({ label: short(monday), title: `Semana del ${short(monday)}`, keys: daysFrom(monday, 7) });
@@ -320,13 +320,22 @@ function renderHistoryChart(box, animate) {
     const sessions = points.reduce((a, p) => a + p.n, 0);
     dotPanel(box, {
         buckets, points, groups, animate, aria: "Carga de deportes",
-        heading: "Carga (100 = una salida normal para ti)",
+        heading: "Carga 100 = normal",
         goal: chartPeriod === "day" ? 100 : null, goalLabel: "Normal",
         styleOf: group => { const k = Math.max(0, groups.findIndex(g => g.group === group)); return { color: colors[k], shape: k }; },
         summary: () => `Carga total <b>${fmtNum(total, 0)}</b> · ${sessions} ${sessions === 1 ? "salida" : "salidas"}${chartPeriod === "day" ? "" : " · cada punto suma las salidas"}`,
         detail: p => `${p.name} · ${buckets[p.i].title} · carga <b>${p.value}</b>${sportSummary(p.raw) ? " · " + sportSummary(p.raw) : ""}${p.n > 1 ? ` (${p.n} veces)` : ""}`
     });
 }
+
+/* Texto en un solo renglón con la letra más grande que quepa (por defecto 16 → 11 px) */
+function fitText(el, max = 16, min = 11) {
+    for (let size = max; size >= min; size -= 0.5) {
+        el.style.fontSize = size + "px";
+        if (el.scrollWidth <= el.clientWidth + 1) return;
+    }
+}
+const fitCaption = el => fitText(el);
 
 /* Un panel de puntos: resumen arriba, leyenda (si hay grupos), una sola escala, halo del color de cada punto,
    línea fina que une los puntos de un mismo grupo y detalle al tocar un punto */
@@ -349,6 +358,7 @@ function dotPanel(box, { buckets, points, groups = [], H, goal = null, goalLabel
         return;
     }
     caption.innerHTML = summary();
+    fitCaption(caption);
 
     if (groups.length) {
         const legend = document.createElement("div");
@@ -396,7 +406,7 @@ function dotPanel(box, { buckets, points, groups = [], H, goal = null, goalLabel
         if ((buckets.length - 1 - i) % every === 0) svg += `<text class="chart-label" x="${m.l + slot * i + slot / 2}" y="${H - 6}" text-anchor="middle">${b.label}</text>`;
     });
     svg += `<line class="chart-base" x1="${m.l}" x2="${W - m.r}" y1="${m.t + ph}" y2="${m.t + ph}"/>`;
-    if (goal) svg += `<line class="chart-goal" x1="${m.l}" x2="${W - m.r}" y1="${y(goal)}" y2="${y(goal)}"/><text class="chart-goal-label" x="${W - m.r}" y="${y(goal) - 5}" text-anchor="end">${goalLabel}</text>`;
+    if (goal) svg += `<line class="chart-goal" x1="${m.l}" x2="${W - m.r}" y1="${y(goal)}" y2="${y(goal)}"/><text class="chart-goal-label" x="${goalLabel === "Meta" ? W - m.r : m.l + 2}" y="${y(goal) - 5}" text-anchor="${goalLabel === "Meta" ? "end" : "start"}">${goalLabel}</text>`;
 
     [...new Set(points.map(p => p.group))].forEach(group => {
         const ps = points.filter(p => p.group === group).sort((a, b) => a.i - b.i);
@@ -424,6 +434,7 @@ function dotPanel(box, { buckets, points, groups = [], H, goal = null, goalLabel
         svgEl.classList.toggle("has-selection", selected >= 0);
         svgEl.querySelectorAll(".chart-pt").forEach(g => g.classList.toggle("selected", Number(g.dataset.n) === selected));
         caption.innerHTML = selected < 0 ? summary() : detail(points[selected]);
+        fitCaption(caption);
     });
 
     if (animate) svgEl.querySelectorAll(".chart-pt").forEach((g, k) =>

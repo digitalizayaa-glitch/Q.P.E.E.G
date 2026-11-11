@@ -190,22 +190,25 @@ test("ejercicio: la imagen elegida se guarda y se limpia si no es válida", () =
     assert.equal(mk(42), undefined);
 });
 
-test("deportes: una salida normal da 100 con 1, 2 o 3 datos, y escala con el mantenimiento", () => {
+test("deportes: la carga es el promedio de cada dato contra la salida normal; normal = 100 con 1, 2 o 3 datos", () => {
     app("state.nutrition = null");
-    const ref = ev("sportReference('bike')");
-    assert.deepEqual(ref, { min: 90, km: 35, up: 400 }, "sin plan: referencia de 2400 kcal");
+    assert.deepEqual(call("sportReference", "bike"), { min: 90, km: 35, up: 400 }, "sin plan: salida normal de 2400 kcal");
     const load = sp => Math.round(call("sportLoad", sp) * 1000) / 1000;
-    for (const sp of [{ k: "bike", min: 90 }, { k: "bike", km: 35 }, { k: "bike", up: 400 }, { k: "bike", min: 90, km: 35 }, { k: "bike", km: 35, up: 400 }, { k: "bike", min: 90, km: 35, up: 400 }])
+    /* una salida normal da 100 pongas los datos que pongas */
+    for (const sp of [{ k: "bike", min: 90 }, { k: "bike", km: 35 }, { k: "bike", up: 400 }, { k: "bike", km: 35, up: 400 }, { k: "bike", min: 90, km: 35, up: 400 }])
         assert.equal(load(sp), 100, JSON.stringify(sp));
-    assert.equal(load({ k: "bike", min: 135, km: 56, up: 600 }), Math.round((150 + 160 + 150) / 3 * 1000) / 1000, "promedio de los puntajes");
-    assert.equal(load({ k: "volley", min: 60, up: 500 }), 100, "un dato que no aplica al deporte no cuenta");
+    /* cada dato cuenta: 3 datos → ÷3, 2 datos → ÷2 */
+    assert.equal(load({ k: "bike", min: 180, km: 35, up: 400 }), 133.333, "el doble de tiempo sube un tercio");
+    assert.equal(load({ k: "bike", km: 70, up: 400 }), 150, "el doble de km con 2 datos sube la mitad");
+    assert.equal(load({ k: "bike", min: 90, km: 35, up: 1200 }), 166.667, "el desnivel cuenta aunque haya tiempo");
+    assert.equal(load({ k: "volley", min: 60, km: 5, up: 500 }), 100, "lo que no aplica al deporte no cuenta");
+    assert.equal(load({ k: "volley", up: 500 }), 0);
     /* más mantenimiento → salida normal más larga */
     app("state.nutrition = { profile: { sex: 'm', age: 30, height: 180, weight: 80, activity: 1.55, bf: null }, goal: 'bulk', diet: 'high' }");
     const f = ev("calcTDEE(state.nutrition.profile).tdee") / 2400;
-    const ref2 = ev("sportReference('run')");
-    assert.ok(Math.abs(ref2.min - 45 * f) < 1e-9 && Math.abs(ref2.km - 7 * f) < 1e-9);
-    assert.equal(load({ k: "run", min: 45 * f, km: 7 * f }), 100, "su salida normal sigue dando 100");
-    assert.ok(load({ k: "run", min: 45, km: 7 }) < 100, "lo normal de 2400 kcal es menos para alguien con más mantenimiento");
+    assert.ok(Math.abs(call("sportReference", "run").min - 45 * f) < 1e-9);
+    assert.equal(load({ k: "run", min: 45 * f, km: 7 * f, up: 60 * f }), 100, "su salida normal sigue dando 100");
+    assert.ok(load({ k: "run", min: 45 }) < 100);
     app("state.nutrition = null");
 });
 

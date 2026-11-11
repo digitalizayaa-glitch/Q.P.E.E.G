@@ -5,9 +5,19 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.14.0";
+const APP_VERSION = "1.14.1";
 
 const CHANGELOG = [
+    {
+        v: "1.14.1",
+        items: [
+            "Carga de deportes: cada dato (tiempo, km, desnivel) se compara con tu salida normal y se promedia. Con 3 datos cuenta cada uno un tercio, con 2 la mitad; una salida normal da 100 pongas los datos que pongas.",
+            "Añadir deporte: ▲ arriba y ▼ abajo de cada campo, campos más altos que se deslizan, y desnivel de 5 en 5.",
+            "Toca un deporte de la semana para cambiarlo.",
+            "Gráfica de deportes más clara (\"Carga 100 = normal\", detalle en un renglón) y el título del día siempre centrado.",
+            "El nombre de cada calendario (Rutinas, Calorías, Deportes) ahora es texto normal, no parece botón."
+        ]
+    },
     {
         v: "1.14.0",
         items: [

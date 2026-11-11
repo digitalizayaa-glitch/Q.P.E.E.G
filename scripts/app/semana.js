@@ -137,6 +137,9 @@ function weekActions() {
             chip.className = "sport-chip";
             const text = document.createElement("span");
             text.innerHTML = `${esc(sp.n)} <b>${esc(sportSummary(sp))}</b>`;
+            text.className = "sport-chip-text";
+            keyButton(text, `Cambiar ${sp.n}`);
+            text.onclick = () => editSport(key, sp.id);
             const x = document.createElement("span");
             x.className = "day-delete-x sport-x";
             x.textContent = "✕";

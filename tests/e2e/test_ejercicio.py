@@ -66,11 +66,16 @@ def main():
             pg.evaluate("showSection('week')"); pg.wait_for_timeout(300)
             pg.locator("text=Añadir deporte").click(); pg.wait_for_timeout(400)
             pg.locator(".picker-item", has_text="Ciclismo").click(); pg.wait_for_timeout(400)
-            r["deporte_tres_datos"] = pg.locator(".sport-row").count() == 3
-            r["deporte_normal_100"] = "Carga 100" in pg.inner_text(".sport-load").replace("\n", " ")
+            r["deporte_tres_datos"] = pg.locator(".sport-col").count() == 3 and pg.locator(".sport-col").first.locator(".sport-step").count() == 2
+            pg.locator(".sport-value").nth(1).click(); pg.wait_for_timeout(200); pg.keyboard.press("Control+A"); pg.keyboard.type("33"); pg.keyboard.press("Enter"); pg.wait_for_timeout(300)
+            want = pg.evaluate("Math.round(sportLoad({ k: 'bike', km: 33 }))")
+            r["deporte_carga"] = f"Carga {want}" in pg.inner_text(".sport-load").replace("\n", " ")
             pg.locator(".sport-form .dialog-btn.accept").click(); pg.wait_for_timeout(400)
             sp = pg.evaluate("state.sports[getWorkoutDateKey()].slice(-1)[0]")
-            r["deporte_guardado"] = sp.get("k") == "bike" and sp.get("km") == 35 and "min" not in sp
+            r["deporte_guardado"] = sp.get("k") == "bike" and sp.get("km") == 33 and "min" not in sp
+            pg.locator(".sport-chip-text").last.click(); pg.wait_for_timeout(400)
+            r["deporte_se_edita"] = pg.locator(".sport-form .dialog-btn.accept").inner_text() == "Guardar" and pg.locator(".sport-value").nth(1).inner_text() == "33 km"
+            pg.locator(".sport-form .dialog-btn.ghost").click(); pg.wait_for_timeout(300)
             pg.evaluate("showSection('history'); historyMode = 'sport'; historyView = 'chart'; renderHistory()"); pg.wait_for_timeout(600)
             r["deporte_grafica_carga"] = pg.locator("#historyChart .chart-heading").count() == 1 and pg.inner_text("#historyChart .chart-heading").upper().startswith("CARGA") and pg.locator("#historyChart svg.chart-svg").count() == 1
             pg.evaluate("historyMode = 'workout'; historyView = 'calendar'; renderHistory()")
