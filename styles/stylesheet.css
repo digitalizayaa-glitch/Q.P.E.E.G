@@ -1680,3 +1680,17 @@ main { overflow-x: hidden; }
 }
 .history-cell.today { outline: none; position: relative; z-index: 1; animation: today-pulse 3.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .history-cell.today { animation: none; box-shadow: 0 0 0 2px var(--ui); } }
+
+/* Título del día con tuerca y ventana para ordenar ejercicios */
+.day-title-row { justify-content: flex-start; }
+.day-title-row .picker-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 16px; overflow-y: auto; min-height: 0; }
+.order-row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border-radius: 14px;
+    background: var(--glass-bg); border: 1px solid var(--glass-border); transition: background .25s, border-color .25s;
+}
+.order-row.moved { background: rgba(var(--ui-rgb), .16); border-color: var(--ui); }
+.order-num { width: 22px; text-align: center; font-weight: bold; color: var(--muted); }
+.order-name { flex: 1; min-width: 0; font-size: 16px; font-weight: bold; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-btn { width: 46px; height: 42px; font-size: 16px; padding: 0; }
+.order-btn:disabled { opacity: .3; }

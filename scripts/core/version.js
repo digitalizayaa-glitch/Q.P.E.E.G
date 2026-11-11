@@ -5,9 +5,13 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.10.2";
+const APP_VERSION = "1.10.3";
 
 const CHANGELOG = [
+    {
+        v: "1.10.3",
+        items: ["Editor de rutinas: la tuerca ⚙ junto al nombre del día permite cambiar el orden de los ejercicios."]
+    },
     {
         v: "1.10.2",
         items: [

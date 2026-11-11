@@ -93,10 +93,21 @@ def main():
             pg.locator(".rx-head .ex-gear").nth(1).click(); pg.wait_for_timeout(400)
             pg.locator(".ex-tile[aria-label='Mancuerna']").click(); pg.wait_for_timeout(300)
             r["editor_guarda"] = pg.evaluate("state.routines[0].days[0].exercises[1].fig") == "eq-mancuerna"
+            pg.evaluate("document.querySelectorAll('.ex-settings-sheet').forEach(s => s.closest('.picker-overlay').remove())"); pg.wait_for_timeout(300)
+
+            # Tuerca del título del día: ordenar ejercicios
+            pg.locator(".day-sheet .day-title-row .ex-gear").click(); pg.wait_for_timeout(400)
+            r["orden_abre"] = pg.locator(".order-row").count() == 2
+            pg.locator(".order-row").nth(1).locator(".order-btn").first.click(); pg.wait_for_timeout(300)
+            if SHOTS: pg.screenshot(path=f"{SHOTS}/ejercicio_orden.png")
+            r["orden_guarda"] = pg.evaluate("state.routines[0].days[0].exercises.map(e => e.id)") == ["e1", "e0"]
+            r["orden_primero_sin_subir"] = pg.locator(".order-row").nth(0).locator(".order-btn").first.is_disabled()
+            pg.locator(".order-sheet").locator("xpath=..").locator(".picker-close").click(); pg.wait_for_timeout(400)
+            r["orden_en_editor"] = pg.locator(".day-sheet .rx-head .exercise-name").nth(0).inner_text() == "Aperturas"
 
             # Persiste al recargar
             pg.wait_for_timeout(500); pg.reload(); pg.wait_for_timeout(900)
-            r["persiste"] = pg.evaluate("state.routines[0].days[0].exercises[1].fig") == "eq-mancuerna"
+            r["persiste"] = pg.evaluate("state.routines[0].days[0].exercises[0].fig") == "eq-mancuerna"
             ctx.close(); b.close()
     finally:
         srv.terminate()

@@ -317,6 +317,20 @@ function openDaySheet(routineId, dayId) {
     if (!day) return;
 
     const { sheet } = openSheet("day-sheet", day.name, () => { daySheet = null; });
+
+    /* Tuerca junto al título: cambiar el orden de los ejercicios del día */
+    const title = sheet.querySelector(".picker-title");
+    const titleRow = document.createElement("div");
+    titleRow.className = "ex-name-row day-title-row";
+    title.replaceWith(titleRow);
+    const gear = document.createElement("button");
+    gear.type = "button";
+    gear.className = "ex-gear";
+    gear.setAttribute("aria-label", "Ordenar ejercicios");
+    gear.innerHTML = GEAR_SVG;
+    gear.onclick = () => openExerciseOrder(routineId, dayId);
+    titleRow.append(title, gear);
+
     const list = document.createElement("div");
     list.className = "day-sheet-list";
     sheet.appendChild(list);
@@ -838,4 +852,53 @@ function openExerciseSettings(routineId, dayId, exerciseId, onChange) {
     paintGallery();
 
     body.append(label("Nombre"), nameBtn, label("Imagen"), note, gallery);
+}
+
+/* ---------- Orden de los ejercicios de un día (tuerca del título del día) ----------
+   Cada fila sube o baja con ▲ ▼; se guarda al momento. Los registros van por id, así que no se pierden. */
+function openExerciseOrder(routineId, dayId) {
+    const day = findDay(findRoutine(routineId), dayId);
+    if (!day || !day.exercises.length) return;
+    const { sheet } = openSheet("order-sheet", "Ordenar ejercicios", () => {
+        renderDaySheet();
+        if (typeof refreshWorkout === "function") refreshWorkout();
+    });
+    const body = document.createElement("div");
+    body.className = "order-list";
+    sheet.appendChild(body);
+
+    const move = (i, dir) => {
+        const j = i + dir;
+        if (j < 0 || j >= day.exercises.length) return;
+        [day.exercises[i], day.exercises[j]] = [day.exercises[j], day.exercises[i]];
+        saveState();
+        paint(day.exercises[j].id);
+    };
+    const paint = movedId => {
+        body.innerHTML = "";
+        day.exercises.forEach((ex, i) => {
+            const row = document.createElement("div");
+            row.className = "order-row" + (ex.id === movedId ? " moved" : "");
+            row.dataset.id = ex.id;
+            const n = document.createElement("span");
+            n.className = "order-num";
+            n.textContent = i + 1;
+            const name = document.createElement("span");
+            name.className = "order-name";
+            name.textContent = ex.name;
+            const btn = (label, dir, aria) => {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.className = "stepper-btn order-btn";
+                b.textContent = label;
+                b.setAttribute("aria-label", `${aria} ${ex.name}`);
+                b.disabled = (dir < 0 && i === 0) || (dir > 0 && i === day.exercises.length - 1);
+                b.onclick = () => move(i, dir);
+                return b;
+            };
+            row.append(n, name, btn("▲", -1, "Subir"), btn("▼", 1, "Bajar"));
+            body.appendChild(row);
+        });
+    };
+    paint();
 }
