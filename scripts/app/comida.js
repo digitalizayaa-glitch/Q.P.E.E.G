@@ -64,7 +64,7 @@ const FOOD_CATALOG = {
         ["Cereal Allinklusive ZERO", "1/4 taza (26 g)"],
         ["Cereal (Cheerios, Zucaritas…)", "1/4 taza (20 g)"],
         ["Cereal Trijuelas", "1/4 taza (17,5 g)"],
-        ["Pan cuadrado blanco Bimbo", "2 rebanadas (62 g)"],
+        ["Pan cuadrado blanco Bimbo", "1 rebanada (31 g)", "rebanadas", 1],
         ["Pan / Bollitos Ruiseñor", "1 unidad"],
         ["Pan Thins Bimbo", "1 pieza"],
         ["Pan baguette", "4 dedos"],
@@ -201,8 +201,10 @@ const FOOD_CATALOG = {
     ]
 };
 
-/* Alimentos de la tabla INISA/UCR 1984 (valores por 100 g de porción comestible). */
-const FOOD_INISA = {"h":[["Arracache (INISA)","72 g"],["Camote (INISA)","52 g (≈1/3 unidad)"],["Ñame (INISA)","62 g"],["Ñampí (INISA)","67 g (≈1 unidad)"],["Papa (INISA)","84 g (≈1,5 unidades)"],["Raíz de chayote (INISA)","76 g"],["Yuca (INISA)","40 g"],["Arepa (INISA)","41 g (≈1/3 unidad)"],["Arroz crudo (INISA)","19 g (≈1,5 cdas)"],["Arroz frito (INISA)","56 g (≈2 cdas)"],["Avena (cruda) (INISA)","22,5 g (≈2 cdas)"],["Cebada (INISA)","20 g (≈1,5 cdas)"],["Corn flakes (INISA)","17,5 g"],["Galleta dulce (INISA)","20 g (≈3 unidades)"],["Galleta María (INISA)","22,5 g"],["Galleta soda (INISA)","21,5 g (≈6 unidades)"],["Harina de trigo (INISA)","19,5 g (≈1 cda)"],["Maicena (INISA)","17,5 g (≈1,5 cdas)"],["Maíz pelado (INISA)","19,5 g"],["Pan de rodaja blanco (INISA)","24,5 g (≈1 rebanada)"],["Pan de rodaja integral (INISA)","26 g (≈1 rebanada)"],["Pan francés (INISA)","30 g (≈1 pedazo)"],["Pasta cruda (INISA)","20,5 g (≈1 cda)"],["Tamal asado (INISA)","30 g (≈1/2 pedazo)"],["Tortilla de maíz (INISA)","35 g (≈1,5 unidades)"],["Plátano verde (INISA)","42 g"],["Puré de papa (INISA)","115 g (≈6 cdas)"],["Macarrones cocidos (INISA)","43 g (≈1 cda)"],["Gallo pinto (INISA)","60 g (≈1,5 cdas)"],["Frijol crudo (INISA)","24,5 g (≈3 cdas)"],["Arvejas secas (INISA)","24,5 g"],["Garbanzo crudo (INISA)","24,5 g"],["Lenteja cruda (INISA)","24,5 g"],["Gandul seco (INISA)","23,5 g"]],"bg":[["Pollo, muslo (INISA)","34 g"],["Pollo, pechuga (crudo) (INISA)","36 g"],["Res, carne magra (INISA)","33 g"],["Res, hígado (INISA)","35 g"],["Res, corazón (INISA)","41 g"],["Cerdo, hígado (INISA)","36 g"],["Venado asado (INISA)","23,5 g"],["Pescado fresco de mar (INISA)","35 g"],["Pescado de río (filete) (INISA)","38 g"],["Camarón fresco (INISA)","40 g (≈1 unidad)"],["Cangrejo / Langosta (INISA)","40 g"],["Calamares (INISA)","43 g"],["Bacalao seco (INISA)","8,5 g"],["Clara de huevo (INISA)","64 g (≈2 unidades)"],["Queso oreado semidescremado (INISA)","27,5 g"],["Casilán (INISA)","8 g"]],"mg":[["Pollo, tierno (INISA)","38 g"],["Res, molida / semigorda (INISA)","37 g"],["Res, lengua (INISA)","44 g"],["Ternera (INISA)","36 g"],["Cerdo, carne (INISA)","53 g"],["Conejo (INISA)","34 g"],["Atún en aceite (escurrido) (INISA)","29 g"],["Sardina en tomate (INISA)","37 g"],["Huevo de gallina (INISA)","62 g (≈1 unidad)"],["Yema de huevo (INISA)","44 g (≈2,5 unidades)"],["Chorizo (INISA)","44 g (≈1 pedazo)"],["Jamón de cerdo (INISA)","45 g"],["Mortadela (INISA)","47 g (≈1,5 rodajas)"],["Salchicha de res (INISA)","51 g (≈1,5 unidades)"],["Queso fresco (leche íntegra) (INISA)","40 g"],["Queso fresco semidescremado (INISA)","34 g"],["Queso duro (leche íntegra) (INISA)","25 g"],["Queso Kraft (INISA)","28 g (≈1 rodaja)"],["Requesón (INISA)","74 g (≈1,5 cdas)"],["Cuajada (INISA)","37 g"]],"g":[["Aguacate (INISA)","32 g (≈1/3 unidad)"],["Coco maduro (pulpa) (INISA)","18,5 g"],["Maní pelado (INISA)","10 g"],["Semilla de marañón (INISA)","12,5 g"],["Aceite vegetal / de palma (INISA)","5 g (≈1/2 cda)"],["Manteca de cerdo (INISA)","5 g (≈1/4 cda)"],["Manteca vegetal (INISA)","5 g (≈1/8 cda)"],["Mantequilla (INISA)","6 g (≈1/2 cda)"],["Margarina (INISA)","6 g (≈1/4 cda)"],["Mayonesa (INISA)","13,5 g (≈1/2 cda)"],["Tocino (INISA)","7,5 g"],["Chicharrones (INISA)","9 g"],["Natilla espesa (INISA)","13,5 g"],["Queso crema (INISA)","12 g"]],"v":[["Apio (INISA)","120 g"],["Ayote tierno (INISA)","91 g (≈1,5 pedazos)"],["Berenjena (INISA)","79 g"],["Berro (INISA)","125 g"],["Cebolla (INISA)","52 g (≈1 unidad)"],["Chayote (INISA)","83 g (≈1/3 unidad)"],["Chile dulce (INISA)","63 g (≈1,5 unidades)"],["Coliflor (INISA)","77 g"],["Espinaca (INISA)","100 g"],["Lechuga (INISA)","170 g (≈18,5 hojas)"],["Palmito (INISA)","96 g"],["Pepino (INISA)","145 g"],["Rábano (INISA)","100 g"],["Remolacha (INISA)","53 g"],["Repollo picado (INISA)","82 g (≈6 cdas)"],["Tomate (INISA)","110 g (≈1/2 unidad)"],["Vainicas (INISA)","76 g"],["Zanahoria (INISA)","53 g (≈1/2 unidad)"],["Hojas de mostaza / rábano (INISA)","105 g"],["Quelite de ayote (INISA)","145 g"],["Jugo de tomate (INISA)","115 g"]],"fr":[["Anona blanca (INISA)","60 g"],["Cereza (INISA)","100 g"],["Ciruela fresca (INISA)","125 g (≈2,5 unidades)"],["Durazno (INISA)","115 g (≈2,5 unidades)"],["Fresa (INISA)","175 g (≈16,5 unidades)"],["Grapefruit / Toronja (INISA)","155 g"],["Guayaba (INISA)","91 g (≈1,5 unidades)"],["Higo (INISA)","155 g (≈8,5 unidades)"],["Jocote maduro (INISA)","68 g (≈4,5 unidades)"],["Limón dulce (INISA)","215 g (≈2,5 unidades)"],["Mandarina (INISA)","140 g (≈2,5 unidades)"],["Mango maduro (INISA)","97 g (≈1,5 unidades)"],["Manzana de agua (INISA)","190 g (≈3,5 unidades)"],["Manzana rosa (INISA)","91 g"],["Marañón (fruta) (INISA)","130 g (≈2 unidades)"],["Melocotón / Durazno enlatado (INISA)","82 g"],["Nance (INISA)","105 g"],["Níspero (INISA)","140 g"],["Piña (INISA)","110 g (≈1,5 rodajas)"],["Tamarindo (INISA)","21 g"],["Uvas (INISA)","90 g (≈7,5 unidades)"],["Zapote (INISA)","48 g"],["Banano maduro (INISA)","59 g (≈1 unidad)"],["Guineo maduro (INISA)","55 g (≈1 unidad)"],["Plátano maduro (INISA)","46 g (≈1,5 rodajas)"],["Jugo de naranja (INISA)","150 g"],["Jugo de piña enlatado (INISA)","130 g"],["Jugo de manzana (INISA)","125 g"],["Agua de coco (INISA)","395 g"]],"l":[["Leche fluida de vaca (INISA)","230 g (≈1 vaso)"],["Leche descremada en polvo (INISA)","24,5 g (≈3 cdas)"],["Leche entera en polvo (INISA)","31 g (≈2 cdas)"],["Leche evaporada (INISA)","105 g (≈7,5 cdas)"],["Leche chocolatada (INISA)","110 g (≈1/2 caja)"],["Yogurt natural semidescremado (INISA)","230 g (≈12,5 cdas)"],["Leche condensada (INISA)","21,5 g (≈1 cda)"],["Helado de leche (INISA)","81 g"]]};
+/* Alimentos de la tabla INISA/UCR 1984 que no tienen par en el catálogo de arriba (los repetidos se quitaron:
+   p. ej. el huevo queda solo como "Huevo (completo)"). La porción es la de INISA en gramos, con su equivalencia
+   aproximada en tazas, cucharadas o unidades (medidas rasas). */
+const FOOD_INISA = {"h":[["Arracache (INISA)","1/2 taza (72 g)"],["Ñame (INISA)","1/2 taza (62 g)"],["Ñampí (INISA)","1 unidad (67 g)"],["Raíz de chayote (INISA)","1/2 taza (76 g)"],["Arepa (INISA)","1/3 unidad (41 g)"],["Arroz crudo (INISA)","1 1/2 cdas (19 g)"],["Arroz frito (INISA)","1/3 taza (56 g)"],["Cebada (INISA)","1 1/2 cdas (20 g)"],["Galleta dulce (INISA)","3 unidades (20 g)"],["Harina de trigo (INISA)","2 1/2 cdas (19,5 g)"],["Maicena (INISA)","2 cdas (17,5 g)"],["Maíz pelado (INISA)","2 cdas (19,5 g)"],["Pan de rodaja integral (INISA)","1 rebanada (26 g)"],["Pasta cruda (INISA)","3 cdas (20,5 g)"],["Tamal asado (INISA)","1/2 pedazo (30 g)"],["Plátano verde (INISA)","1/4 unidad (42 g)"],["Puré de papa (INISA)","1/2 taza (115 g)"],["Frijol crudo (INISA)","2 cdas (24,5 g)"],["Arvejas secas (INISA)","2 cdas (24,5 g)"],["Garbanzo crudo (INISA)","2 cdas (24,5 g)"],["Lenteja cruda (INISA)","2 cdas (24,5 g)"],["Gandul seco (INISA)","2 cdas (23,5 g)"]],"bg":[["Res, hígado (INISA)","1 trozo pequeño (35 g)"],["Res, corazón (INISA)","1 trozo pequeño (41 g)"],["Cerdo, hígado (INISA)","1 trozo pequeño (36 g)"],["Venado asado (INISA)","1 trozo pequeño (23,5 g)"],["Cangrejo / Langosta (INISA)","1/4 taza de carne (40 g)"],["Bacalao seco (INISA)","1 cda desmenuzado (8,5 g)"],["Queso oreado semidescremado (INISA)","1 rebanada (27,5 g)"],["Casilán (INISA)","1 cda (8 g)"]],"mg":[["Pollo, tierno (INISA)","1 trozo pequeño (38 g)"],["Res, lengua (INISA)","1 rebanada (44 g)"],["Ternera (INISA)","1 trozo pequeño (36 g)"],["Conejo (INISA)","1 trozo pequeño (34 g)"],["Yema de huevo (INISA)","2 1/2 unidades (44 g)"],["Chorizo (INISA)","1 pedazo (44 g)"],["Jamón de cerdo (INISA)","2 rebanadas (45 g)"],["Mortadela (INISA)","1 1/2 rodajas (47 g)"],["Salchicha de res (INISA)","1 1/2 unidades (51 g)"],["Queso Kraft (INISA)","1 rodaja (28 g)"],["Cuajada (INISA)","2 1/2 cdas (37 g)"]],"g":[["Coco maduro (pulpa) (INISA)","1/4 taza rallado (18,5 g)"],["Manteca de cerdo (INISA)","1 cdta (5 g)"],["Manteca vegetal (INISA)","1 cdta (5 g)"],["Margarina (INISA)","1 cdta (6 g)"],["Mayonesa (INISA)","1 cda (13,5 g)"],["Tocino (INISA)","1 cda picado (7,5 g)"],["Natilla espesa (INISA)","1 cda (13,5 g)"],["Queso crema (INISA)","1 cda (12 g)"]],"v":[["Apio (INISA)","1 taza picado (120 g)"],["Ayote tierno (INISA)","3/4 taza en cubos (91 g)"],["Berenjena (INISA)","1 taza en cubos (79 g)"],["Berro (INISA)","3 1/2 tazas (125 g)"],["Cebolla (INISA)","1/3 taza picada o 1 pequeña (52 g)"],["Chayote (INISA)","2/3 taza en cubos (83 g)"],["Chile dulce (INISA)","1/2 taza picado (63 g)"],["Coliflor (INISA)","3/4 taza (77 g)"],["Espinaca (INISA)","3 tazas cruda (100 g)"],["Lechuga (INISA)","3 1/2 tazas picada (170 g)"],["Palmito (INISA)","2/3 taza (96 g)"],["Pepino (INISA)","1 1/4 tazas en rodajas (145 g)"],["Rábano (INISA)","1 taza en rodajas (100 g)"],["Remolacha (INISA)","1/3 taza (53 g)"],["Repollo picado (INISA)","1 taza (82 g)"],["Tomate (INISA)","1 mediano (110 g)"],["Vainicas (INISA)","2/3 taza (76 g)"],["Zanahoria (INISA)","1/2 unidad o 1/2 taza rallada (53 g)"],["Hojas de mostaza / rábano (INISA)","2 tazas (105 g)"],["Quelite de ayote (INISA)","3 tazas crudo (145 g)"],["Jugo de tomate (INISA)","1/2 taza (115 ml)"]],"fr":[["Anona blanca (INISA)","1/4 taza de pulpa (60 g)"],["Grapefruit / Toronja (INISA)","1/2 unidad grande (155 g)"],["Higo (INISA)","8 unidades pequeñas (155 g)"],["Limón dulce (INISA)","2 1/2 unidades (215 g)"],["Mandarina (INISA)","2 1/2 unidades (140 g)"],["Manzana de agua (INISA)","3 1/2 unidades (190 g)"],["Manzana rosa (INISA)","2 unidades (91 g)"],["Marañón (fruta) (INISA)","2 unidades (130 g)"],["Melocotón / Durazno enlatado (INISA)","1/3 taza (82 g)"],["Nance (INISA)","3/4 taza (105 g)"],["Níspero (INISA)","1 unidad pequeña (140 g)"],["Tamarindo (INISA)","2 cdas de pulpa (21 g)"],["Zapote (INISA)","1/4 taza de pulpa (48 g)"],["Guineo maduro (INISA)","1 unidad (55 g)"],["Jugo de piña enlatado (INISA)","1/2 taza (130 ml)"]],"l":[["Leche descremada en polvo (INISA)","1/3 taza (24,5 g)"],["Leche entera en polvo (INISA)","1/4 taza (31 g)"],["Leche evaporada (INISA)","1/2 taza escasa (105 ml)"],["Leche chocolatada (INISA)","1/2 taza (110 ml)"],["Helado de leche (INISA)","1/2 taza (81 g)"]]};
 for (const k in FOOD_INISA) FOOD_CATALOG[k].push(...FOOD_INISA[k]);
 
 /* Calibración de alimentos del catálogo cuya porción no cuadra con su valor real
@@ -217,15 +219,14 @@ const FOOD_CALIBRATION = {
     "Mermelada con azúcar":      { k: 70,  c: 17,   p: 0.1, f: 0,   pt: { h: 1 } },
     "Pasas":                     { k: 60,  c: 15.9, p: 0.6, f: 0.1, pt: { h: 1 } },
     "Leche condensada":          { k: 241, c: 40.7, p: 5.9, f: 6.5, pt: { l: 0.5, h: 2, g: 0.5 } },
-    "Leche condensada (INISA)":  { k: 69,  c: 11.7, p: 1.7, f: 1.9, pt: { h: 0.5, g: 0.5 } },
 
     /* Etiqueta Dos Pinos (sabor chocolate, ½ taza = 63 g: 82 kcal) llevada a 70 g; cubre los demás sabores */
     "Helado Prote DP (chocolate, coco y otros sabores)": { k: 91, c: 11.1, p: 6.9, f: 2.2, pt: { l: 0.5, h: 0.5 } },
     /* Tabla nutricional de referencia por 100 g */
     "Torta de arroz":            { k: 295, c: 44,   p: 8.2, f: 9.5, pt: { h: 2.5, l: 0.5, g: 1 } },
 
-    /* Pan Bimbo blanco: 2 rebanadas (62 g) = 146 kcal → 2 harinas */
-    "Pan cuadrado blanco Bimbo":       { k: 146, c: 28.3, p: 5.1, f: 1.4, pt: { h: 2 } },
+    /* Pan Bimbo blanco: 1 rebanada (31 g) = 73 kcal → 1 harina */
+    "Pan cuadrado blanco Bimbo":       { k: 73,  c: 14.2, p: 2.6, f: 0.7, pt: { h: 1 } },
     /* Salmón cocido (30 g): más grasa que la pechuga → mitad baja y mitad media en grasa */
     "Salmón":                          { k: 62,  c: 0,    p: 6.6, f: 3.7, pt: { bg: 0.5, mg: 0.5 } },
     /* Delga-C ultra light: ~15 kcal por cucharada (15 g) */
@@ -666,13 +667,14 @@ function openFoodPicker(groupKey) {
 
 /* Cuadro de cantidad común. Con "existing" ({ id, qty }) abre en la cantidad ya agregada en este menú:
    se puede subir, bajar o dejar en 0 para quitarla. done({ id, qty }) al guardar, done(null) al quitar. */
-function amountStepper({ title, subtitle, unit, existing, makeEntry, done }) {
+/* unitOne: la unidad en singular, para 1 o menos ("1 rebanada", "2 rebanadas") */
+function amountStepper({ title, subtitle, unit, unitOne, existing, makeEntry, done }) {
     let qty = existing ? existing.qty : 1;
     const allowZero = !!existing;
     openStepper({
         title,
         subtitle,
-        unit,
+        unit: () => (unitOne && qty > 0 && qty <= 1 ? unitOne : unit),
         doneLabel: existing ? "Guardar" : "Agregar",
         cancelLabel: "Cancelar",
         read: () => fmtNum(qty, 2),
@@ -709,6 +711,7 @@ function askFoodAmount(groupKey, item, done, existing) {
         title: name,
         subtitle: (unit ? equiv : `1 porción = ${equiv}`) + (cal ? `\n= ${fmtNum(cal.k, 0)} kcal · ${portionsText(cal.pt)}` : ""),
         unit: unitName,
+        unitOne: unit ? unit.replace(/s$/, "") : "porción",   /* latas, scoops, rebanadas */
         existing,
         done,
         makeEntry: qty => ({
@@ -732,6 +735,7 @@ function askFastFood(key, done, existing) {
         title: name,
         subtitle: `1 ${unit} = ${fmtNum(kcal, 0)} kcal\n= ${portionsText(pt)}`,
         unit: plural,
+        unitOne: unit,
         existing,
         done,
         makeEntry: qty => ({

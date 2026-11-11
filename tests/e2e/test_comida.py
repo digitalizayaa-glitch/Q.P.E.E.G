@@ -110,7 +110,7 @@ def main():
                 pg.fill(".picker-search", "pepperoni"); pg.wait_for_timeout(300)
             kcal0 = pg.evaluate("foodTotals(foodEntries()).kcal")
             pg.locator(".picker-item", has_text="Pizza Hut · Pizza pepperoni mediana").first.click(); pg.wait_for_timeout(500)
-            r["stepper_slices"] = "slices" in pg.locator(".stepper-overlay").inner_text()
+            r["stepper_slices"] = "slice" in pg.locator(".stepper-overlay").inner_text()
             r["stepper_equivalencia"] = "harina" in pg.locator(".stepper-overlay").inner_text()
             pg.locator(".stepper-overlay button[aria-label*='Subir'], .stepper-overlay .stepper-up").first.click(); pg.wait_for_timeout(200)
             r["flecha_de_uno"] = "2" in pg.locator(".stepper-value, .stepper-overlay").first.inner_text().split("slices")[0]

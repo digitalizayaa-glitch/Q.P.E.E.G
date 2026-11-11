@@ -93,6 +93,9 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
         if (after !== before) animateValue(box, dir, after);
     };
 
+    /* unidad que cambia con la cantidad (1 rebanada / 2 rebanadas): se repinta cada vez que cambia el número */
+    if (typeof unit === "function") new MutationObserver(() => { unitEl.textContent = unitText(); }).observe(box, { childList: true, characterData: true, subtree: true });
+
     bindHold(up, () => apply(1));
     bindHold(down, () => apply(-1));
 

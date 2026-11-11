@@ -229,6 +229,24 @@ test("comida rápida: catálogo coherente (calorías ≈ macros) y pizzas por sl
     }
 });
 
+test("catálogo: INISA sin repetidos y con su medida en tazas, cucharadas o unidades", () => {
+    const all = Object.values(ev("FOOD_CATALOG")).flat().map(i => i[0]);
+    const inisa = Object.values(ev("FOOD_INISA")).flat();
+    assert.ok(inisa.length >= 80, "quedan los de INISA sin par");
+    for (const gone of ["Huevo de gallina (INISA)", "Pan de rodaja blanco (INISA)", "Aguacate (INISA)", "Leche fluida de vaca (INISA)", "Leche condensada (INISA)"])
+        assert.ok(!all.includes(gone), gone);
+    for (const [name, eq] of inisa)
+        assert.match(eq, /^(\d|1\/).*(taza|cda|cdta|unidad|rebanada|rodaja|pedazo|trozo|mediano|pequeñ).*\(\d+(,\d+)? (g|ml)\)$/, `${name}: ${eq}`);
+    assert.equal(new Set(all).size, all.length, "nombres sin repetir");
+    for (const k of Object.keys(ev("FOOD_CALIBRATION"))) assert.ok(all.includes(k), `calibración sin alimento: ${k}`);
+});
+
+test("pan cuadrado: se cuenta por rebanada (1 rebanada = 1 harina)", () => {
+    const item = ev("FOOD_CATALOG.h.find(i => i[0] === 'Pan cuadrado blanco Bimbo')");
+    assert.deepEqual(item, ["Pan cuadrado blanco Bimbo", "1 rebanada (31 g)", "rebanadas", 1]);
+    assert.deepEqual(ev("FOOD_CALIBRATION['Pan cuadrado blanco Bimbo'].pt"), { h: 1 });
+});
+
 test("supermercado: galletas y snacks pedidos están en el catálogo", () => {
     const names = [...ev("FAST_FOOD.filter(c => c.super).flatMap(c => c.items.map(i => i[0]))")].join(" | ");
     for (const want of ["Chiky", "Yipy", "Oreo", "Sponch", "Ranchitas", "Picaritas", "Papiolas", "Pringles"]) assert.match(names, new RegExp(want), want);
