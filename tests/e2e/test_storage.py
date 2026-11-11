@@ -43,10 +43,11 @@ def main():
             b = getattr(p, engine).launch(**opts)
 
             # 1) Datos v1 en localStorage → se migran a v2 y se copian a IndexedDB
+            #    (los datos viejos se ponen ANTES de abrir la app, como en un teléfono que tenía la versión antigua)
             ctx = b.new_context(service_workers="block"); ctx.add_init_script(SEEN)
+            ctx.add_init_script("if (!sessionStorage.getItem('v1_puesto')) { sessionStorage.setItem('v1_puesto', '1'); localStorage.setItem('%s', %s); }" % (KEY, json.dumps(json.dumps(V1_STATE))))
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
-            pg.goto(URL); pg.evaluate(f"localStorage.setItem('{KEY}', {json.dumps(json.dumps(V1_STATE))})")
-            pg.reload(); pg.wait_for_function("document.readyState==='complete'"); pg.wait_for_timeout(600)
+            pg.goto(URL); pg.wait_for_function("document.readyState==='complete'"); pg.wait_for_timeout(600)
             idb = pg.evaluate(READ_IDB)
             for _ in range(60):   # la copia a IndexedDB puede tardar un poco más que la carga (sobre todo en Safari)
                 if idb and "r1" in idb["state"].get("logs", {}): break
