@@ -12,6 +12,7 @@ function fakeD1() {
         bind: (...a) => stmt(sql, a),
         first: async () => db.prepare(sql).get(...args) ?? null,
         run: async () => { db.prepare(sql).run(...args); return { success: true }; },
+        all: async () => ({ results: db.prepare(sql).all(...args) }),
         _exec: () => db.prepare(sql).run(...args)
     });
     return {
@@ -89,4 +90,48 @@ test("el cliente de la app funciona contra el Worker (dos teléfonos)", async ()
     assert.equal(A.data.routines.length, 2);
     const pair = await QSync.publishPair(rpc, code);
     assert.equal(await QSync.takePair(rpc, pair), code);
+});
+
+test("historial: una copia cada 3 horas como mucho, se guardan las 20 últimas", async () => {
+    const db = fakeD1();
+    const realNow = Date.now;
+    let t = 1_800_000_000_000;
+    Date.now = () => t;
+    try {
+        assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "v1", p_rev: 0 }), 1);
+        assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "v2", p_rev: 1 }), 2);   /* primera copia: v1 */
+        t += 60_000;
+        assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "v3", p_rev: 2 }), 3);   /* hace 1 min: sin copia */
+        let h = await handlers.qpeeg_history(db, { p_id: ID });
+        assert.deepEqual(h.map(x => x.rev), [1]);
+        assert.deepEqual(await handlers.qpeeg_history_get(db, { p_id: ID, p_rev: 1 }), [{ blob: "v1", rev: 1 }]);
+        t += 3 * 3600 * 1000 + 1;
+        assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "v4", p_rev: 3 }), 4);   /* 3 h después: copia de v3 */
+        h = await handlers.qpeeg_history(db, { p_id: ID });
+        assert.deepEqual(h.map(x => x.rev), [3, 1]);
+        /* un conflicto no guarda copia */
+        t += 4 * 3600 * 1000;
+        assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "x", p_rev: 1 }), -1);
+        assert.deepEqual((await handlers.qpeeg_history(db, { p_id: ID })).map(x => x.rev), [3, 1]);
+        /* copia a pedido (antes de volver a una versión) y tope de 20 */
+        await handlers.qpeeg_snapshot(db, { p_id: ID });
+        assert.deepEqual((await handlers.qpeeg_history(db, { p_id: ID })).map(x => x.rev), [4, 3, 1]);
+        let rev = 4;
+        for (let i = 0; i < 25; i++) { t += 4 * 3600 * 1000; rev = await handlers.qpeeg_put(db, { p_id: ID, p_blob: "w" + i, p_rev: rev }); }
+        h = await handlers.qpeeg_history(db, { p_id: ID });
+        assert.equal(h.length, 20);
+        assert.equal(h[0].rev, rev - 1);
+    } finally { Date.now = realNow; }
+});
+
+test("cambio de código: la cuenta vieja queda dada de baja y no se puede recrear", async () => {
+    const db = fakeD1();
+    await handlers.qpeeg_put(db, { p_id: ID, p_blob: "v1", p_rev: 0 });
+    await handlers.qpeeg_snapshot(db, { p_id: ID });
+    await handlers.qpeeg_retire(db, { p_id: ID });
+    assert.deepEqual(await handlers.qpeeg_get(db, { p_id: ID }), [{ gone: true }]);
+    assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "otra", p_rev: 0 }), -2);
+    assert.equal(await handlers.qpeeg_put(db, { p_id: ID, p_blob: "otra", p_rev: 1 }), -2);
+    assert.deepEqual(await handlers.qpeeg_history(db, { p_id: ID }), [], "el historial del código viejo también se borra");
+    assert.deepEqual(await handlers.qpeeg_get(db, { p_id: ID2 }), [], "las demás cuentas no cambian");
 });

@@ -189,6 +189,7 @@ const QSync = (() => {
                                   o los datos tal como quedaron guardados
          loadAccount() / saveAccount(acc)   guarda { code, id, keyRaw, rev, base, lastSync }
          onStatus(status)         "idle" | "syncing" | "ok" | "offline" | "error" | "busy"
+                                  | "gone" (la cuenta cambió de código en otro teléfono: este ya no sincroniza)
        } */
     function engine(hooks) {
         let running = null, again = false;
@@ -200,6 +201,7 @@ const QSync = (() => {
                 const local = hooks.getLocal();
                 const rows = await hooks.rpc("qpeeg_get", { p_id: acc.id });
                 const row = Array.isArray(rows) ? rows[0] : rows;
+                if (row && row.gone) return "gone";
                 const remoteRev = row ? Number(row.rev) : 0;
                 let merged = local.data, remote = null;
 
@@ -225,6 +227,7 @@ const QSync = (() => {
                 const savedAt = Math.max(local.savedAt, remote ? remote.savedAt : 0);
                 const blob = await seal({ data: merged, savedAt }, acc.keyRaw, acc.id);
                 const newRev = Number(await hooks.rpc("qpeeg_put", { p_id: acc.id, p_blob: blob, p_rev: row ? remoteRev : 0 }));
+                if (newRev === -2) return "gone";
                 if (newRev > 0) {
                     Object.assign(acc, { rev: newRev, base: merged, lastSync: Date.now() });
                     await hooks.saveAccount(acc);

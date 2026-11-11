@@ -1694,3 +1694,6 @@ main { overflow-x: hidden; }
 .order-name { flex: 1; min-width: 0; font-size: 16px; font-weight: bold; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .order-btn { width: 46px; height: 42px; font-size: 16px; padding: 0; }
 .order-btn:disabled { opacity: .3; }
+
+/* Versiones anteriores de la cuenta */
+.versions-list .version-btn { width: 100%; text-transform: capitalize; }

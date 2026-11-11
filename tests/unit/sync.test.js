@@ -82,21 +82,23 @@ test("fusión al unir dos teléfonos sin base común: se suman las dos listas", 
 
 /* Servidor simulado con la misma lógica que el SQL */
 function fakeServer() {
-    const vaults = new Map(), pairs = new Map();
+    const vaults = new Map(), pairs = new Map(), retired = new Set();
     const rpc = async (name, a) => {
         await new Promise(r => setTimeout(r, Math.random() * 3));
-        if (name === "qpeeg_get") { const v = vaults.get(a.p_id); return v ? [{ blob: v.blob, rev: v.rev }] : []; }
+        if (name === "qpeeg_get") { const v = vaults.get(a.p_id); return v ? [{ blob: v.blob, rev: v.rev }] : retired.has(a.p_id) ? [{ gone: true }] : []; }
         if (name === "qpeeg_put") {
+            if (retired.has(a.p_id)) return -2;
             const v = vaults.get(a.p_id);
             if (a.p_rev === 0) { if (v) return -1; vaults.set(a.p_id, { blob: a.p_blob, rev: 1 }); return 1; }
             if (!v || v.rev !== a.p_rev) return -1;
             v.blob = a.p_blob; v.rev++; return v.rev;
         }
+        if (name === "qpeeg_retire") { vaults.delete(a.p_id); retired.add(a.p_id); return null; }
         if (name === "qpeeg_pair_put") { pairs.set(a.p_id, a.p_payload); return null; }
         if (name === "qpeeg_pair_take") { const p = pairs.get(a.p_id) || null; pairs.delete(a.p_id); return p; }
         throw new Error(name);
     };
-    return { rpc, vaults };
+    return { rpc, vaults, retired };
 }
 function phone(server, acc) {
     const ph = { data: { routines: [], logs: {} }, savedAt: 0, acc: acc && structuredClone(acc), busy: false };
@@ -169,4 +171,17 @@ test("motor: tras un intento sin conexión vuelve a sincronizar al haber red", a
         assert.equal(await A.engine.sync(), "ok");
         assert.equal(server.vaults.size, 1);
     } finally { if (nav) Object.defineProperty(globalThis, "navigator", nav); }
+});
+
+test("motor: si la cuenta cambió de código, el teléfono deja de sincronizar sin perder datos", async () => {
+    const server = fakeServer();
+    const acc = await QSync.accountFromCode(QSync.newAccountCode());
+    const A = phone(server, acc), B = phone(server, acc);
+    A.edit(d => d.routines.push({ id: "r1", name: "Push" }));
+    await A.engine.sync(); await B.engine.sync();
+    await server.rpc("qpeeg_retire", { p_id: acc.id });
+    B.edit(d => d.routines.push({ id: "r2", name: "Pierna" }));
+    assert.equal(await B.engine.sync(), "gone");
+    assert.deepEqual(B.data.routines.map(r => r.name), ["Push", "Pierna"], "lo de este teléfono se queda");
+    assert.ok(!server.vaults.has(acc.id), "no vuelve a crear la cuenta vieja");
 });

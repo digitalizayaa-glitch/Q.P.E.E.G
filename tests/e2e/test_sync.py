@@ -17,7 +17,7 @@ SEEN = "localStorage.setItem('qpeeg_seen_version', '%s');" % _VER
 SHOTS = os.environ.get("SHOTS")
 SERVER = "https://sync.prueba"
 
-vaults, pairs = {}, {}
+vaults, pairs, history, retired = {}, {}, {}, set()
 calls = []
 
 
@@ -28,13 +28,16 @@ def rpc(route):
     out = None
     if name == "qpeeg_get":
         v = vaults.get(a["p_id"])
-        out = [{"blob": v["blob"], "rev": v["rev"]}] if v else []
+        out = [{"blob": v["blob"], "rev": v["rev"]}] if v else ([{"gone": True}] if a["p_id"] in retired else [])
     elif name == "qpeeg_put":
         v = vaults.get(a["p_id"])
-        if a["p_rev"] == 0:
+        if a["p_id"] in retired:
+            out = -2
+        elif a["p_rev"] == 0:
             out = -1 if v else 1
             if not v: vaults[a["p_id"]] = {"blob": a["p_blob"], "rev": 1}
         elif v and v["rev"] == a["p_rev"]:
+            history.setdefault(a["p_id"], {})[v["rev"]] = {"blob": v["blob"], "saved_at": int(time.time() * 1000) - 3600_000}   # aquí: copia en cada cambio
             v["blob"] = a["p_blob"]; v["rev"] += 1; out = v["rev"]
         else:
             out = -1
@@ -42,7 +45,18 @@ def rpc(route):
         pairs[a["p_id"]] = a["p_payload"]
     elif name == "qpeeg_pair_take":
         out = pairs.pop(a["p_id"], None)
-    route.fulfill(status=200, content_type="application/json", body="" if out is None and name == "qpeeg_pair_put" else json.dumps(out))
+    elif name == "qpeeg_history":
+        out = [{"rev": k, "saved_at": h["saved_at"]} for k, h in sorted(history.get(a["p_id"], {}).items(), reverse=True)]
+    elif name == "qpeeg_history_get":
+        h = history.get(a["p_id"], {}).get(a["p_rev"])
+        out = [{"blob": h["blob"], "rev": a["p_rev"]}] if h else []
+    elif name == "qpeeg_snapshot":
+        v = vaults.get(a["p_id"])
+        if v: history.setdefault(a["p_id"], {})[v["rev"]] = {"blob": v["blob"], "saved_at": int(time.time() * 1000)}
+    elif name == "qpeeg_retire":
+        vaults.pop(a["p_id"], None); history.pop(a["p_id"], None); retired.add(a["p_id"])
+    empty = name in ("qpeeg_pair_put", "qpeeg_snapshot", "qpeeg_retire")
+    route.fulfill(status=200, content_type="application/json", body="" if empty else json.dumps(out))
 
 
 def phone(browser, data, errors):
@@ -84,7 +98,7 @@ def main():
             A.evaluate("openSettings()"); A.wait_for_timeout(400)
             r["seccion_visible"] = A.locator(".settings-label", has_text="Cuenta").count() == 1
             if SHOTS: A.screenshot(path=f"{SHOTS}/cuenta_1_sin_cuenta.png")
-            click(A, "Crear código de cuenta")
+            click(A, "Crear mi código")
             code = re.search(r"[2-9A-Z]{4}(?:-[2-9A-Z]{4}){4}", dialog_text(A)).group(0)
             if SHOTS: A.screenshot(path=f"{SHOTS}/cuenta_2_codigo.png")
             click(A, "Listo"); A.wait_for_timeout(800)
@@ -95,9 +109,9 @@ def main():
             # Teléfono B: nuevo, entra con el código de cuenta
             ctxB, B = phone(b, None, errors)
             B.evaluate("openSettings()"); B.wait_for_timeout(400)
-            click(B, "Ya tengo un código")
-            B.fill(".dialog-input", code.lower().replace("-", " ")); click(B, "Entrar"); B.wait_for_timeout(1200)
-            r["b_vinculado"] = "vinculada" in B.locator(".dialog-overlay .dialog-title").first.inner_text()
+            click(B, "Entrar con un código")
+            B.fill(".dialog-input", code.lower().replace("-", " ")); click(B, "Seguir"); B.wait_for_timeout(1200)
+            r["b_vinculado"] = "ya usa esa cuenta" in dialog_text(B)
             click(B, "Entendido")
             r["b_recibe"] = B.evaluate("state.routines.map(x => x.name).join()") == "Push"
 
@@ -111,18 +125,19 @@ def main():
 
             # Teléfono C con sus propios datos: entra con código temporal y une
             A.evaluate("openSettings()"); A.wait_for_timeout(400)
-            click(A, "Vincular otro teléfono")
+            click(A, "Usar en otro teléfono")
             pair = re.search(r"\b[2-9A-Z]{4}-[2-9A-Z]{4}\b", dialog_text(A)).group(0)
             click(A, "Listo"); A.keyboard.press("Escape"); A.wait_for_timeout(300)
             ctxC, C = phone(b, {"routines": [routine("r9", "Pierna")], "logs": {}, "food": {"log": {}}, "achievements": []}, errors)
             C.evaluate("openSettings()"); C.wait_for_timeout(400)
-            click(C, "Ya tengo un código"); C.fill(".dialog-input", pair); click(C, "Entrar"); C.wait_for_timeout(900)
-            r["c_pregunta_unir"] = "ya tiene datos" in C.locator(".dialog-overlay .dialog-title").first.inner_text()
-            if SHOTS: C.screenshot(path=f"{SHOTS}/cuenta_4_unir.png")
-            click(C, "Unir"); C.wait_for_timeout(1200); click(C, "Entendido")
-            r["c_unio"] = sorted(C.evaluate("state.routines.map(x => x.name)")) == ["Pierna", "Push"]
+            click(C, "Entrar con un código"); C.fill(".dialog-input", pair); click(C, "Seguir"); C.wait_for_timeout(900)
+            r["c_avisa_datos_sin_cuenta"] = "datos sin cuenta" in C.locator(".dialog-overlay .dialog-title").first.inner_text()
+            r["sin_unir"] = C.locator("button", has_text="Unir").count() == 0
+            if SHOTS: C.screenshot(path=f"{SHOTS}/cuenta_4_reemplazar.png")
+            click(C, "Entrar y reemplazar"); C.wait_for_timeout(1200); click(C, "Entendido")
+            r["c_reemplaza"] = C.evaluate("state.routines.map(x => x.name)") == ["Push"]
             A.evaluate("syncNow()"); A.wait_for_timeout(800)
-            r["a_recibe_de_c"] = sorted(A.evaluate("state.routines.map(x => x.name)")) == ["Pierna", "Push"]
+            r["a_no_recibe_mezcla"] = A.evaluate("state.routines.map(x => x.name)") == ["Push"]
             r["temporal_un_uso"] = len(pairs) == 0
 
             # Sin conexión: B guarda y sube al volver la conexión
@@ -149,6 +164,52 @@ def main():
             for pg in (A, B, C, A, B): pg.evaluate("syncNow()"); pg.wait_for_timeout(500)
             snap = lambda pg: pg.evaluate("JSON.stringify(syncableState())")
             r["todos_iguales"] = snap(A) == snap(B) == snap(C)
+
+            # B cambia a otra cuenta (D) y vuelve a la suya: nada se mezcla
+            ctxD, D = phone(b, {"routines": [routine("r7", "Cuenta D")], "logs": {}, "food": {"log": {}}, "achievements": []}, errors)
+            D.evaluate("openSettings()"); D.wait_for_timeout(400)
+            click(D, "Crear mi código")
+            code_d = re.search(r"[2-9A-Z]{4}(?:-[2-9A-Z]{4}){4}", dialog_text(D)).group(0)
+            click(D, "Listo"); D.wait_for_timeout(800)
+            B.evaluate("openSettings()"); B.wait_for_timeout(400)
+            click(B, "Entrar con otro código"); B.fill(".dialog-input", code_d); click(B, "Seguir"); B.wait_for_timeout(1200)
+            r["cambio_muestra_mi_codigo"] = code in dialog_text(B)
+            if SHOTS: B.screenshot(path=f"{SHOTS}/cuenta_5_cambiar.png")
+            click(B, "Cambiar de cuenta"); B.wait_for_timeout(1200); click(B, "Entendido")
+            r["b_en_cuenta_d"] = B.evaluate("state.routines.map(x => x.name)") == ["Cuenta D"]
+            B.evaluate("openSettings()"); B.wait_for_timeout(400)
+            click(B, "Entrar con otro código"); B.fill(".dialog-input", code); click(B, "Seguir"); B.wait_for_timeout(1200)
+            click(B, "Cambiar de cuenta"); B.wait_for_timeout(1200); click(B, "Entendido")
+            r["b_vuelve_a_la_suya"] = "Push" in B.evaluate("state.routines.map(x => x.name).join()") and "Cuenta D" not in B.evaluate("state.routines.map(x => x.name).join()")
+            ctxD.close()
+
+            # Versiones anteriores: A borra una rutina y vuelve a una versión de antes
+            names_before = A.evaluate("state.routines.map(x => x.name).join()")
+            A.evaluate("state.routines = state.routines.filter(x => x.name !== 'Push'); saveState(); syncNow()"); A.wait_for_timeout(900)
+            A.evaluate("openSettings()"); A.wait_for_timeout(400)
+            click(A, "Versiones anteriores"); A.wait_for_timeout(500)
+            r["versiones_lista"] = A.locator(".version-btn").count() >= 1
+            if SHOTS: A.screenshot(path=f"{SHOTS}/cuenta_6_versiones.png")
+            A.locator(".version-btn").first.click(); A.wait_for_timeout(400)
+            click(A, "Volver a esta versión"); A.wait_for_timeout(1500); click(A, "Entendido")
+            r["version_restaurada"] = A.evaluate("state.routines.map(x => x.name).join()") == names_before
+            B.evaluate("syncNow()"); B.wait_for_timeout(800)
+            r["version_llega_a_b"] = "Push" in B.evaluate("state.routines.map(x => x.name).join()")
+
+            # Cambiar el código: A recibe uno nuevo; B (código viejo) deja de sincronizar y entra con el nuevo
+            A.evaluate("openSettings()"); A.wait_for_timeout(400)
+            click(A, "Cambiar mi código"); click(A, "Cambiar código"); A.wait_for_timeout(1500)
+            new_code = re.search(r"[2-9A-Z]{4}(?:-[2-9A-Z]{4}){4}", dialog_text(A)).group(0)
+            r["codigo_nuevo"] = new_code != code
+            click(A, "Listo")
+            B.keyboard.press("Escape"); B.wait_for_timeout(300)
+            r["b_codigo_viejo"] = B.evaluate("syncNow()") in ("gone", "idle")
+            B.wait_for_timeout(400); B.evaluate("openSettings()"); B.wait_for_timeout(500)
+            r["b_avisa_cambio"] = "cambió de código" in B.locator(".settings-account").inner_text()
+            if SHOTS: B.screenshot(path=f"{SHOTS}/cuenta_7_codigo_viejo.png")
+            click(B, "Entrar con un código"); B.fill(".dialog-input", new_code); click(B, "Seguir"); B.wait_for_timeout(1000)
+            click(B, "Entrar"); B.wait_for_timeout(1200); click(B, "Entendido")
+            r["b_con_codigo_nuevo"] = snap(A) == snap(B)
             for c in (ctxA, ctxB, ctxC): c.close()
 
             # Sin servidor configurado la sección no aparece

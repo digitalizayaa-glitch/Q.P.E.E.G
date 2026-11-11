@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.10.3";
+const APP_VERSION = "1.11.0";
 
 const CHANGELOG = [
+    {
+        v: "1.11.0",
+        items: [
+            "Cuentas más simples: tu código es tu cuenta. Escríbelo en otro teléfono y los dos tendrán los mismos datos; si escribes el código de otra persona, el teléfono cambia a esa cuenta y la tuya queda guardada con tu código. Ya no se mezclan cuentas.",
+            "Versiones anteriores: el servidor guarda copias de tu cuenta y puedes volver a una de antes desde Ajustes → Cuenta.",
+            "Cambiar mi código: crea un código nuevo con tus datos y el anterior deja de funcionar."
+        ]
+    },
     {
         v: "1.10.3",
         items: ["Editor de rutinas: la tuerca ⚙ junto al nombre del día permite cambiar el orden de los ejercicios."]
