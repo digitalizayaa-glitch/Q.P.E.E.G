@@ -192,6 +192,7 @@ function openSettings() {
     /* Cuenta y sincronización (solo si hay servidor configurado) */
     const account = buildAccountSection(label);
     sheet.append(...account.nodes);
+    sheet.append(...buildLegalSection(label));
 
     overlay.appendChild(sheet);
 

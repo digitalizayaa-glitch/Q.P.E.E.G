@@ -807,9 +807,12 @@ main { overflow-x: hidden; }
 
 .dialog-overlay { z-index: 1100; }
 
-.dialog-sheet { width: min(100%, 340px); max-height: none; padding: 18px 18px 16px; margin: 0; }
+.dialog-sheet { width: min(100%, 340px); max-height: 86vh; max-height: 86dvh; padding: 18px 18px 16px; margin: 0; }
 .dialog-title { margin-bottom: 8px; }
 .dialog-text { white-space: pre-line; display: block; margin: 0 0 10px; color: var(--text-2); font-size: 14px; line-height: 1.45; }
+/* Textos largos (política, aviso): el texto se desplaza y el título y los botones quedan fijos */
+.dialog-sheet > * { flex-shrink: 0; }
+.dialog-sheet > .dialog-text { flex-shrink: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
 
 .dialog-input {
     width: 100%;
@@ -1743,3 +1746,40 @@ main { overflow-x: hidden; }
 .sport-load span { display: block; font-size: 12px; color: var(--muted); }
 .sport-form .dialog-btn:disabled { opacity: .4; }
 .sport-chip-text { cursor: pointer; }
+
+/* =========================================================
+    ACUERDOS: formulario "Importante" (primera vez) y "Mis acuerdos" (Ajustes)
+========================================================= */
+.agree-form { display: flex; flex-direction: column; gap: 10px; padding: 0 16px 16px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.agree-form > * { flex-shrink: 0; }
+.agree-intro { margin: 0 2px 2px; font-size: 13px; line-height: 1.45; color: var(--text-2); }
+.agree-row {
+    display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 14px;
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+}
+.agree-check {
+    flex-shrink: 0; width: 30px; height: 30px; padding: 0; margin: 0; border-radius: 9px; cursor: pointer;
+    display: grid; place-items: center; background: var(--inset); border: 1.5px solid rgba(var(--ui-rgb), .7);
+    animation: ui-pulse 3.4s ease-in-out infinite;
+}
+.agree-check svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.agree-check.on { background: var(--ui); border-color: var(--ui); animation: none; }
+.agree-check.on svg { opacity: 1; }
+.agree-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.agree-text b { font-size: 14px; line-height: 1.3; cursor: pointer; }
+.agree-text small { font-size: 12px; line-height: 1.4; color: var(--muted); }
+.agree-opt {
+    display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px; vertical-align: 1px;
+    font-size: 10px; font-weight: bold; letter-spacing: .5px; text-transform: uppercase; color: var(--text-2);
+    border: 1px solid var(--glass-border);
+}
+.agree-read {
+    align-self: flex-start; margin: 2px 0 0; padding: 0; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 12px; font-weight: bold; color: var(--ui); text-decoration: underline; text-underline-offset: 2px;
+}
+.agree-need { margin: 0 2px; font-size: 12px; line-height: 1.4; color: var(--muted); text-align: center; }
+.agree-need:empty { display: none; }
+.agree-form .dialog-actions { margin-top: 2px; }
+.agree-form .dialog-btn:disabled { opacity: .45; animation: none; }
+@media (prefers-reduced-motion: reduce) { .agree-check { animation: none; } }
+.picker-close[hidden] { display: none; }

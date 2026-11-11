@@ -168,7 +168,7 @@ async function enterCode() {
         if (current && !current.gone && current.id === acc.id) { await showMessage({ title: "Ya estás en esa cuenta", message: "Este teléfono ya usa la cuenta de ese código." }); return; }
         const rows = await syncRpc("qpeeg_get", { p_id: acc.id });
         const row = Array.isArray(rows) ? rows[0] : null;
-        if (row && row.gone) { await showMessage({ title: "Código antiguo", message: "Ese código ya no funciona porque la cuenta cambió de código. Pide el código nuevo." }); return; }
+        if (row && row.gone) { await showMessage({ title: "Código antiguo", message: "Ese código ya no funciona: la cuenta se borró o cambió de código. Si cambió, pide el código nuevo." }); return; }
         if (!row) { await showMessage({ title: "No existe esa cuenta", message: "No hay ninguna cuenta con ese código. Revisa que esté bien escrito." }); return; }
 
         let ok;
@@ -371,7 +371,7 @@ function buildAccountSection(label) {
         }
         if (acc.gone) {
             wrap.append(
-                note("Esta cuenta cambió de código en otro teléfono, así que este ya no se sincroniza. Tus datos siguen aquí. Escribe el código nuevo para seguir sincronizando."),
+                note("Esta cuenta se borró o cambió de código en otro teléfono, así que este ya no se sincroniza. Tus datos siguen aquí. Si cambió de código, escribe el nuevo para seguir sincronizando."),
                 btn("Entrar con un código", "accept", async () => { await enterCode(); paint(); }),
                 btn("Salir de la cuenta", "danger", async () => { await leaveAccount(); paint(); })
             );

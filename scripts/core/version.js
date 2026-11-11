@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "1.14.3";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "1.15.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "1.15.0",
+        items: [
+            "Política de privacidad y aviso de salud: al abrir la app se aceptan una vez, y se pueden revisar o cambiar en Ajustes → Privacidad y salud → Mis acuerdos.",
+            "Nuevo y opcional: compartir tus datos de entrenamiento (rutinas, series y deportes, sin tu código ni tu cuenta) para ayudar a mejorar la app.",
+            "\"Borrar mi cuenta\" en Ajustes: borra del servidor tu cuenta, sus copias y lo que hayas compartido."
+        ]
+    },
     {
         v: "1.14.1",
         items: [

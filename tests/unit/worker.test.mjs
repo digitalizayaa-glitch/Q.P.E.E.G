@@ -191,3 +191,18 @@ test("errores: los repetidos suman, con tope y sin datos raros", async () => {
     for (let i = 0; i < 310; i++) await handlers.qpeeg_error(db, { ...e, p_msg: "error " + i });
     assert.equal((await db.prepare("SELECT COUNT(*) AS n FROM app_errors").first()).n, 300);
 });
+
+test("datos compartidos: solo con id anónimo, se reemplazan, se borran al retirarlos y por la limpieza", async () => {
+    const db = fakeD1();
+    const data = JSON.stringify({ logs: { "2026-11-11": [] } });
+    assert.equal(await handlers.qpeeg_share(db, { p_id: ID, p_ver: "1.15.0", p_data: data }), undefined);
+    assert.equal(await handlers.qpeeg_share(db, { p_id: ID, p_ver: "1.15.0", p_data: data }), undefined, "se reemplaza");
+    assert.equal((await db.prepare("SELECT COUNT(*) AS n FROM shared_training").first()).n, 1);
+    await assert.rejects(handlers.qpeeg_share(db, { p_id: ID, p_data: "no es json" }));
+    await assert.rejects(handlers.qpeeg_share(db, { p_id: ID, p_data: "x".repeat(300_001) }));
+    assert.equal(await handlers.qpeeg_share(db, { p_id: ID, p_data: null }), undefined);
+    assert.equal((await db.prepare("SELECT COUNT(*) AS n FROM shared_training").first()).n, 0, "retirar lo borra");
+    await handlers.qpeeg_share(db, { p_id: ID2, p_ver: "1", p_data: data });
+    await cleanup(db, Date.now() + 77 * 86400 * 1000);
+    assert.equal((await db.prepare("SELECT COUNT(*) AS n FROM shared_training").first()).n, 0, "76 días sin actualizar");
+});

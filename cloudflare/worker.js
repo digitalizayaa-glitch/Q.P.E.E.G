@@ -11,6 +11,8 @@
       POST /rest/v1/rpc/qpeeg_snapshot   { p_id }                 → (vacío)   guarda ya una copia de la versión actual
       POST /rest/v1/rpc/qpeeg_retire     { p_id }                 → (vacío)   la cuenta cambió de código: se borra y queda dada de baja
       POST /rest/v1/rpc/qpeeg_error      { p_msg, p_stack, p_ver, p_ua } → (vacío)   error anónimo de la app (sin datos de cuentas)
+      POST /rest/v1/rpc/qpeeg_share      { p_id, p_ver, p_data }  → (vacío) | -3   datos de entrenamiento que el usuario aceptó compartir
+                                                                          (id anónimo propio, no el de la cuenta; p_data null = borrarlos)
     Una cuenta dada de baja responde [{ gone: true }] a qpeeg_get y -2 a qpeeg_put (no se puede volver a crear).
     Límites: 1 MB por cuenta (413 si se pasa) y no se crean cuentas nuevas si los datos pasan de 400 MB (-3).
     Una vez al día (cron) se borran las cuentas sin uso en 76 días (2 meses y medio) con sus copias.
@@ -30,6 +32,8 @@ const SNAP_EVERY = 3 * 3600 * 1000;  /* como mucho una copia cada 3 horas… */
 const SNAP_KEEP = 20;                /* …y se guardan las últimas 20 */
 const ERRORS_KEEP = 300;             /* errores distintos guardados como mucho (los repetidos solo suman) */
 const ERRORS_DAYS = 60;              /* y se borran a los 60 días sin repetirse */
+const MAX_SHARE = 300_000;           /* datos de entrenamiento compartidos: uno por teléfono, se reemplaza */
+const SHARE_TOTAL = 100_000_000;     /* tope de todo lo compartido */
 const ALLOWED_ORIGINS = [
     "https://digitalizayaa-glitch.github.io",
     "http://localhost:8080"
@@ -140,6 +144,23 @@ export const handlers = {
         return undefined;
     },
 
+    /* Solo si el usuario lo aceptó en la app. Sin cifrar (es para estudiarlo), sin código ni cuenta */
+    async qpeeg_share(db, a) {
+        const id = needId(a.p_id);
+        if (a.p_data === null || a.p_data === undefined) {
+            await db.prepare("DELETE FROM shared_training WHERE id = ?").bind(id).run();
+            return undefined;
+        }
+        const data = needText(a.p_data, MAX_SHARE, "datos");
+        JSON.parse(data);                                            /* SyntaxError → 400 */
+        const ver = typeof a.p_ver === "string" ? a.p_ver.slice(0, 20) : "?";
+        const used = await db.prepare("SELECT COALESCE(SUM(LENGTH(data)), 0) AS n FROM shared_training WHERE id <> ?").bind(id).first();
+        if (used && used.n + data.length > SHARE_TOTAL) return -3;
+        await db.prepare("INSERT INTO shared_training (id, ver, data, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET ver = excluded.ver, data = excluded.data, updated_at = excluded.updated_at")
+            .bind(id, ver, data, Date.now()).run();
+        return undefined;
+    },
+
     async qpeeg_pair_put(db, a) {
         const id = needId(a.p_id);
         const payload = needText(a.p_payload, MAX_PAYLOAD, "payload");
@@ -169,7 +190,8 @@ export async function cleanup(db, now = Date.now()) {
         db.prepare(`DELETE FROM vault_history WHERE id IN (${old})`).bind(limit),
         db.prepare("DELETE FROM vaults WHERE COALESCE(seen_at, updated_at) < ?").bind(limit),
         db.prepare("DELETE FROM pairs WHERE expires_at < ?").bind(now),
-        db.prepare("DELETE FROM app_errors WHERE last_at < ?").bind(now - ERRORS_DAYS * 86400 * 1000)
+        db.prepare("DELETE FROM app_errors WHERE last_at < ?").bind(now - ERRORS_DAYS * 86400 * 1000),
+        db.prepare("DELETE FROM shared_training WHERE updated_at < ?").bind(limit)
     ]);
     return gone ? gone.n : 0;
 }

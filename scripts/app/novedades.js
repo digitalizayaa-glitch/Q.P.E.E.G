@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     await stateReady;
+    await consentReady;             /* primero el formulario de acuerdos, si falta */
     let seen = null;
     try { seen = localStorage.getItem(SEEN_VERSION_KEY); } catch (e) { /* nada */ }
     if (seen === APP_VERSION) return;

@@ -12,7 +12,7 @@ URL = f"http://localhost:{PORT}/index.html"
 
 # Las pruebas no son sobre el aviso de novedades: se marca la versión actual como ya vista
 _VER = re.search(r'APP_VERSION = "([^"]+)"', open(os.path.join(ROOT, "scripts/core/version.js")).read()).group(1)
-SEEN = "localStorage.setItem('qpeeg_seen_version', '%s');" % _VER
+SEEN = "localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false})); localStorage.setItem('qpeeg_seen_version', '%s');" % _VER
 KEY = "qpeeg_state_v1"
 
 V1_STATE = {  # datos tal como los guardaba la versión anterior (sin "meta")

@@ -13,11 +13,11 @@ SHOTS = os.environ.get("SHOTS")
 DATA = {"routines": [{"id": "r1", "name": "Push", "days": []}], "logs": {}, "food": {"log": {}}, "achievements": []}
 
 
-def page(b, errors, data=None, seen=None):
+def page(b, errors, data=None, seen=None, consent=True):
     ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
     pg = ctx.new_page()
     pg.on("pageerror", lambda e: errors.append(str(e)))
-    init = ""
+    init = "localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false}));" if consent else ""
     if data: init += "if(!localStorage.getItem('qpeeg_state_v1'))localStorage.setItem('qpeeg_state_v1',%s);" % json.dumps(json.dumps(data))
     if seen: init += "if(!sessionStorage.getItem('x')){sessionStorage.setItem('x',1);localStorage.setItem('qpeeg_seen_version','%s');}" % seen
     if init: pg.add_init_script(init)
@@ -58,6 +58,32 @@ def main():
             # Instalación nueva: sin aviso
             ctx, pg = page(b, errors)
             r["nuevo_sin_aviso"] = not dialog(pg)
+            ctx.close()
+
+            # Primera vez: formulario "Importante" que no se cierra sin aceptar lo obligatorio; compartir es opcional
+            ctx, pg = page(b, errors, DATA, seen=None, consent=False)
+            form = pg.locator(".agree-sheet")
+            r["acuerdos_primera_vez"] = form.count() == 1 and "Importante" in form.locator(".picker-title").inner_text() and not dialog(pg)
+            ok = form.locator(".dialog-btn.accept")
+            r["acuerdos_sin_cerrar"] = ok.is_disabled() and not form.locator(".picker-close").is_visible()
+            pg.keyboard.press("Escape"); pg.mouse.click(5, 5); pg.wait_for_timeout(400)
+            r["acuerdos_no_se_escapa"] = pg.locator(".agree-sheet").count() == 1
+            if SHOTS: pg.screenshot(path=f"{SHOTS}/acuerdos.png")
+            checks = form.locator(".agree-check")
+            checks.nth(1).click(); checks.nth(2).click(); pg.wait_for_timeout(200)
+            r["acuerdos_opcional"] = not ok.is_disabled() and checks.nth(0).get_attribute("aria-checked") == "false"
+            ok.click(); pg.wait_for_timeout(1200)
+            c = pg.evaluate("JSON.parse(localStorage.getItem('qpeeg_consent'))")
+            r["acuerdos_guardados"] = c["v"] == 1 and c["share"] is False
+            r["novedades_despues"] = dialog(pg)                      # quien ya usaba la app ve después las novedades
+            pg.reload(); pg.wait_for_timeout(1300)
+            r["acuerdos_una_vez"] = pg.locator(".agree-sheet").count() == 0
+            pg.evaluate("openSettings()"); pg.wait_for_timeout(500)
+            pg.locator(".dialog-btn", has_text="Mis acuerdos").click(); pg.wait_for_timeout(500)
+            pg.locator(".agree-sheet .agree-check").nth(0).click()
+            pg.locator(".agree-sheet .dialog-btn.accept", has_text="Guardar").click(); pg.wait_for_timeout(500)
+            r["compartir_desde_ajustes"] = pg.evaluate("getConsent().share") is True and \
+                "Compartes" in pg.locator(".settings-sheet").inner_text()
             ctx.close()
 
             # Venía de una versión anterior ya registrada: ve lo nuevo

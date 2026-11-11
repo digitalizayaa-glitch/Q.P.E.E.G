@@ -181,7 +181,8 @@ function sheetCollapse(sheet, ms) {
 
 /* Ventana flotante genérica con título y ✕ (test TDEE, resultado, plan, historial de comida).
    Se cierra con ✕, Escape o tocando fuera. Devuelve { sheet, close }. */
-function openSheet(className, title, onClose) {
+/* locked: sin ✕, sin cerrar con Escape ni tocando fuera (hay que usar sus botones) */
+function openSheet(className, title, onClose, { locked = false } = {}) {
     const overlay = document.createElement("div");
     overlay.className = "picker-overlay";
     const sheet = document.createElement("div");
@@ -215,7 +216,7 @@ function openSheet(className, title, onClose) {
     };
     /* Escape cierra solo la ventana de más arriba (no si hay otra encima o si se está escribiendo) */
     const onKey = e => {
-        if (e.key !== "Escape" || dialogOverlay || stepperOverlay || pickerOverlay) return;
+        if (e.key !== "Escape" || locked || dialogOverlay || stepperOverlay || pickerOverlay) return;
         if (e.target.closest && e.target.closest("input, textarea")) return;
         if (overlay !== [...document.querySelectorAll(".picker-overlay")].pop()) return;
         e.preventDefault();
@@ -223,7 +224,8 @@ function openSheet(className, title, onClose) {
     };
     window.addEventListener("keydown", onKey, true);
     closeBtn.onclick = close;
-    overlay.addEventListener("pointerdown", e => { if (e.target === overlay) close(); });
+    closeBtn.hidden = locked;
+    overlay.addEventListener("pointerdown", e => { if (e.target === overlay && !locked) close(); });
 
     document.body.appendChild(overlay);
     overlay.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: "ease-out" });

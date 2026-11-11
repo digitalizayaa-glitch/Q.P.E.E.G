@@ -45,3 +45,12 @@ CREATE TABLE IF NOT EXISTS app_errors (
     first_at    INTEGER NOT NULL,
     last_at     INTEGER NOT NULL
 );
+
+-- Datos de entrenamiento que el usuario aceptó compartir (opcional, se puede retirar).
+-- id: anónimo y propio de cada teléfono (no es el de la cuenta). Se borra a los 76 días sin actualizarse.
+CREATE TABLE IF NOT EXISTS shared_training (
+    id          TEXT PRIMARY KEY,
+    ver         TEXT NOT NULL,
+    data        TEXT NOT NULL,
+    updated_at  INTEGER NOT NULL
+);
