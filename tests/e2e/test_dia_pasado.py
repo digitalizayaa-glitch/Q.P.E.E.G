@@ -69,12 +69,16 @@ def main():
             r["comida_sigue"] = pg.evaluate("foodKey()") == PK
 
             # "Hoy" vuelve a hoy en todas
-            pg.locator("#todayBtn").click(); pg.wait_for_timeout(500)
+            pg.locator("#todayBtn").click()
+            try: pg.wait_for_function("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()", timeout=4000); pg.wait_for_timeout(300)
+            except Exception: pass
             r["hoy_vuelve"] = pg.evaluate("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()") and not today_btn()
 
             # Desde el calendario de entreno lleva al día y también a su comida
             pg.evaluate(f"setViewDate(null); showSection('history'); historyMode = 'workout'; openHistoryDay('{PK}')"); pg.wait_for_timeout(600)
-            pg.evaluate("showSection('food')"); pg.wait_for_timeout(300)
+            pg.evaluate("showSection('food')")
+            try: pg.wait_for_function(f"foodKey() === '{PK}'", timeout=4000)
+            except Exception: pass
             r["entreno_luego_comida_mismo_dia"] = pg.evaluate("foodKey()") == PK
             ctx.close(); b.close()
     finally:
