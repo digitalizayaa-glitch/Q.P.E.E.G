@@ -48,11 +48,11 @@ def main():
             pg.goto(URL); pg.evaluate(f"localStorage.setItem('{KEY}', {json.dumps(json.dumps(V1_STATE))})")
             pg.reload(); pg.wait_for_function("document.readyState==='complete'"); pg.wait_for_timeout(600)
             idb = pg.evaluate(READ_IDB)
-            for _ in range(20):   # la copia a IndexedDB puede tardar un poco más que la carga
+            for _ in range(60):   # la copia a IndexedDB puede tardar un poco más que la carga (sobre todo en Safari)
                 if idb and "r1" in idb["state"].get("logs", {}): break
-                pg.wait_for_timeout(150); idb = pg.evaluate(READ_IDB)
+                pg.wait_for_timeout(200); idb = pg.evaluate(READ_IDB)
             results["migra_v1"] = bool(idb) and idb["state"]["meta"]["schema"] == 2 and len(idb["state"]["routines"]) == 1
-            results["conserva_registro"] = bool(idb) and idb["state"]["logs"]["r1"]["2026-11-02"]["exercises"]["e1"]["reps"] == [10, 9, 8]
+            results["conserva_registro"] = bool(idb) and "r1" in idb["state"].get("logs", {}) and idb["state"]["logs"]["r1"]["2026-11-02"]["exercises"]["e1"]["reps"] == [10, 9, 8]
             results["tema_claro"] = pg.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
 
             # 2) Se borra localStorage → los datos vuelven desde IndexedDB
