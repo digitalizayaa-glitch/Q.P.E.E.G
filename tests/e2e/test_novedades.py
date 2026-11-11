@@ -34,9 +34,11 @@ def main():
     r, errors = {}, []
     try:
         with sync_playwright() as p:
-            opts = {"args": ["--no-sandbox", "--no-proxy-server"]}
-            if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
-            b = p.chromium.launch(**opts)
+            # BROWSER=webkit prueba con el motor de Safari (iPhone); por defecto Chromium
+            engine = os.environ.get("BROWSER", "chromium")
+            opts = {"args": ["--no-sandbox", "--no-proxy-server"]} if engine == "chromium" else {}
+            if os.environ.get("CHROME") and engine == "chromium": opts["executable_path"] = os.environ["CHROME"]
+            b = getattr(p, engine).launch(**opts)
             version = None
 
             # Quien ya usaba la app recibe la actualización: ve las novedades una vez

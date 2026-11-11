@@ -30,9 +30,11 @@ def main():
     r, errors = {}, []
     try:
         with sync_playwright() as p:
-            opts = {"args": ["--no-sandbox", "--no-proxy-server"]}
-            if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
-            b = p.chromium.launch(**opts)
+            # BROWSER=webkit prueba con el motor de Safari (iPhone); por defecto Chromium
+            engine = os.environ.get("BROWSER", "chromium")
+            opts = {"args": ["--no-sandbox", "--no-proxy-server"]} if engine == "chromium" else {}
+            if os.environ.get("CHROME") and engine == "chromium": opts["executable_path"] = os.environ["CHROME"]
+            b = getattr(p, engine).launch(**opts)
             ctx = b.new_context(viewport={"width": 390, "height": 844})
             ctx.add_init_script(SEEN)
             pg = ctx.new_page()
