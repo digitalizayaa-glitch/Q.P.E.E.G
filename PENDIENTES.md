@@ -4,16 +4,14 @@ Lista de trabajo apuntado para más adelante (actualizada en la versión 2.0.0, 
 
 ## Fase A — Cuentas seguras ✅ (1.11.0)
 - Hecho: el código ya no une cuentas (entrar con un código = usar esa cuenta), versiones anteriores en el servidor y "Cambiar mi código".
-- Pendiente del usuario: cambiar el código de las 2 cuentas cuyos códigos se escribieron en un chat.
 
 ## Fase B — Servidor ✅ (1.12.0)
 - Hecho: tope de 1 MB por cuenta y de 400 MB en total para cuentas nuevas, sin consulta cada 90 s, y limpieza diaria de cuentas sin uso en 2 meses y medio.
-- Pendiente (opcional): límite de peticiones por cliente (rate limit) si algún día hay abuso.
+- Tope de peticiones por IP: hecho en la 2.0.
 
 ## Fase C — Calidad ✅ (1.13.0)
 - Hecho: registro de errores anónimo, auditoría de accesibilidad (contraste AA, área de toque, nombres para lectores de pantalla, calendario descrito en palabras) y pruebas de interfaz en WebKit (Safari) en cada publicación.
 - Mínimo: iOS 15.4; la sincronización comprimida necesita iOS 16.4 (marzo 2023).
-- Pendiente (opcional): probar a mano en un iPhone real (instalar desde Safari → Compartir → "Añadir a pantalla de inicio").
 
 ## Fase D — Publicación ✅ (2.0.0)
 - Hecho: textos legales y acuerdos (1.15.0), guía para instalar y mudanza (1.16.0), y la app publicada en Cloudflare:
@@ -33,10 +31,5 @@ Lo que se encontró y se corrigió para publicar la 2.0:
 9. Carpeta `supabase/` sin uso, README y LEEME desactualizados, manifest con descripción vieja → limpiado y al día.
 10. La prueba de sincronización fallaba sin avisar desde la 1.15.0 (dos secciones de Ajustes con la misma clase) → corregida; ahora se revisan también los cierres inesperados.
 
-Pendiente (no bloquea):
-- Del dueño: cambiar el código de las 2 cuentas cuyos códigos se escribieron en un chat.
-- Cuando ya nadie use la dirección anterior: quitar el aviso de mudanza, borrar el Worker `qpeeg-sync` y desactivar GitHub Pages.
-- Opcional: dominio propio (por ejemplo qpeeg.app); al cambiar de dominio los datos del teléfono no se mudan solos (hace falta el código de cuenta).
-- Opcional: que Cloudflare publique solo si pasan las pruebas de GitHub Actions (hoy publica en cada push; las pruebas se corren antes a mano).
-- Opcional: probar a mano en un iPhone real.
-- Tabla `vault_backups` en la base: copia manual de cuando se separaron dos cuentas; borrarla cuando ya no haga falta.
+Pendientes de la 2.0: dados por realizados por el dueño el 11 de noviembre de 2026 (cambio de códigos, retiro de la
+dirección anterior, dominio propio, pruebas antes de publicar, prueba en iPhone y tabla `vault_backups`). No queda nada abierto.

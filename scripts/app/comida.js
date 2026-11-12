@@ -63,7 +63,7 @@ const FOOD_CATALOG = {
         ["Nochis (crudo)", "1/3 taza (21 g)"],
         ["Cereal Allinklusive ZERO", "1/4 taza (26 g)"],
         ["Cereal (Cheerios, Zucaritas…)", "1/4 taza (20 g)"],
-        ["Cereal Trijuelas", "1/4 taza (17,5 g)"],
+        ["Cereal Trijuelas", "1/3 taza (17,5 g)"],
         ["Pan cuadrado blanco Bimbo", "1 rebanada (31 g)", "rebanadas", 1],
         ["Pan / Bollitos Ruiseñor", "1 unidad"],
         ["Pan Thins Bimbo", "1 pieza"],
