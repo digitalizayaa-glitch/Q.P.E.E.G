@@ -132,7 +132,9 @@ const FOOD_CATALOG = {
         ["Aceite (oliva, coco, canola…)", "1 cdta (5 g)"],
         ["Aguacate / Aceitunas", "1/4 o 2 cdas (30 g)"],
         ["Maní natural o con sal", "10 u o 1 cdta (8 g)"],
-        ["Mantequilla de maní / almendra", "1 cdta (8 g)"],
+        ["Mantequilla de maní Jif", "1 cda (16 g) = 2 porciones", "cdas", 2],               /* 2 cdas (33 g) = 190 kcal */
+        ["Mantequilla de maní Member's Selection", "1 cda (16 g) = 2 porciones", "cdas", 2], /* 2 cdas (32 g) = 190 kcal */
+        ["Mantequilla de almendra", "1/2 cda (8 g)"],
         ["Mantequilla normal", "1 cdta (6 g)"],
         ["Mantequilla Light Dos Pinos", "2 cdtas (11 g)"],
         ["Almendra / Marañón", "8 unidades"],
