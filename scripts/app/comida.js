@@ -115,6 +115,10 @@ const FOOD_CATALOG = {
         ["Huevo (completo)", "1 unidad"],
         ["Carne de res (+15% grasa)", "28 g"],
         ["Cerdo (chuleta / beef steak)", "30 g"],
+        ["Costilla de cerdo al horno o a la parrilla", "25 g (sin hueso)"],
+        ["Costilla de cerdo en salsa BBQ", "35 g (sin hueso)"],
+        ["Costilla de cerdo frita o en olla", "25 g (sin hueso)"],
+        ["Costilla de res en olla o en sopa", "25 g (sin hueso)"],
         ["Tocineta", "1,5 unidades"],
         ["Salchicha de pavo", "1 unidad"],
         ["Nuggets de pollo Pipasa", "40 g"],
@@ -252,6 +256,12 @@ const FOOD_CALIBRATION = {
     "Yogurt griego de sabor":                         { k: 150, c: 18,   p: 14,   f: 2,   pt: { l: 1, bg: 1 } },
     "Yogurt natural Dos Pinos":                       { k: 101, c: 7.8,  p: 5.8,  f: 5.4, pt: { l: 1 } },
     "Yogurt de sabor con azúcar (batido o bebible)":  { k: 163, c: 30.7, p: 6.6,  f: 1.8, pt: { l: 0.5, h: 1.5 } },
+
+    /* Costillas (USDA, carne sin hueso, grasa incluida). La de res es la más grasosa. */
+    "Costilla de cerdo al horno o a la parrilla": { k: 73,  c: 0,   p: 5.8, f: 5.4,  pt: { mg: 1 } },
+    "Costilla de cerdo en salsa BBQ":             { k: 120, c: 4.5, p: 7.5, f: 7.8,  pt: { mg: 1, h: 0.5 } },
+    "Costilla de cerdo frita o en olla":          { k: 99,  c: 0,   p: 7.3, f: 7.6,  pt: { mg: 1, g: 0.5 } },
+    "Costilla de res en olla o en sopa":          { k: 118, c: 0,   p: 5.4, f: 10.5, pt: { mg: 1, g: 1 } },
 
     /* Chicharritos: de cerdo (proteína y grasa) o de harina/maíz (harina y grasa) */
     "Chicharritos Jacks de cerdo (chicharrón)":  { k: 82, c: 0, p: 9.2, f: 4.7, pt: { mg: 1 } },
