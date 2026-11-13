@@ -29,6 +29,8 @@ if ("serviceWorker" in navigator) {
 
 const STORAGE_KEY = "qpeeg_state_v1";
 const THEME_KEY = "qpeeg_theme";   /* solo el tema, para pintar el fondo correcto antes de cargar nada */
+const FONT_KEY = "qpeeg_font";     /* igual con la fuente (tema.js la pone antes de pintar) */
+const APP_FONTS = ["atkinson", "grotesk", "saira"];   /* la primera vez (sin datos ni cuenta) sale una al azar */
 
 const DEFAULT_STATE = {
     photo: null,
@@ -69,11 +71,24 @@ function stateFrom(parsed) {
     if (!parsed) {
         const s = structuredClone(DEFAULT_STATE);
         s.meta.device = QStore.newId();
+        s.settings.font = firstFont();
         return s;
     }
     const migrated = QStore.migrate(parsed);
     try { return freezeOldPlans(sanitizeState(migrated)); }
     catch (e) { return Object.assign(structuredClone(DEFAULT_STATE), migrated); }   /* nunca perder los datos guardados */
+}
+
+/* App nueva: una fuente al azar entre las de la app. Se recuerda aparte para que no cambie
+   en cada apertura antes del primer guardado. */
+function firstFont() {
+    let f = null;
+    try { f = localStorage.getItem(FONT_KEY); } catch (e) { f = null; }
+    if (!APP_FONTS.includes(f) && f !== "arial") {
+        f = APP_FONTS[Math.floor(Math.random() * APP_FONTS.length)];
+        try { localStorage.setItem(FONT_KEY, f); } catch (e) { /* nada */ }
+    }
+    return f;
 }
 
 async function hydrateState() {
@@ -275,6 +290,7 @@ function saveState() {
     let localOk = true;
     try { localStorage.setItem(STORAGE_KEY, json); } catch (e) { localOk = false; }
     try { localStorage.setItem(THEME_KEY, state.settings.theme === "light" ? "light" : "dark"); } catch (e) { /* nada */ }
+    try { localStorage.setItem(FONT_KEY, state.settings.font || "arial"); } catch (e) { /* nada */ }
     if (typeof scheduleSync === "function") scheduleSync();   /* cuenta.js: sube el cambio en unos segundos */
     return QStore.queueSave(json, state.meta.savedAt).then(idbOk => {
         if (!idbOk && !localOk && !saveWarned) {

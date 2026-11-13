@@ -2,11 +2,25 @@
     BASE
 ========================================================= */
 
+/* Fuentes de la app (Ajustes → Fuente). Vienen igualadas a Arial en ancho y alto de línea
+   (tools/fuentes.py), así cambiar de fuente no mueve ningún renglón. Licencia SIL OFL (fonts/). */
+@font-face { font-family: "QP Atkinson"; src: url("../fonts/atkinson-400.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Atkinson"; src: url("../fonts/atkinson-700.woff") format("woff"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Grotesk"; src: url("../fonts/grotesk-400.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Grotesk"; src: url("../fonts/grotesk-700.woff") format("woff"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Saira"; src: url("../fonts/saira-400.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Saira"; src: url("../fonts/saira-700.woff") format("woff"); font-weight: 700; font-style: normal; font-display: swap; }
+
+:root { --app-font: Arial, sans-serif; }
+:root[data-font="atkinson"] { --app-font: "QP Atkinson", Arial, sans-serif; }
+:root[data-font="grotesk"]  { --app-font: "QP Grotesk", Arial, sans-serif; }
+:root[data-font="saira"]    { --app-font: "QP Saira", Arial, sans-serif; }
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: var(--app-font);
 }
 
 :root {
@@ -1006,6 +1020,27 @@ main { overflow-x: hidden; }
     color: var(--muted); cursor: pointer;
 }
 .settings-btn svg { width: 22px; height: 22px; }
+
+/* Globo "Personaliza": apunta a la tuerca hasta que se abre Ajustes por primera vez */
+.settings-tip {
+    position: absolute; top: calc(66px + env(safe-area-inset-top, 0px)); right: 8px; z-index: 2;
+    padding: 6px 11px; border-radius: 8px; font-size: 13px; font-weight: bold; white-space: nowrap;
+    background: var(--text); color: var(--bg); pointer-events: none;
+    animation: tip-in .4s cubic-bezier(.2,.8,.2,1) both, tip-float 2.4s ease-in-out .4s infinite;
+}
+.settings-tip::after {
+    content: ""; position: absolute; bottom: 100%; right: 19px;
+    border: 6px solid transparent; border-bottom-color: var(--text);
+}
+@keyframes tip-in { from { opacity: 0; transform: translateY(6px) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes tip-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .settings-tip { animation: tip-in .01s both; } }
+.font-btn[data-f="atkinson"] { font-family: "QP Atkinson", Arial, sans-serif; }
+.font-btn[data-f="grotesk"]  { font-family: "QP Grotesk", Arial, sans-serif; }
+.font-btn[data-f="saira"]    { font-family: "QP Saira", Arial, sans-serif; }
+.font-btn[data-f="arial"]    { font-family: Arial, sans-serif; }
+.seg.seg-wrap { flex-wrap: wrap; }
+.seg.seg-wrap .seg-btn { flex: 1 1 calc(50% - 4px); }
 .settings-btn:active { background: var(--glass-bg-strong); color: var(--text); }
 .landing { position: relative; }
 

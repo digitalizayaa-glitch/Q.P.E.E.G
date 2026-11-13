@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "2.0.4";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "2.1.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "2.1.0",
+        items: [
+            "Nuevo en Ajustes: elige la fuente de la app entre Atkinson, Grotesk, Saira y Arial. Cada botón se ve con su propia letra.",
+            "Las fuentes nuevas miden igual que Arial, así que la app se ve igual de ordenada con cualquiera.",
+            "Al instalar la app por primera vez te toca una de las tres al azar, y un globo junto a la tuerca te invita a personalizarla."
+        ]
+    },
     {
         v: "2.0.0",
         items: [

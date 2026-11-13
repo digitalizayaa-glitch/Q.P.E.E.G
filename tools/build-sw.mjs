@@ -2,7 +2,8 @@
 /* Genera la lista de archivos y el nombre de caché del service worker.
    Uso:  node tools/build-sw.mjs          → reescribe service-worker.js
          node tools/build-sw.mjs --check  → falla si service-worker.js no está al día (CI)
-   Los archivos salen de index.html (scripts, estilos, iconos) más el manifest y sus iconos. */
+   Los archivos salen de index.html (scripts, estilos, iconos), de las url() de las hojas de estilo
+   (fuentes) y del manifest y sus iconos. */
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -17,6 +18,13 @@ const refs = new Set(["index.html", "manifest.json"]);
 for (const m of html.matchAll(/(?:src|href)="([^"#?:]+)"/g)) {
     const p = m[1].replace(/^\.\//, "");
     if (existsSync(join(ROOT, p))) refs.add(p);
+}
+/* Archivos que pide la hoja de estilos (fuentes) */
+for (const css of [...refs].filter(f => f.endsWith(".css"))) {
+    for (const m of read(css).toString().matchAll(/url\("?([^")#?:]+)"?\)/g)) {
+        const p = join(dirname(css), m[1]).replace(/\\/g, "/");
+        if (existsSync(join(ROOT, p))) refs.add(p);
+    }
 }
 const manifest = JSON.parse(read("manifest.json"));
 for (const icon of manifest.icons || []) refs.add(icon.src.replace(/^\.\//, ""));

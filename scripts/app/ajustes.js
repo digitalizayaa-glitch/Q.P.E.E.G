@@ -1,6 +1,6 @@
 /* =========================================================
     AJUSTES DE ESTILO: tema claro/oscuro, color del destello y foto de perfil
-    Se guardan en state.settings = { theme, glow }.
+    Se guardan en state.settings = { theme, glow, bright, speed, font }.
 ========================================================= */
 
 const GLOW_PALETTES = [
@@ -15,8 +15,13 @@ const GLOW_PALETTES = [
     { id: "gris",     name: "Gris",     g1: "160, 160, 170", g2: "110, 110, 120" }
 ];
 
+/* Fuentes (todas igualadas a Arial: cambiar no mueve los renglones). Datos viejos sin fuente → Arial. */
+const FONT_OPTIONS = [["atkinson", "Atkinson"], ["grotesk", "Grotesk"], ["saira", "Saira"], ["arial", "Arial"]];
+const SETTINGS_TIP_KEY = "qpeeg_tip_settings";   /* el globo "Personaliza" ya no sale después de abrir Ajustes */
+
 function getSettings() {
-    state.settings = Object.assign({ theme: "dark", glow: "verde", bright: "mid", speed: "mid" }, state.settings || {});
+    state.settings = Object.assign({ theme: "dark", glow: "verde", bright: "mid", speed: "mid", font: "arial" }, state.settings || {});
+    if (!FONT_OPTIONS.some(([id]) => id === state.settings.font)) state.settings.font = "arial";
     return state.settings;
 }
 
@@ -32,6 +37,8 @@ function applySettings() {
 
     if (st.theme === "light") root.dataset.theme = "light";
     else delete root.dataset.theme;
+    if (st.font !== "arial") root.dataset.font = st.font;
+    else delete root.dataset.font;
 
     root.style.setProperty("--glow1", palette.g1);
     root.style.setProperty("--glow2", palette.g2);
@@ -57,6 +64,7 @@ let settingsOverlay = null;
 function openSettings() {
     if (settingsOverlay) return;
     const st = getSettings();
+    hideSettingsTip(true);
 
     const overlay = document.createElement("div");
     overlay.className = "picker-overlay";
@@ -94,6 +102,25 @@ function openSettings() {
         seg.appendChild(b);
     });
     sheet.append(label("Tema"), seg);
+
+    /* Fuente: cada botón se ve con su propia letra */
+    const fonts = document.createElement("div");
+    fonts.className = "seg seg-wrap settings-font";
+    FONT_OPTIONS.forEach(([value, text]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "seg-btn font-btn" + (st.font === value ? " active" : "");
+        b.dataset.f = value;
+        b.textContent = text;
+        b.onclick = () => {
+            getSettings().font = value;
+            saveState();
+            applySettings();
+            fonts.querySelectorAll(".seg-btn").forEach(x => x.classList.toggle("active", x === b));
+        };
+        fonts.appendChild(b);
+    });
+    sheet.append(label("Fuente"), fonts);
 
     /* Color del destello */
     const swatches = document.createElement("div");
@@ -292,8 +319,23 @@ function renderProfile() {
     plus.style.display = useAvatar || usePhoto ? "none" : "";
 }
 
+/* Globo "Personaliza" junto a la tuerca: sale hasta la primera vez que se abre Ajustes */
+function hideSettingsTip(forever) {
+    const tip = document.getElementById("settingsTip");
+    if (tip) tip.hidden = true;
+    if (forever) try { localStorage.setItem(SETTINGS_TIP_KEY, "1"); } catch (e) { /* nada */ }
+}
+
+function showSettingsTip() {
+    let seen = false;
+    try { seen = !!localStorage.getItem(SETTINGS_TIP_KEY); } catch (e) { seen = true; }
+    const tip = document.getElementById("settingsTip");
+    if (tip && !seen) tip.hidden = false;
+}
+
 applySettings();
 document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("settingsBtn");
     if (btn) btn.addEventListener("click", openSettings);
+    showSettingsTip();
 });
