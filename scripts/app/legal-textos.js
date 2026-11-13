@@ -4,7 +4,7 @@
     Si cambian los acuerdos, sube LEGAL_VERSION: el formulario vuelve a salir.
 ========================================================= */
 
-const LEGAL_UPDATED = "11 de noviembre de 2026";
+const LEGAL_UPDATED = "13 de noviembre de 2026";
 const LEGAL_CONTACT = "digitalizayaa@gmail.com";
 const LEGAL_VERSION = 1;          /* subirlo si cambian los acuerdos: el formulario vuelve a salir */
 
@@ -19,7 +19,7 @@ const LEGAL = {
             ["Si usas un código de cuenta",
                 "Tus datos se cifran en tu teléfono con una clave que sale de tu código antes de enviarse. El servidor solo guarda ese bloque cifrado: no puede ver tus rutinas, comidas, peso ni foto. Tampoco pedimos correo, nombre ni contraseña. Por eso, si pierdes el código, nadie puede recuperar tu cuenta.\n\nEl servidor guarda además hasta 20 copias anteriores de tu cuenta (como mucho una cada 3 horas), también cifradas, para que puedas volver a una versión de antes. Los códigos temporales para pasar la cuenta a otro teléfono se borran a los 10 minutos."],
             ["Compartir datos de entrenamiento (opcional)",
-                "Si lo aceptas, una vez al día se envía una copia de tus rutinas, entrenos (ejercicios, series, repeticiones y pesos) y deportes. Va sin cifrar para poder estudiarla, pero sin tu código, sin tu cuenta, sin tus comidas, sin tu plan ni tu foto: solo con un número al azar de este teléfono. Se usa únicamente para desarrollar y mejorar Q.P.E.E.G; no se vende ni se comparte con nadie.\n\nPuedes quitarlo cuando quieras en Ajustes → Privacidad y salud → Mis acuerdos, y lo que compartiste se borra del servidor. Si no abres la app en 76 días, también se borra."],
+                "Si lo aceptas, una vez al día se envía una copia de tus rutinas, entrenos (ejercicios, series, repeticiones y pesos) y deportes. Va sin cifrar para poder estudiarla, pero sin tu código, sin tu cuenta, sin tus comidas, sin tu plan ni tu foto: solo con un número anónimo. Si tienes código, ese número sale de tu clave para que todos tus teléfonos cuenten como uno, pero no se puede relacionar con tu cuenta en el servidor; si no tienes, es un número al azar de este teléfono. Se usa únicamente para desarrollar y mejorar Q.P.E.E.G; no se vende ni se comparte con nadie.\n\nPuedes quitarlo cuando quieras en Ajustes → Privacidad y salud → Mis acuerdos, y lo que compartiste se borra del servidor. Si no abres la app en 76 días, también se borra."],
             ["Errores de la app",
                 "Si la app falla, envía un informe técnico anónimo: el mensaje del error, la versión de la app y el sistema y navegador (por ejemplo, \"Android 14 · Chrome 130\"). No incluye tu código, tu cuenta ni nada de lo que registras. Los informes se borran a los 60 días si el error no se repite."],
             ["Quién da el servicio",

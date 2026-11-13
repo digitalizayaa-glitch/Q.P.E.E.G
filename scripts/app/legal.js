@@ -4,7 +4,9 @@
       compartir datos de entrenamiento (opcional), aceptar la política y entender el aviso de salud.
       Se cambia después en Ajustes → Privacidad y salud → Mis acuerdos.
     - Compartir datos: si se acepta, una vez al día se envían rutinas, entrenos y deportes con un id
-      anónimo de este teléfono (no el de la cuenta). Al quitarlo se borran del servidor.
+      anónimo. Con cuenta, el id sale de la clave de la cuenta (igual en todos sus teléfonos, así una
+      persona cuenta una vez) pero no se puede relacionar con la cuenta del servidor; sin cuenta, es un
+      número al azar de este teléfono. Al quitarlo se borran del servidor.
     Los textos están en legal-textos.js.
 ========================================================= */
 
@@ -21,6 +23,7 @@ const showLegal = doc => openDialog({
 const CONSENT_KEY = "qpeeg_consent";
 const SHARE_ID_KEY = "qpeeg_share_id";
 const SHARE_AT_KEY = "qpeeg_share_at";
+const SHARE_SENT_KEY = "qpeeg_share_sent";  /* id con el que está guardado en el servidor ahora */
 const SHARE_EVERY = 20 * 3600 * 1000;      /* como mucho una vez al día */
 
 const getConsent = () => {
@@ -140,7 +143,8 @@ const openAgreements = ({ first = false } = {}) => new Promise(resolve => {
 
 /* ---------- compartir datos de entrenamiento ---------- */
 
-const shareId = () => {
+/* id al azar de este teléfono (sin cuenta) */
+const deviceShareId = () => {
     let id = null;
     try { id = localStorage.getItem(SHARE_ID_KEY); } catch (e) { /* nada */ }
     if (!/^[0-9a-f]{64}$/.test(id || "")) {
@@ -148,6 +152,37 @@ const shareId = () => {
         try { localStorage.setItem(SHARE_ID_KEY, id); } catch (e) { /* nada */ }
     }
     return id;
+};
+
+/* Con cuenta: huella de la clave secreta de la cuenta (no del id del servidor), así todos los
+   teléfonos de la cuenta comparten con el mismo id y el servidor no puede unirlo con la cuenta */
+const shareId = async () => {
+    try {
+        const acc = SYNC_ON ? await loadAccount() : null;
+        if (acc && !acc.gone && acc.keyRaw) {
+            const bytes = new TextEncoder().encode("qpeeg/share/v1:" + acc.keyRaw);
+            const h = await crypto.subtle.digest("SHA-256", bytes);
+            return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+    } catch (e) { /* sin cuenta legible: el del teléfono */ }
+    return deviceShareId();
+};
+
+/* id con el que está en el servidor (los teléfonos de antes de la 2.3.2 usaban el del teléfono) */
+const sentShareId = () => {
+    let id = null;
+    try { id = localStorage.getItem(SHARE_SENT_KEY) || localStorage.getItem(SHARE_ID_KEY); } catch (e) { /* nada */ }
+    return /^[0-9a-f]{64}$/.test(id || "") ? id : null;
+};
+const setSentShareId = id => {
+    try { id ? localStorage.setItem(SHARE_SENT_KEY, id) : localStorage.removeItem(SHARE_SENT_KEY); } catch (e) { /* nada */ }
+};
+
+/* Borra del servidor lo compartido, con el id actual y con el anterior si cambió */
+const unshareAll = async () => {
+    const ids = new Set([await shareId(), sentShareId()].filter(Boolean));
+    for (const id of ids) await syncRpc("qpeeg_share", { p_id: id, p_data: null });
+    setSentShareId(null);
 };
 
 /* Solo rutinas, entrenos y deportes: nada de comida, plan, foto, ajustes ni cuenta */
@@ -160,15 +195,20 @@ const syncSharedTraining = async () => {
     sharing = true;
     try {
         if (c.share) {
+            const id = await shareId();
+            const sent = sentShareId();
             let last = 0;
             try { last = Number(localStorage.getItem(SHARE_AT_KEY)) || 0; } catch (e) { /* nada */ }
-            if (Date.now() - last < SHARE_EVERY) return;
+            /* si cambió el id (se creó, se cambió o se quitó la cuenta) se manda ya, sin esperar el día */
+            if (sent === id && Date.now() - last < SHARE_EVERY) return;
             const data = JSON.stringify(sharedTraining());
             if (data.length > 300000) return;
-            await syncRpc("qpeeg_share", { p_id: shareId(), p_ver: APP_VERSION, p_data: data });
+            await syncRpc("qpeeg_share", { p_id: id, p_ver: APP_VERSION, p_data: data });
+            if (sent && sent !== id) await syncRpc("qpeeg_share", { p_id: sent, p_data: null });
+            setSentShareId(id);
             try { localStorage.setItem(SHARE_AT_KEY, String(Date.now())); } catch (e) { /* nada */ }
         } else if (c.unshare) {
-            await syncRpc("qpeeg_share", { p_id: shareId(), p_data: null });
+            await unshareAll();
             setConsent({ ...getConsent(), unshare: false });
         }
     } catch (e) { /* sin red o servidor caído: se reintenta después */ }
@@ -204,7 +244,7 @@ const deleteMyData = async () => {
     if (!ok) return;
     if (!navigator.onLine) { await offlineMsg("borrar tu cuenta"); return; }
     try {
-        if (shared) await syncRpc("qpeeg_share", { p_id: shareId(), p_data: null });
+        if (shared) await unshareAll();
         if (hasAcc) await syncRpc("qpeeg_retire", { p_id: acc.id });
     } catch (e) {
         await showMessage({ title: "No se pudo borrar", message: "Revisa tu conexión e inténtalo de nuevo." });
