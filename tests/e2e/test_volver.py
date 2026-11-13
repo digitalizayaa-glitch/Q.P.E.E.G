@@ -64,34 +64,54 @@ def main():
             r["plan_sin_cambio_kg_lb"] = not any(x["toggle"] for x in rows) and [x["unit"] for x in rows] == ["kg", "kg", "lb"]
             r["cifras_caben_3_digitos_y_rango"] = all(x["fits"] for x in rows) and len(rows[1]["reps"]) == 5
 
-            # Deslizables: bloqueados hasta un toque; activos laten y se deslizan; 3 s sin tocar → bloqueados; 2.º toque abre el cuadro
+            # Deslizables fuera de ventanas emergentes: libres (se deslizan directo, un toque abre el cuadro)
             box = pg.locator(".workout-track .wb-card").first.locator(".wb-serie .reps-value").first
             reps = lambda: pg.evaluate("(state.logs.r1[getWorkoutDateKey()].exercises.e0 || { reps: [0] }).reps[0]")
-            def drag(dy):
-                bb = box.bounding_box(); x, y = bb["x"] + bb["width"] / 2, bb["y"] + bb["height"] / 2
+            def drag(loc, dy):
+                bb = loc.bounding_box(); x, y = bb["x"] + bb["width"] / 2, bb["y"] + bb["height"] / 2
                 pg.mouse.move(x, y); pg.mouse.down()
                 for i in range(1, 9): pg.mouse.move(x, y + dy * i / 8)
                 pg.mouse.up(); pg.wait_for_timeout(300)
-            drag(-120)
+            pg.wait_for_timeout(500)
+            r["entreno_libre"] = box.evaluate("e => e.classList.contains('value-free')")
+            drag(box, -120)
             pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); pg.wait_for_timeout(200)
-            r["bloqueado_no_cambia"] = reps() == 0 and not pg.evaluate("!!document.querySelector('.value-armed')")
-            box.click(); pg.wait_for_timeout(250)
-            armed = lambda: box.evaluate("e => e.classList.contains('value-armed')")
-            r["un_toque_activa_y_late"] = armed() and box.evaluate("e => getComputedStyle(e).animationName") == "value-armed-pulse"
-            r["sin_cuadro_al_primer_toque"] = pg.locator(".stepper-overlay, .picker-overlay").count() == 0
-            drag(-120)
-            r["activo_se_desliza"] = reps() > 0 and armed()
-            pg.wait_for_timeout(3300)
-            r["3_segundos_se_bloquea"] = not armed()
-            before = reps(); drag(-120)
-            r["bloqueado_otra_vez"] = reps() == before
-            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); pg.wait_for_timeout(200)
-            box.click(); pg.wait_for_timeout(200); box.click(); pg.wait_for_timeout(500)
-            r["dos_toques_abren_el_cuadro"] = pg.locator(".picker-overlay, .stepper-overlay").count() > 0
+            r["libre_se_desliza_directo"] = reps() > 0 and not pg.evaluate("!!document.querySelector('.value-armed')")
+            box.click(); pg.wait_for_timeout(500)
+            r["libre_un_toque_abre_el_cuadro"] = pg.locator(".picker-overlay, .stepper-overlay").count() > 0
             shot(pg, "volver_4_cuadro")
             pg.keyboard.press("Escape"); pg.wait_for_timeout(400)
             if pg.locator(".picker-overlay, .stepper-overlay").count(): pg.locator(".picker-close").first.click(); pg.wait_for_timeout(400)
             pg.evaluate("delete state.logs.r1[getWorkoutDateKey()].exercises.e0; saveState()")
+
+            # En una ventana emergente alta que se desplaza: bloqueados hasta un toque, laten suave, al soltar dejan de latir
+            pg.evaluate("""() => {
+                const { sheet } = openSheet('test-sheet', 'Prueba');
+                const wrap = document.createElement('div'); wrap.className = 'sport-form';
+                const v = document.createElement('div'); v.className = 'sport-value'; v.id = 'tv'; v.textContent = '0'; window.__tv = 0;
+                const filler = document.createElement('div'); filler.style.height = '2000px'; filler.style.flexShrink = '0';
+                wrap.append(v, filler); sheet.appendChild(wrap);
+                attachValueSwipe(v, d => { window.__tv += d; v.textContent = window.__tv; }, () => { window.__tapped = true; });
+            }""")
+            pg.wait_for_timeout(600)
+            tv = pg.locator("#tv")
+            val = lambda: pg.evaluate("window.__tv")
+            armed = lambda: tv.evaluate("e => e.classList.contains('value-armed')")
+            r["alta_bloqueada"] = not tv.evaluate("e => e.classList.contains('value-free')")
+            drag(tv, -120)
+            r["bloqueado_no_cambia"] = val() == 0 and not armed()
+            tv.click(); pg.wait_for_timeout(250)
+            r["un_toque_activa_y_late"] = armed() and tv.evaluate("e => getComputedStyle(e).animationName") == "value-armed-pulse"
+            r["sin_cuadro_al_primer_toque"] = not pg.evaluate("!!window.__tapped")
+            drag(tv, -120)
+            r["activo_se_desliza"] = val() > 0
+            r["al_soltar_deja_de_latir"] = not armed()
+            tv.click(); pg.wait_for_timeout(200); tv.click(); pg.wait_for_timeout(300)
+            r["dos_toques_abren_el_cuadro"] = pg.evaluate("!!window.__tapped")
+            tv.click(); pg.wait_for_timeout(3300)
+            r["3_segundos_se_bloquea"] = not armed()
+            pg.keyboard.press("Escape"); pg.wait_for_timeout(400)
+            if pg.locator(".picker-overlay").count(): pg.locator(".picker-close").first.click(); pg.wait_for_timeout(400)
 
             # Un ejercicio en verde y los demás sin marcar: rojo; con ✓: verde
             pg.evaluate("state.logs.r1[getWorkoutDateKey()].exercises.e0 = { kg: 40, reps: [10, 10, 10], extra: 0 }; saveState()")

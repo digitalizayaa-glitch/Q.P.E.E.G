@@ -221,7 +221,7 @@ function runTdeeTest() {
         const missing = ["age", "weight", "height"].filter(k => v[k] == null);
         if (missing.length) {
             missing.forEach(k => tiles[k].classList.add("bad"));
-            error.textContent = `Falta: ${missing.map(k => TDEE_FIELDS[k].label.toLowerCase()).join(", ")}. Toca dos veces el número.`;
+            error.textContent = `Falta: ${missing.map(k => TDEE_FIELDS[k].label.toLowerCase()).join(", ")}. Toca el número para escribirlo.`;
             return;
         }
         const profile = { age: v.age, sex: v.sex, height: v.height, weight: v.weight, activity: v.activity, bf: bfUnknown ? null : v.bf };

@@ -67,7 +67,9 @@ def main():
             pg.locator("text=Añadir deporte").click(); pg.wait_for_timeout(400)
             pg.locator(".picker-item", has_text="Ciclismo").click(); pg.wait_for_timeout(400)
             r["deporte_tres_datos"] = pg.locator(".sport-col").count() == 3 and pg.locator(".sport-col").first.locator(".sport-step").count() == 2
-            pg.locator(".sport-value").nth(1).click(); pg.wait_for_timeout(150); pg.locator(".sport-value").nth(1).click(); pg.wait_for_timeout(200); pg.keyboard.press("Control+A"); pg.keyboard.type("33"); pg.keyboard.press("Enter"); pg.wait_for_timeout(300)
+            sv = pg.locator(".sport-value").nth(1); pg.wait_for_timeout(500)
+            if not sv.evaluate("e => e.classList.contains('value-free')"): sv.click(); pg.wait_for_timeout(150)
+            sv.click(); pg.wait_for_timeout(200); pg.keyboard.press("Control+A"); pg.keyboard.type("33"); pg.keyboard.press("Enter"); pg.wait_for_timeout(300)
             want = pg.evaluate("Math.round(sportLoad({ k: 'bike', km: 33 }))")
             r["deporte_carga"] = f"Carga {want}" in pg.inner_text(".sport-load").replace("\n", " ")
             pg.locator(".sport-form .dialog-btn.accept").click(); pg.wait_for_timeout(400)

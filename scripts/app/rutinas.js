@@ -681,10 +681,11 @@ const VALUE_STEP_PX = 26;
 
 /* Deslizar sobre el número lo sube/baja (un paso cada stepPx px). Un toque corto (sin mover) llama a onTap. */
 /* Valores deslizables (kg, reps, series, rangos, deportes, metas…).
-   Para no cambiarlos sin querer al recorrer la app, empiezan bloqueados:
-   1.er toque → se activan (pulso del color de la app) y se pueden deslizar arriba/abajo;
-   2.º toque mientras están activos → abre su cuadro (onTap);
-   3 s sin tocarlos → se bloquean otra vez. Bloqueados, el gesto pasa a la página (desplazar, cambiar de ejercicio). */
+   - Fuera de ventanas emergentes, o en una ventana que no necesita desplazarse: libres. Se deslizan
+     directo y un toque abre su cuadro (onTap).
+   - En una ventana emergente alta que se desplaza: empiezan bloqueados, para no cambiarlos sin querer
+     al desplazarla. 1.er toque → se activan (pulso discreto) y se pueden deslizar; 2.º toque → abre su
+     cuadro; al soltar después de deslizar, o 3 s sin tocarlos → se bloquean otra vez. */
 const VALUE_ARM_MS = 3000;
 let armedValue = null;   /* { el, timer } — solo uno activo a la vez */
 
@@ -707,8 +708,29 @@ function armValue(el) {
 
 const isArmed = el => !!(armedValue && armedValue.el === el);
 
+/* ¿Está dentro de una ventana emergente que se desplaza (contenido más alto que la ventana)? */
+function inScrollingPopup(el) {
+    const popup = el.closest(".picker-sheet");
+    if (!popup) return false;
+    for (let n = el.parentElement; n; n = n.parentElement) {
+        if (n.scrollHeight > n.clientHeight + 2) {
+            const oy = getComputedStyle(n).overflowY;
+            if (oy === "auto" || oy === "scroll") return true;
+        }
+        if (n === popup) break;
+    }
+    return false;
+}
+/* "value-free" = se desliza sin activar (el navegador no desplaza la página con ese dedo) */
+const syncValueMode = el => { if (el.isConnected) el.classList.toggle("value-free", !inScrollingPopup(el)); };
+
 function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX) {
-    let lastY = null, pointer = null, startX = 0, startY = 0, startT = 0, moved = false, live = false;
+    let lastY = null, pointer = null, startX = 0, startY = 0, startT = 0, moved = false, live = false, free = false;
+    /* el modo se decide cuando ya está en pantalla (y otra vez cuando la ventana termina de abrir o cambia de tamaño) */
+    requestAnimationFrame(() => syncValueMode(el));
+    setTimeout(() => syncValueMode(el), 450);
+    const onResize = () => { if (!el.isConnected) window.removeEventListener("resize", onResize); else syncValueMode(el); };
+    window.addEventListener("resize", onResize);
 
     el.addEventListener("pointerdown", e => {
         if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -718,9 +740,11 @@ function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX) {
         startT = performance.now();
         moved = false;
         pointer = e.pointerId;
-        live = isArmed(el);
+        syncValueMode(el);
+        free = el.classList.contains("value-free");
+        live = free || isArmed(el);
         if (!live) return;                  /* bloqueado: solo se cuenta el toque, sin quitarle el gesto a la página */
-        clearTimeout(armedValue.timer);      /* mientras el dedo está encima no se bloquea */
+        if (armedValue) clearTimeout(armedValue.timer);      /* mientras el dedo está encima no se bloquea */
         try { el.setPointerCapture(pointer); } catch (err) {}
     });
 
@@ -743,12 +767,12 @@ function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX) {
         const wasLive = live;
         lastY = null; pointer = null; live = false;
         if (!wasLive) { if (tap) armValue(el); return; }        /* 1.er toque: activar */
-        if (tap && onTap) { disarmValue(); onTap(); return; }   /* 2.º toque: abrir el cuadro */
-        if (isArmed(el)) armValue(el);                          /* tras deslizar: otros 3 s */
+        if (tap && onTap) { disarmValue(); onTap(); return; }   /* libre o 2.º toque: abrir el cuadro */
+        if (isArmed(el)) disarmValue();                         /* ya se puso el valor: deja de latir */
     });
     el.addEventListener("pointercancel", () => {
         lastY = null; pointer = null;
-        if (live && isArmed(el)) armValue(el);
+        if (live && isArmed(el)) disarmValue();
         live = false;
     });
 }

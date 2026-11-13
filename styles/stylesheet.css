@@ -1066,15 +1066,17 @@ main { overflow-x: hidden; }
 /* El deslizado horizontal debe funcionar sobre todo (incluidos botones dentro de secciones con scroll) */
 .section, .section * { touch-action: pan-y; }
 .kg-value, .reps-value, .stepper-value { touch-action: pan-y; }
-/* Valor activado con un toque: se desliza (y ya no desplaza la página) y late con el color de la app */
+/* Valor libre (fuera de ventanas que se desplazan): se desliza directo */
+.value-free { touch-action: none !important; }
+/* Valor activado con un toque (ventanas altas): se desliza y late suave con el color de la app */
 .value-armed {
     touch-action: none !important; cursor: ns-resize !important;
-    border-color: var(--ui) !important; box-shadow: 0 0 0 1px var(--ui);
-    animation: value-armed-pulse 1s ease-in-out infinite !important;
+    border-color: rgba(var(--ui-rgb), .6) !important;
+    animation: value-armed-pulse 1.4s ease-in-out infinite !important;
 }
 @keyframes value-armed-pulse {
-    0%, 100% { box-shadow: 0 0 0 1px var(--ui), 0 0 0 0 rgba(var(--ui-rgb), 0); }
-    50%      { box-shadow: 0 0 0 1px var(--ui), 0 0 14px 2px rgba(var(--ui-rgb), .55); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 4px 0 rgba(var(--ui-rgb), .14); }
 }
 @media (prefers-reduced-motion: reduce) { .value-armed { animation: none !important; } }
 
