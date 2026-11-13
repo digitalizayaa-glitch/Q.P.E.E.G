@@ -7,11 +7,13 @@
     goal = porciones al día del plan (null = sin meta).
 ========================================================= */
 
+/* Plan base. Proteínas y grasas en 40 % BG · 30 % MG · 30 % Grasas (7 · 5 · 5 porciones);
+   con el test TDEE todo se escala a las calorías de cada persona. */
 const FOOD_GROUPS = [
     { k: "h",  name: "Harinas",     c: 15, p: 3, f: 1, goal: 21,   color: "#e08a4b" },
-    { k: "bg", name: "Proteína BG", c: 0,  p: 7, f: 1, goal: 10,   color: "#d9544f" },
-    { k: "mg", name: "Proteína MG", c: 0,  p: 7, f: 5, goal: 2,    color: "#ef7a6a" },
-    { k: "g",  name: "Grasas",      c: 0,  p: 0, f: 5, goal: 6,    color: "#f2c14e" },
+    { k: "bg", name: "Proteína BG", c: 0,  p: 7, f: 1, goal: 7,    color: "#d9544f" },
+    { k: "mg", name: "Proteína MG", c: 0,  p: 7, f: 5, goal: 5,    color: "#ef7a6a" },
+    { k: "g",  name: "Grasas",      c: 0,  p: 0, f: 5, goal: 5,    color: "#f2c14e" },
     { k: "v",  name: "Vegetales",   c: 5,  p: 2, f: 0, goal: 3,    color: "#4caf6d" },
     { k: "fr", name: "Frutas",      c: 15, p: 0, f: 0, goal: null, color: "#9ccc65" },
     { k: "l",  name: "Lácteos",     c: 12, p: 8, f: 3, goal: null, color: "#5aa9e6" }

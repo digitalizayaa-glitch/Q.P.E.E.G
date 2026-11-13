@@ -4,7 +4,7 @@
    el nombre lleva un hash del contenido, así cada cambio publica una caché nueva sola. */
 
 /* <generado> */
-const CACHE_NAME = "qpeeg-2a2f539bda";
+const CACHE_NAME = "qpeeg-821959943e";
 const CORE_ASSETS = [
     "./",
     "./fonts/atkinson-400.woff",
