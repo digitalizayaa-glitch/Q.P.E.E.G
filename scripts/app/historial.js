@@ -293,7 +293,7 @@ function renderHistoryChart(box, animate) {
         return;
     }
 
-    /* Deportes: una sola gráfica con la carga (100 = una salida normal para ti), cada deporte con su color y forma.
+    /* Deportes: una sola gráfica con la carga (100 = una corrida normal: ver deportes.js), cada deporte con su color y forma.
        La carga junta tiempo, distancia y desnivel (ver deportes.js), así que todos los deportes se comparan */
     const groups = [];
     const points = [];
@@ -320,7 +320,7 @@ function renderHistoryChart(box, animate) {
     const sessions = points.reduce((a, p) => a + p.n, 0);
     dotPanel(box, {
         buckets, points, groups, animate, aria: "Carga de deportes",
-        heading: "Carga 100 = normal",
+        heading: "Carga 100 = una corrida normal",
         goal: chartPeriod === "day" ? 100 : null, goalLabel: "Normal",
         styleOf: group => { const k = Math.max(0, groups.findIndex(g => g.group === group)); return { color: colors[k], shape: k }; },
         summary: () => `Carga total <b>${fmtNum(total, 0)}</b> · ${sessions} ${sessions === 1 ? "salida" : "salidas"}${chartPeriod === "day" ? "" : " · cada punto suma las salidas"}`,

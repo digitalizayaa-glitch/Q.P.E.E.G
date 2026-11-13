@@ -190,69 +190,47 @@ test("ejercicio: la imagen elegida se guarda y se limpia si no es válida", () =
     assert.equal(mk(42), undefined);
 });
 
-test("deportes de juego: la distancia del partido manda, el tiempo corrige; voleibol solo por tiempo", () => {
-    const load = sp => Math.round(call("sportLoad", sp) * 10) / 10;
-    app("state.nutrition = null");
-    assert.deepEqual(ev("sportReference('soccer')").km, 6, "sin plan: 8 km de la tabla con 25 % menos");
-    assert.equal(Math.round(ev("sportReference('soccer')").min * 10) / 10, 67.5);
-    for (const sp of [{ k: "soccer", min: 67.5 }, { k: "soccer", km: 6 }, { k: "soccer", min: 67.5, km: 6 }, { k: "volley", min: 45 }])
-        assert.equal(load(sp), 100, JSON.stringify(sp));
-    assert.equal(load({ k: "soccer", km: 12 }), 200, "el doble de distancia, el doble de carga");
-    assert.ok(load({ k: "soccer", km: 6, min: 45 }) > 100 && load({ k: "soccer", km: 6, min: 120 }) < 100, "el tiempo corrige");
-    assert.equal(load({ k: "volley", min: 90 }), 200);
-    assert.equal(load({ k: "volley", min: 45, km: 5, up: 500 }), 100, "lo que no aplica al deporte no cuenta");
-    assert.equal(load({ k: "volley", up: 500 }), 0);
-    /* el cuerpo, no las calorías: más peso → distancia normal más corta; el tiempo normal es igual para todos */
-    app("state.nutrition = { profile: { sex: 'm', age: 30, height: 175, weight: 110, activity: 1.9, bf: null }, goal: 'bulk', diet: 'high' }");
-    assert.ok(ev("sportReference('basket')").km < 3);
-    assert.equal(Math.round(ev("sportReference('basket')").min * 10) / 10, 45);
-    assert.equal(load({ k: "volley", min: 45 }), 100);
-    app("state.nutrition = null");
-});
-
-test("otro deporte: cada dato contra la salida normal, promediados", () => {
-    app("state.nutrition = null");
-    const load = sp => Math.round(call("sportLoad", sp) * 1000) / 1000;
-    assert.equal(load({ k: "custom", min: 45, km: 3.75, up: 75 }), 100);
-    assert.equal(load({ k: "custom", min: 90, km: 3.75 }), 150);
-});
-
-test("deportes de distancia: manda la distancia, el tiempo corrige en curva S con topes, el desnivel suma por Naismith", () => {
-    const load = sp => Math.round(call("sportLoad", sp) * 10) / 10;
-    app("state.nutrition = { profile: { sex: 'm', age: 30, height: 175, weight: 75, activity: 1.2, bf: null }, goal: 'maintain', diet: 'mod' }");
-    /* la salida normal da 100 con o sin tiempo; su tiempo es el esperado */
-    for (const k of ["run", "walk", "bike", "swim"]) {
-        const ref = call("sportReference", k);
-        assert.equal(load({ k, km: ref.km, up: ref.up }), 100, k);
-        assert.equal(load({ k, km: ref.km, up: ref.up, min: ref.min }), 100, k + " con su tiempo esperado");
-        assert.equal(load({ k, min: ref.min }), 100, k + " solo con tiempo");
-    }
-    assert.equal(Math.round(ev("sportPaceDetail({ k: 'run', km: 10 }).expected")), 60, "referencia: 10 km/h");
-    assert.equal(Math.round(ev("sportPaceDetail({ k: 'walk', km: 5, up: 100 }).expected")), 70, "Naismith: +10 min por 100 m caminando");
-    /* curva S: cerca del esperado casi nada, luego se nota, con topes +40 % / −30 % */
-    const m = r => ev(`sportPaceMult(${r})`);
-    assert.ok(Math.abs(m(1.1) - 1) < 0.03 && Math.abs(m(0.9) - 1) < 0.03);
-    assert.ok(m(1.5) > 1.15 && m(0.67) < 0.9);
-    assert.ok(m(10) <= 1.4 + 1e-9 && m(10) > 1.39 && m(0.1) >= 0.7 - 1e-9 && m(0.1) < 0.71);
-    const base = load({ k: "run", km: 10 });
-    assert.ok(load({ k: "run", km: 10, min: 50 }) > base && load({ k: "run", km: 10, min: 75 }) < base, "más rápido sube, más lento baja");
-    assert.ok(load({ k: "run", km: 10, min: 2 }) <= base * 1.4 + 0.1 && load({ k: "run", km: 10, min: 600 }) >= base * 0.7 - 0.1);
+test("deportes: carga = esfuerzo en una sola escala (100 = una corrida normal)", () => {
+    const load = sp => call("sportLoad", sp);
+    const REF = "state.nutrition = { profile: { sex: 'm', age: 30, height: 175, weight: 75, activity: 1.55, bf: null }, goal: 'maintain', diet: 'mod' }";
+    app(REF);
+    const run = call("sportReference", "run");
+    assert.ok(Math.abs(load({ k: "run", km: run.km, up: run.up }) - 100) < 5, "la corrida típica ≈ 100");
+    /* una caminata larga y suave pesa mucho menos que una salida en bici con subida */
+    const walk = load({ k: "walk", km: 6.6 });
+    assert.ok(walk < 40, `caminar 6,6 km: ${walk}`);
+    assert.ok(load({ k: "bike", km: 26, up: 300, min: 90 }) > walk * 4);
+    /* el desnivel suma bastante */
+    assert.ok(load({ k: "walk", km: 6.6, up: 150 }) > walk * 1.4);
+    /* el tiempo: más rápido la misma distancia sube, con tope; tiempos imposibles avisan */
+    const r50 = load({ k: "run", km: 10, min: 50 }), r60 = load({ k: "run", km: 10, min: 60 }), r75 = load({ k: "run", km: 10, min: 75 });
+    assert.ok(r50 > r60 && r60 > r75);
+    assert.ok(load({ k: "run", km: 10, min: 2 }) < r60 * 2);
     assert.ok(ev("sportPaceDetail({ k: 'run', km: 10, min: 20 }).tooFast"));
-    assert.ok(load({ k: "run", km: 5, up: 300 }) > load({ k: "run", km: 5 }), "el desnivel suma");
-    /* el cuerpo: más peso, más edad o mujer → ritmo esperado más lento y salida normal más corta */
+    /* sin tiempo = el esperado */
+    const exp = ev("sportPaceDetail({ k: 'run', km: 10 }).expected");
+    assert.equal(Math.round(exp), 60);
+    assert.ok(Math.abs(load({ k: "run", km: 10 }) - load({ k: "run", km: 10, min: exp })) < 1);
+    /* deportes de juego y solo tiempo */
+    assert.ok(load({ k: "soccer", min: 90 }) > load({ k: "basket", min: 60 }) && load({ k: "basket", min: 60 }) > load({ k: "volley", min: 60 }));
+    assert.equal(Math.round(load({ k: "volley", min: 45, km: 5, up: 500 })), Math.round(load({ k: "volley", min: 45 })), "lo que no aplica no cuenta");
+    assert.equal(load({ k: "volley", up: 500 }), 0);
+    assert.ok(load({ k: "otro-que-no-existe", min: 60 }) > 0, "otro deporte: por tiempo");
+    /* las calorías del plan no cuentan; el cuerpo pesa poco */
+    const r5 = load({ k: "run", km: 5 });
+    app("state.nutrition.profile.activity = 1.9");
+    assert.equal(load({ k: "run", km: 5 }), r5);
+    for (const bp of [{ s: "f", a: 30, h: 160, w: 55 }, { s: "m", a: 30, h: 175, w: 100 }, { s: "f", a: 60, h: 160, w: 70 }])
+        assert.ok(Math.abs(load({ k: "run", km: 5, bp }) / r5 - 1) < 0.15, JSON.stringify(bp));
+    /* el cuerpo guardado en el registro manda sobre el perfil actual */
+    app("state.nutrition.profile.weight = 120");
+    assert.equal(load({ k: "run", km: 5, bp: { s: "m", a: 30, h: 175, w: 75 } }), r5);
+    /* el ritmo esperado sale del cuerpo */
     const v = body => ev(`sportSpeed("run", ${JSON.stringify(body)})`);
     assert.equal(v({ s: "m", a: 30, h: 175, w: 75 }), 10);
     assert.ok(v({ s: "m", a: 30, h: 175, w: 100 }) < 10 && v({ s: "m", a: 60, h: 175, w: 75 }) < 10 && v({ s: "f", a: 30, h: 175, w: 75 }) < 10);
-    assert.ok(load({ k: "run", km: 5, bp: { s: "m", a: 30, h: 175, w: 100 } }) > load({ k: "run", km: 5, bp: { s: "m", a: 30, h: 175, w: 75 } }), "a más peso, los mismos km cargan más");
-    /* las calorías ya no cambian nada: solo el cuerpo */
-    const before = load({ k: "run", km: 5 });
-    app("state.nutrition.profile.activity = 1.9");
-    assert.equal(load({ k: "run", km: 5 }), before);
-    /* el cuerpo guardado en el registro manda sobre el perfil actual */
-    app("state.nutrition.profile.weight = 120");
-    assert.equal(load({ k: "run", km: 5, bp: { s: "m", a: 30, h: 175, w: 75 } }), before);
     app("state.nutrition = null");
-    assert.equal(load({ k: "run", km: 5, min: 30 }), before, "sin plan: persona de referencia");
+    assert.ok(Math.abs(load({ k: "run", km: 5 }) - r5) < 1e-9, "sin plan: persona de referencia");
 });
 
 test("deportes: el cuerpo del día (bp) se guarda limpio", () => {

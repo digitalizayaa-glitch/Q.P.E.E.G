@@ -1,33 +1,27 @@
 /* =========================================================
-    DEPORTES → "carga" (100 = una salida normal para ti)
+    DEPORTES → "carga": esfuerzo en una sola escala para todos los deportes.
+    100 = una corrida normal (≈ 34 min a tu ritmo). Así una caminata larga y suave queda por
+    debajo de una salida en bici dura, aunque cada una sea "normal" para su deporte.
 
-    Correr, ciclismo, caminar, nadar y los de juego (SPORT_PACE): manda la DISTANCIA y el tiempo la corrige.
-    En los de juego la distancia es la que se recorre en el partido; sin ella, sale del tiempo.
-    - El desnivel se pasa a km planos con la regla de Naismith/Scarf (caminar y correr: 100 m de
-      subida ≈ 0,8 km; ciclismo ≈ 2 km, ya contando que la bajada devuelve parte del tiempo).
-      Distancia equivalente = km + desnivel en km planos. La carga = distancia equivalente ÷ la normal.
-    - Ritmo esperado según el cuerpo: altura, peso, sexo y edad (no las calorías). Con él sale el
-      tiempo esperado para esa distancia (el desnivel lo alarga, como en la regla).
-    - Sin tiempo: se toma el esperado (sin cambio). Con tiempo: más rápido sube la carga y más lento
-      la baja, en curva S: cerca del esperado casi no cambia, luego se nota y al final se frena.
-      Topes: hasta +40 % (muy rápido) y −30 % (muy lento).
-    - La salida normal dura lo mismo para todos (≈ 34 min corriendo); lo que cambia es cuánta
-      distancia es, según el ritmo de cada cuerpo.
+    Esfuerzo = minutos × intensidad (MET netos: lo que se gasta por encima de estar sentado).
+    - Intensidad según la velocidad (fórmulas ACSM para caminar y correr; tabla de MET para bici,
+      natación y deportes de juego). Ir más rápido sube la intensidad.
+    - Desnivel: energía de subir el cuerpo (≈ 0,9 kcal por kg cada 100 m), aparte del plano.
+      A pie, 100 m de subida ≈ 1,9 km de caminata en plano; en bici ≈ 2,5 km a 22 km/h.
+    - Sin tiempo: se usa el que tardaría tu cuerpo a su ritmo esperado (altura, peso, sexo y edad).
+      Con tiempo: tu velocidad real da la intensidad (topes: no más de 2,2 veces tu ritmo esperado).
+    - Carga = esfuerzo ÷ el de una corrida normal × √(intensidad ÷ la de correr). La raíz hace que lo
+      suave pese menos que lo intenso aunque gaste lo mismo (2 h caminando no es 1 h corriendo).
+    - El cuerpo cambia el ritmo esperado; tu "nivel" mueve la escala solo a la mitad (pesa poco).
     - Cada registro guarda el cuerpo de ese día (bp), para que bajar de peso no cambie el historial.
       Los que no lo tienen usan el perfil actual.
-
-    "Otro": como antes (cada dato ÷ normal, promediados), con la normal escalada por las calorías de
-    mantenimiento. Referencias para 2400 kcal.
 ========================================================= */
 
-const SPORT_BASE_KCAL = 2400;
-/* La salida normal es una que se hace en un día y aún queda para otra actividad: 25 % menos que la tabla.
-   Cambia la carga de todo lo registrado también (la carga se calcula al mostrarla, no se guarda). */
+/* Salida típica = 75 % de la tabla (solo para las pistas "Típico ..." al registrar) */
 const SPORT_REF_FACTOR = 0.75;
 
-/* ref: salida normal de la tabla. Sin "km" o "up" = ese dato no aplica a ese deporte.
-   Todos menos "Otro": km y up son para la persona de referencia; el tiempo normal sale del ritmo
-   (en los de juego coincide con "min"; voleibol, sin km, usa "min"). "Otro": para 2400 kcal de mantenimiento */
+/* ref: salida típica de la tabla para la persona de referencia (hombre, 30 años, 175 cm, 75 kg).
+   Sin "km" o "up" = ese dato no aplica a ese deporte */
 const SPORTS = [
     { k: "run",    name: "Correr",     ref: { min: 45, km: 7,   up: 60 } },
     { k: "bike",   name: "Ciclismo",   ref: { min: 90, km: 35,  up: 400 } },
@@ -54,24 +48,37 @@ function fmtDuration(min) {
     return h ? `${h} h${m ? ` ${m} min` : ""}` : `${m} min`;
 }
 
-/* Ritmo en plano de la persona de referencia (hombre, 30 años, 175 cm, 75 kg) y cuánto lo mueve cada dato del cuerpo.
-   v: km/h · up: km planos por cada 100 m de subida · sex: mujer × · age: −x por año pasados los 30 ·
-   bmi: −x por punto de IMC fuera de 18,5–25 · h: (altura ÷ 175)^h (piernas más largas, paso más largo) */
+/* Ritmo en plano de la persona de referencia y cuánto lo mueve cada dato del cuerpo.
+   v: km/h · up: km planos por cada 100 m de subida, solo para el TIEMPO esperado (Naismith/Scarf) ·
+   sex: mujer × · age: −x por año pasados los 30 · bmi: −x por punto de IMC fuera de 18,5–25 ·
+   h: (altura ÷ 175)^h · met: MET de juego (Compendio de actividades físicas), sin velocidad propia.
+   En los de juego "v" es la distancia por hora de partido (fútbol 8 km en 90 min) */
 const SPORT_PACE = {
-    run:  { v: 10, up: 0.8, sex: 0.88, age: 0.007, bmi: 0.025, h: 0.3 },
-    walk: { v: 5,  up: 0.8, sex: 0.96, age: 0.004, bmi: 0.010, h: 0.5 },
-    bike: { v: 25, up: 2,   sex: 0.88, age: 0.006, bmi: 0.012, h: 0 },
-    swim: { v: 2,  up: 0,   sex: 0.92, age: 0.006, bmi: 0.008, h: 0.3 },
-    /* Deportes de juego: "v" es la distancia que se recorre por hora de partido con la persona de referencia
-       (fútbol 8 km en 90 min, básquetbol 4 km/h, tenis 3 km/h). Voleibol no lleva distancia: solo tiempo */
-    soccer: { v: 8 / 1.5, up: 0, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2 },
-    basket: { v: 4,       up: 0, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2 },
-    tennis: { v: 3,       up: 0, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2 },
-    volley: { v: 1,       up: 0, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2 }
+    run:    { v: 10,      up: 0.8, sex: 0.88, age: 0.007, bmi: 0.025, h: 0.3 },
+    walk:   { v: 5,       up: 0.8, sex: 0.96, age: 0.004, bmi: 0.010, h: 0.5 },
+    bike:   { v: 22,      up: 2,   sex: 0.88, age: 0.006, bmi: 0.012, h: 0 },
+    swim:   { v: 2,       up: 0,   sex: 0.92, age: 0.006, bmi: 0.008, h: 0.3 },
+    soccer: { v: 8 / 1.5, up: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 8 },
+    basket: { v: 4,       up: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 7.5 },
+    tennis: { v: 3,       up: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 7.3 },
+    volley: { v: 1,       up: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 4 },
+    custom: { v: 5,       up: 0.8, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 6 }
 };
-/* Distancia de la salida normal de la tabla (persona de referencia); sin km en la tabla: la de su tiempo */
-const sportBaseKm = k => { const b = sportDef(k).ref; return b.km || b.min / 60 * SPORT_PACE[k].v; };
-const SPORT_FAST_MAX = 0.4, SPORT_SLOW_MAX = 0.3, SPORT_PACE_CURVE = 0.45;
+
+/* MET netos (por encima de 1 = sentado) a una velocidad v en km/h. Juego: su MET, que sube o baja
+   un poco si se recorrió más o menos distancia por minuto que lo esperado (relV) */
+function sportNetMet(k, v, relV = 1) {
+    const mmin = v * 1000 / 60;
+    if (k === "run") return 0.2 * mmin / 3.5;                  /* ACSM: 10 km/h ≈ 9,5 */
+    if (k === "walk") return 0.1 * mmin / 3.5;                 /* ACSM: 5 km/h ≈ 2,4 */
+    if (k === "bike") return Math.max(2, 0.45 * v - 2.3);      /* Compendio: 20 km/h ≈ 6,7 · 25 ≈ 9 · 30 ≈ 11 */
+    if (k === "swim") return Math.max(2, 4 * v - 1);           /* 2 km/h (3 min/100 m) ≈ 7 */
+    return (SPORT_PACE[k].met - 1) * Math.min(1.4, Math.max(0.7, Math.sqrt(relV)));
+}
+const SPORT_RUN_MET = 0.2 * 10000 / 60 / 3.5;                  /* intensidad de correr de la persona de referencia */
+const SPORT_NORMAL_MIN = 34;                                   /* una corrida normal */
+const SPORT_UP_METMIN = 0.54;                                  /* MET·min por cada metro subido (≈ 0,9 kcal/kg cada 100 m) */
+const SPORT_TOO_FAST = 2.2;
 
 /* Cuerpo del perfil (sin plan: null → persona de referencia) */
 function sportBodyNow() {
@@ -93,80 +100,57 @@ function sportPaceFactor(k, body) {
     return Math.min(1.2, Math.max(0.4, f));
 }
 const sportSpeed = (k, body) => SPORT_PACE[k].v * sportPaceFactor(k, body);     /* km/h en plano */
+/* Nivel de la persona: la mitad de lo que su cuerpo cambia el ritmo de correr (pesa poco) */
+const sportLevel = body => 1 + 0.5 * (sportPaceFactor("run", body) - 1);
 
-/* Distancia equivalente en plano (km + desnivel pasado a km) */
-const sportEqKm = (k, km, up) => (km || 0) + (up || 0) / 100 * SPORT_PACE[k].up;
+/* Tiempo esperado (min) para una distancia con su desnivel, a ritmo esperado (Naismith alarga con la subida) */
+const sportExpectedMin = (k, km, up, body) => ((km || 0) + (up || 0) / 100 * SPORT_PACE[k].up) / sportSpeed(k, body) * 60;
 
-/* Curva S del ritmo: r = tiempo esperado ÷ tiempo puesto (>1 = más rápido) */
-function sportPaceMult(r) {
-    if (!(r > 0)) return 1;
-    const x = Math.log(r);
-    const g = 1 - Math.exp(-((x / SPORT_PACE_CURVE) ** 2));
-    return x >= 0 ? 1 + SPORT_FAST_MAX * g : 1 - SPORT_SLOW_MAX * g;
-}
-
-/* Detalle del cálculo de un registro de correr/ciclismo/caminar/nadar */
+/* Cálculo completo de un registro */
 function sportPaceDetail(sp) {
-    const k = sp.k, body = sportBody(sp), base = sportDef(k).ref;
-    const v = sportSpeed(k, body), f = sportPaceFactor(k, body) * SPORT_REF_FACTOR;
-    const refEq = sportEqKm(k, sportBaseKm(k), base.up) * f;
+    const k = sp.k, body = sportBody(sp), base = sportDef(k).ref, c = SPORT_PACE[k];
     /* solo los datos que aplican al deporte */
     const km = sp.km > 0 && base.km ? sp.km : 0, up = sp.up > 0 && base.up ? sp.up : 0, min = sp.min > 0 ? sp.min : 0;
-    let eq, expected, mult = 1;
-    if (km > 0) {
-        eq = sportEqKm(k, km, up);
-        expected = eq / v * 60;
-        if (min > 0) mult = sportPaceMult(expected / min);
-    } else if (min > 0) {
-        eq = min / 60 * v;               /* solo tiempo: la distancia que se hace en ese tiempo (con la subida dentro) */
-        expected = min;
+    const vExp = sportSpeed(k, body);
+    const expected = km > 0 || up > 0 ? sportExpectedMin(k, km, up, body) : min;
+    let minutes, v, tooFast = false;
+    if (min > 0) {
+        minutes = min;
+        v = km > 0 ? km / (min / 60) : vExp;
+        if (v > vExp * SPORT_TOO_FAST) { tooFast = true; v = vExp * SPORT_TOO_FAST; }
     } else {
-        eq = sportEqKm(k, 0, up);        /* solo desnivel */
-        expected = eq / v * 60;
+        minutes = (km || 0) / vExp * 60;          /* sin tiempo: el plano a ritmo esperado; la subida va aparte */
+        v = vExp;
     }
+    const net = c.met ? sportNetMet(k, v, km > 0 && min > 0 ? v / vExp : 1) : sportNetMet(k, v);
+    const effort = minutes * net + up * SPORT_UP_METMIN;             /* MET·min netos */
+    const level = sportLevel(body);
+    const ref = SPORT_NORMAL_MIN * SPORT_RUN_MET * level;          /* una corrida normal de esta persona */
+    const allMin = Math.max(1, min > 0 ? min : expected);           /* con la subida dentro (Naismith) */
+    const intensity = Math.min(2, Math.max(0.05, effort / allMin / (SPORT_RUN_MET * level)));
+    const kg = body ? body.w : 75;
     return {
-        eq, refEq, expected, mult, speed: v,
-        tooFast: km > 0 && min > 0 && expected / min > 2.2,
-        load: refEq > 0 ? eq / refEq * 100 * mult : 0
+        expected, minutes: allMin, speed: v, net, effort, tooFast,
+        kcal: (effort + allMin) * kg / 60,
+        load: effort > 0 ? effort / ref * Math.sqrt(intensity) * 100 : 0
     };
 }
 
-/* Escala de la salida normal de "Otro": mantenimiento del plan ÷ 2400 (sin plan: 1) */
-function sportScale() {
-    const n = typeof nutrition === "function" ? nutrition() : null;
-    if (!n) return 1;
-    const tdee = calcTDEE(n.profile).tdee;
-    return Math.min(2, Math.max(0.5, tdee / SPORT_BASE_KCAL));
-}
-
-/* Salida normal de este usuario en un deporte ({ min, km, up } según aplique) */
+/* Salida típica de este usuario en un deporte ({ min, km, up } según aplique) */
 function sportReference(k) {
-    const base = sportDef(k).ref;
-    if (SPORT_PACE[k]) {
-        const body = sportBodyNow();
-        const f = sportPaceFactor(k, body) * SPORT_REF_FACTOR;
-        const out = { min: sportEqKm(k, sportBaseKm(k), base.up) * f / sportSpeed(k, body) * 60 };
-        if (base.km) out.km = base.km * f;
-        if (base.up) out.up = base.up * f;
-        return out;
-    }
-    const f = sportScale() * SPORT_REF_FACTOR;
+    const base = sportDef(k).ref, body = sportBodyNow();
+    const f = sportPaceFactor(k, body) * SPORT_REF_FACTOR;
     const out = {};
-    for (const key in base) out[key] = base[key] * f;
+    if (base.km) out.km = base.km * f;
+    if (base.up) out.up = base.up * f;
+    out.min = base.km ? sportExpectedMin(k, out.km, out.up, body) : base.min * SPORT_REF_FACTOR;
     return out;
 }
 
-/* "Otro": puntaje de cada dato puesto (dato ÷ normal × 100) */
-function sportParts(sp) {
-    const ref = sportReference(sp.k);
-    return SPORT_FIELDS.filter(({ f }) => sp[f] > 0 && ref[f]).map(({ f }) => ({ f, pct: sp[f] / ref[f] * 100 }));
-}
-
-/* Carga (normal = 100) */
+/* Carga (100 = una corrida normal) */
 function sportLoad(sp) {
-    if (SPORT_PACE[sp.k]) return sportFields(sp.k).some(({ f }) => sp[f] > 0) ? sportPaceDetail(sp).load : 0;
-    const parts = sportParts(sp);
-    return parts.length ? parts.reduce((a, p) => a + p.pct, 0) / parts.length : 0;
+    const k = sportDef(sp.k).k;
+    return sportFields(k).some(({ f }) => sp[f] > 0) ? sportPaceDetail({ ...sp, k }).load : 0;
 }
 
 /* "1 h 30 min · 40 km · +450 m" */
@@ -228,27 +212,23 @@ function askSportData(sport, editing) {
     saveBtn.textContent = editing ? "Guardar" : "Añadir";
     actions.append(cancel, saveBtn);
 
-    const pace = !!SPORT_PACE[sport.k];
+    const sk = sportDef(sport.k).k;
     const who = editing && editing.entry.bp ? editing.entry.bp : sportBodyNow();      /* cuerpo con que se calcula */
     const hints = [];
     const paintLoad = () => {
-        const sp = { k: sport.k, ...vals, bp: who };
-        let any, sub = "";
-        if (pace) {
-            any = fields.some(({ f }) => vals[f] > 0);
-            if (any) {
-                const d = sportPaceDetail(sp);
-                const pct = Math.round((d.mult - 1) * 100);
-                sub = vals.km > 0 && vals.min > 0
-                    ? `Esperado ${fmtDuration(d.expected)} · ritmo ${pct > 0 ? "+" : ""}${pct} %${d.tooFast ? " · ¿seguro? es muy rápido" : ""}`
-                    : vals.km > 0 ? `Sin tiempo: se toma el esperado, ${fmtDuration(d.expected)}` : vals.min > 0 ? "Solo tiempo: sin ajuste de ritmo" : "Solo desnivel";
-            }
-        } else {
-            const parts = sportParts(sp);
-            any = parts.length > 0;
-            sub = parts.length === 1 ? "con 1 dato" : `promedio de ${parts.length} datos: ${parts.map(p => Math.round(p.pct)).join(" · ")}`;
+        const sp = { k: sk, ...vals, bp: who };
+        const any = fields.some(({ f }) => vals[f] > 0);
+        let sub = "";
+        if (any) {
+            const d = sportPaceDetail(sp);
+            const bits = [];
+            if (vals.km > 0 && !(vals.min > 0)) bits.push(`sin tiempo: ${fmtDuration(d.expected)}`);
+            if (vals.km > 0 && vals.min > 0) bits.push(`${fmtNum(d.speed, 1)} km/h`);
+            bits.push(`≈ ${fmtNum(Math.round(d.kcal / 10) * 10, 0)} kcal`);
+            if (d.tooFast) bits.push("¿seguro? es muy rápido");
+            sub = bits.join(" · ");
         }
-        load.innerHTML = any ? `Carga <b>${Math.round(sportLoad(sp))}</b><span>${sub}</span>` : `<span>Pon al menos un dato</span>`;
+        load.innerHTML = any ? `Carga <b>${Math.round(sportLoad(sp))}</b><span>${sub}</span><span>100 = una corrida normal</span>` : `<span>Pon al menos un dato</span>`;
         saveBtn.disabled = !any;
         hints.forEach(fn => fn());
     };
@@ -278,11 +258,11 @@ function askSportData(sport, editing) {
         const fit = () => requestAnimationFrame(() => { fitText(box, 19, 12); fitText(hint, 12, 9.5); });
         const paintHint = () => {
             /* con distancia, el tiempo muestra el esperado para esa distancia y desnivel */
-            if (pace && field.f === "min" && (vals.km > 0)) {
-                hint.textContent = `Esperado ${fmtDuration(sportPaceDetail({ k: sport.k, km: vals.km, up: vals.up, bp: who }).expected)}`;
+            if (field.f === "min" && (vals.km > 0)) {
+                hint.textContent = `Esperado ${fmtDuration(sportPaceDetail({ k: sk, km: vals.km, up: vals.up, bp: who }).expected)}`;
             } else {
                 const r = field.f === "km" ? Math.round(ref.km * 2) / 2 : field.f === "min" ? Math.round(ref.min / 5) * 5 : Math.round(ref.up / 5) * 5;
-                hint.textContent = `Normal ${field.fmt(r)}`;
+                hint.textContent = `Típico ${field.fmt(r)}`;
             }
             box.setAttribute("aria-label", `${field.label}: ${vals[field.f] > 0 ? field.fmt(vals[field.f]) : "sin dato"}`);
             fit();
@@ -325,7 +305,7 @@ function askSportData(sport, editing) {
     saveBtn.onclick = () => {
         const entry = editing ? { ...editing.entry } : { id: newId("sp"), k: sport.k, n: sport.name };
         fields.forEach(({ f }) => { if (vals[f] > 0) entry[f] = vals[f]; else delete entry[f]; });
-        if (pace && who) entry.bp = { ...who }; else delete entry.bp;     /* el cuerpo de ese día: bajar de peso no cambia el historial */
+        if (who) entry.bp = { ...who }; else delete entry.bp;     /* el cuerpo de ese día: bajar de peso no cambia el historial */
         if (!fields.some(({ f }) => entry[f] > 0)) return;
         const key = editing ? editing.key : getWorkoutDateKey();
         const list = (state.sports[key] ??= []);
