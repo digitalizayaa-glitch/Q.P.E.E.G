@@ -211,6 +211,10 @@ function sanitizeState(src) {
             if (km > 0) sp.km = Math.min(km, 500);
             if (up > 0) sp.up = Math.min(up, 9000);
             if (sp.km) { sp.u = "km"; sp.v = sp.km; } else if (sp.min) { sp.u = "min"; sp.v = sp.min; }
+            /* cuerpo del día (deportes.js): sexo, edad, altura y peso */
+            const bp = x.bp;
+            if (isObj(bp) && num(bp.h) > 0 && num(bp.w) > 0)
+                sp.bp = { s: bp.s === "m" ? "m" : "f", a: Math.min(120, Math.max(5, num(bp.a) || 30)), h: Math.min(250, num(bp.h)), w: Math.min(400, num(bp.w)) };
             return sp;
         }).filter(sp => sp.min || sp.km || sp.up);
         if (list.length) s.sports[key] = list;

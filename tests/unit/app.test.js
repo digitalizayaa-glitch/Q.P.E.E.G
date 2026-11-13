@@ -190,27 +190,66 @@ test("ejercicio: la imagen elegida se guarda y se limpia si no es válida", () =
     assert.equal(mk(42), undefined);
 });
 
-test("deportes: la carga es el promedio de cada dato contra la salida normal; normal = 100 con 1, 2 o 3 datos", () => {
+test("deportes de juego: la carga es el promedio de cada dato contra la salida normal (escala con el mantenimiento)", () => {
     app("state.nutrition = null");
-    assert.deepEqual(call("sportReference", "bike"), { min: 67.5, km: 26.25, up: 300 }, "sin plan: tabla de 2400 kcal con 25 % menos");
+    assert.deepEqual(call("sportReference", "soccer"), { min: 67.5, km: 6 }, "sin plan: tabla de 2400 kcal con 25 % menos");
     const load = sp => Math.round(call("sportLoad", sp) * 1000) / 1000;
-    /* una salida normal da 100 pongas los datos que pongas */
-    for (const sp of [{ k: "bike", min: 67.5 }, { k: "bike", km: 26.25 }, { k: "bike", up: 300 }, { k: "bike", km: 26.25, up: 300 }, { k: "bike", min: 67.5, km: 26.25, up: 300 }])
+    for (const sp of [{ k: "soccer", min: 67.5 }, { k: "soccer", km: 6 }, { k: "soccer", min: 67.5, km: 6 }])
         assert.equal(load(sp), 100, JSON.stringify(sp));
-    assert.equal(load({ k: "bike", min: 90, km: 35, up: 400 }), 133.333, "la salida de la tabla ahora pasa de 100");
-    /* cada dato cuenta: 3 datos → ÷3, 2 datos → ÷2 */
-    assert.equal(load({ k: "bike", min: 135, km: 26.25, up: 300 }), 133.333, "el doble de tiempo sube un tercio");
-    assert.equal(load({ k: "bike", km: 52.5, up: 300 }), 150, "el doble de km con 2 datos sube la mitad");
-    assert.equal(load({ k: "bike", min: 67.5, km: 26.25, up: 900 }), 166.667, "el desnivel cuenta aunque haya tiempo");
+    assert.equal(load({ k: "soccer", min: 135, km: 6 }), 150, "el doble de tiempo con 2 datos sube la mitad");
     assert.equal(load({ k: "volley", min: 45, km: 5, up: 500 }), 100, "lo que no aplica al deporte no cuenta");
     assert.equal(load({ k: "volley", up: 500 }), 0);
-    /* más mantenimiento → salida normal más larga */
     app("state.nutrition = { profile: { sex: 'm', age: 30, height: 180, weight: 80, activity: 1.55, bf: null }, goal: 'bulk', diet: 'high' }");
     const f = ev("calcTDEE(state.nutrition.profile).tdee") / 2400;
-    assert.ok(Math.abs(call("sportReference", "run").min - 45 * 0.75 * f) < 1e-9);
-    assert.equal(load({ k: "run", min: 45 * 0.75 * f, km: 7 * 0.75 * f, up: 60 * 0.75 * f }), 100, "su salida normal sigue dando 100");
-    assert.ok(load({ k: "run", min: 30 }) < 100);
+    assert.ok(Math.abs(call("sportReference", "basket").min - 60 * 0.75 * f) < 1e-9, "más mantenimiento → salida normal más larga");
     app("state.nutrition = null");
+});
+
+test("deportes de distancia: manda la distancia, el tiempo corrige en curva S con topes, el desnivel suma por Naismith", () => {
+    const load = sp => Math.round(call("sportLoad", sp) * 10) / 10;
+    app("state.nutrition = { profile: { sex: 'm', age: 30, height: 175, weight: 75, activity: 1.2, bf: null }, goal: 'maintain', diet: 'mod' }");
+    /* la salida normal da 100 con o sin tiempo; su tiempo es el esperado */
+    for (const k of ["run", "walk", "bike", "swim"]) {
+        const ref = call("sportReference", k);
+        assert.equal(load({ k, km: ref.km, up: ref.up }), 100, k);
+        assert.equal(load({ k, km: ref.km, up: ref.up, min: ref.min }), 100, k + " con su tiempo esperado");
+        assert.equal(load({ k, min: ref.min }), 100, k + " solo con tiempo");
+    }
+    assert.equal(Math.round(ev("sportPaceDetail({ k: 'run', km: 10 }).expected")), 60, "referencia: 10 km/h");
+    assert.equal(Math.round(ev("sportPaceDetail({ k: 'walk', km: 5, up: 100 }).expected")), 70, "Naismith: +10 min por 100 m caminando");
+    /* curva S: cerca del esperado casi nada, luego se nota, con topes +40 % / −30 % */
+    const m = r => ev(`sportPaceMult(${r})`);
+    assert.ok(Math.abs(m(1.1) - 1) < 0.03 && Math.abs(m(0.9) - 1) < 0.03);
+    assert.ok(m(1.5) > 1.15 && m(0.67) < 0.9);
+    assert.ok(m(10) <= 1.4 + 1e-9 && m(10) > 1.39 && m(0.1) >= 0.7 - 1e-9 && m(0.1) < 0.71);
+    const base = load({ k: "run", km: 10 });
+    assert.ok(load({ k: "run", km: 10, min: 50 }) > base && load({ k: "run", km: 10, min: 75 }) < base, "más rápido sube, más lento baja");
+    assert.ok(load({ k: "run", km: 10, min: 2 }) <= base * 1.4 + 0.1 && load({ k: "run", km: 10, min: 600 }) >= base * 0.7 - 0.1);
+    assert.ok(ev("sportPaceDetail({ k: 'run', km: 10, min: 20 }).tooFast"));
+    assert.ok(load({ k: "run", km: 5, up: 300 }) > load({ k: "run", km: 5 }), "el desnivel suma");
+    /* el cuerpo: más peso, más edad o mujer → ritmo esperado más lento y salida normal más corta */
+    const v = body => ev(`sportSpeed("run", ${JSON.stringify(body)})`);
+    assert.equal(v({ s: "m", a: 30, h: 175, w: 75 }), 10);
+    assert.ok(v({ s: "m", a: 30, h: 175, w: 100 }) < 10 && v({ s: "m", a: 60, h: 175, w: 75 }) < 10 && v({ s: "f", a: 30, h: 175, w: 75 }) < 10);
+    assert.ok(load({ k: "run", km: 5, bp: { s: "m", a: 30, h: 175, w: 100 } }) > load({ k: "run", km: 5, bp: { s: "m", a: 30, h: 175, w: 75 } }), "a más peso, los mismos km cargan más");
+    /* las calorías ya no cambian nada: solo el cuerpo */
+    const before = load({ k: "run", km: 5 });
+    app("state.nutrition.profile.activity = 1.9");
+    assert.equal(load({ k: "run", km: 5 }), before);
+    /* el cuerpo guardado en el registro manda sobre el perfil actual */
+    app("state.nutrition.profile.weight = 120");
+    assert.equal(load({ k: "run", km: 5, bp: { s: "m", a: 30, h: 175, w: 75 } }), before);
+    app("state.nutrition = null");
+    assert.equal(load({ k: "run", km: 5, min: 30 }), before, "sin plan: persona de referencia");
+});
+
+test("deportes: el cuerpo del día (bp) se guarda limpio", () => {
+    const s = call("stateFrom", { sports: { "2026-11-01": [
+        { id: "a", k: "run", n: "Correr", km: 5, bp: { s: "m", a: 30, h: 175, w: 75 } },
+        { id: "b", k: "run", n: "Correr", km: 5, bp: { s: "x", h: "no" } }
+    ] } }).sports["2026-11-01"];
+    assert.deepEqual(s[0].bp, { s: "m", a: 30, h: 175, w: 75 });
+    assert.equal(s[1].bp, undefined);
 });
 
 test("deportes: los registros viejos { u, v } se convierten y guardan u/v para teléfonos sin actualizar", () => {
