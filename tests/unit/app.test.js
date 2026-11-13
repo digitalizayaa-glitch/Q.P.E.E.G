@@ -261,8 +261,9 @@ test("comida rápida: catálogo coherente (calorías ≈ macros) y pizzas por sl
     assert.ok(chains.length >= 8);
     for (const { chain, items } of chains) for (const [name, unit, plural, kcal, c, p, f] of items) {
         const fromMacros = 4 * c + 4 * p + 9 * f;
-        /* hasta 20 %: las cadenas redondean y la fibra/alcoholes de azúcar no suman igual */
-        assert.ok(Math.abs(fromMacros - kcal) / kcal < 0.2, `${chain} · ${name}: ${kcal} kcal vs ${fromMacros}`);
+        /* hasta 20 %: las cadenas redondean y la fibra/alcoholes de azúcar no suman igual (bebidas cero: ±12 kcal) */
+        if (kcal < 20) assert.ok(Math.abs(fromMacros - kcal) <= 12, `${chain} · ${name}: ${kcal} kcal vs ${fromMacros}`);
+        else assert.ok(Math.abs(fromMacros - kcal) / kcal < 0.2, `${chain} · ${name}: ${kcal} kcal vs ${fromMacros}`);
         if (/^Pizza /.test(name) && !/^Subway/.test(chain)) assert.equal(unit, "slice", `${chain} · ${name} va por slice`);
         assert.ok(plural && plural !== unit);
     }
@@ -289,7 +290,13 @@ test("pan cuadrado: se cuenta por rebanada (1 rebanada = 1 harina)", () => {
 test("supermercado: galletas y snacks pedidos están en el catálogo", () => {
     const names = [...ev("FAST_FOOD.filter(c => c.super).flatMap(c => c.items.map(i => i[0]))")].join(" | ");
     for (const want of ["Chiky", "Yipy", "Oreo", "Sponch", "Ranchitas", "Picaritas", "Papiolas", "Pringles"]) assert.match(names, new RegExp(want), want);
-    assert.ok(ev("FAST_FOOD.filter(c => !c.super).length") >= 8, "la comida rápida sigue aparte");
+    assert.ok(ev("FAST_FOOD.filter(c => !c.super && !c.drink).length") >= 8, "la comida rápida sigue aparte");
+});
+
+test("bebidas: refrescos, tés, Arizona, deportivas, energéticas y jugos", () => {
+    const names = [...ev("FAST_FOOD.filter(c => c.drink).flatMap(c => c.items.map(i => i[0]))")].join(" | ");
+    for (const want of ["Coca-Cola", "Pepsi", "Tropical", "Fuze Tea", "Arizona", "Gatorade", "Powerade", "Red Bull", "Monster", "Del Valle"])
+        assert.match(names, new RegExp(want), want);
 });
 
 test("comida rápida: cada pizzería tiene pizza de jamón y queso", () => {
@@ -343,12 +350,13 @@ test("frecuentes incluye comida rápida usada más de 3 veces", () => {
 test("comida rápida → porciones calibradas: cada producto cuadra con sus calorías", () => {
     const G = ev("Object.fromEntries(FOOD_GROUPS.map(g => [g.k, groupKcal(g)]))");
     const errs = [];
-    for (const { chain, items } of ev("FAST_FOOD")) for (const [name, , , kcal, , , , pt] of items) {
+    for (const { chain, items, drink } of ev("FAST_FOOD")) for (const [name, , , kcal, , , , pt] of items) {
+        if (kcal < 20) { assert.deepEqual(pt, {}, `${chain} · ${name}: bebida cero sin porciones`); continue; }
         assert.ok(pt && Object.keys(pt).length, `${chain} · ${name} sin calibrar (node tools/calibrar-porciones.mjs)`);
         for (const v of Object.values(pt)) assert.equal(v * 2, Math.round(v * 2), `${name}: porciones de 0,5 en 0,5`);
         const fromPortions = Object.entries(pt).reduce((s, [k, v]) => s + v * G[k], 0);
         const diff = Math.abs(fromPortions - kcal);
-        if (kcal >= 60) errs.push(diff / kcal);   /* una galleta suelta (< 60 kcal) está por debajo de la resolución de media porción */
+        if (kcal >= 60 && !drink) errs.push(diff / kcal);   /* bebidas: solo harinas (de 0,5 en 0,5 ≈ 40 kcal), van aparte */   /* una galleta suelta (< 60 kcal) está por debajo de la resolución de media porción */
         /* el límite es media porción del grupo más pequeño (~20 kcal) o el 6 %, lo que sea mayor */
         assert.ok(diff <= Math.max(0.06 * kcal, 21), `${chain} · ${name}: ${kcal} kcal vs porciones ${fromPortions}`);
     }

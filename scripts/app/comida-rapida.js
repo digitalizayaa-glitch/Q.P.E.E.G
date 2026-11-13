@@ -243,6 +243,57 @@ const FAST_FOOD = [
         ["M&M's de chocolate (bolsita 48 g)", "bolsita", "bolsitas", 240, 34, 2, 10, { h: 2, g: 1.5 }],
         ["Snickers (52 g)", "barra", "barras", 250, 33, 4, 12, { h: 2, g: 2 }],
         ["Kit Kat (4 barritas, 42 g)", "unidad", "unidades", 210, 27, 3, 11, { h: 1.5, g: 2 }]
+    ] },
+    /* ---------- BEBIDAS (drink: true) ----------
+       Por envase. Etiquetas de Costa Rica / Centroamérica cuando existen (Coca-Cola, Fanta, Sprite,
+       Fresca, Tropical, Fuze Tea); si no, la de EE. UU. (Pepsi, 7Up, Arizona, Gatorade, Powerade, Red Bull, Monster).
+       Solo azúcar → cuenta como Harinas. Las de 0–10 kcal no suman porciones. */
+    { chain: "Refrescos", drink: true, items: [
+        ["Coca-Cola (lata 355 ml)", "lata (355 ml)", "latas (355 ml)", 154, 38, 0, 0, { h: 2 }],
+        ["Coca-Cola (botella 600 ml)", "botella (600 ml)", "botellas (600 ml)", 260, 64, 0, 0, { h: 3 }],
+        ["Coca-Cola Sin Azúcar", "lata (355 ml)", "latas (355 ml)", 0, 0, 0, 0, {}],
+        ["Pepsi", "lata (355 ml)", "latas (355 ml)", 150, 41, 0, 0, { h: 2 }],
+        ["Pepsi Black (sin azúcar)", "lata (355 ml)", "latas (355 ml)", 0, 0, 0, 0, {}],
+        ["Sprite", "lata (355 ml)", "latas (355 ml)", 70, 17, 0, 0, { h: 1 }],
+        ["Sprite Zero", "lata (355 ml)", "latas (355 ml)", 0, 0, 0, 0, {}],
+        ["Fanta Naranja", "botella (600 ml)", "botellas (600 ml)", 225, 56, 0, 0, { h: 3 }],
+        ["Fanta Kolita (lata 355 ml)", "lata (355 ml)", "latas (355 ml)", 130, 32, 0, 0, { h: 1.5 }],
+        ["Fanta Kolita (botella 600 ml)", "botella (600 ml)", "botellas (600 ml)", 220, 54, 0, 0, { h: 2.5 }],
+        ["Fresca toronja", "lata (355 ml)", "latas (355 ml)", 100, 25, 0, 0, { h: 1 }],
+        ["7Up", "lata (355 ml)", "latas (355 ml)", 140, 38, 0, 0, { h: 1.5 }],
+        ["Canada Dry Ginger Ale", "lata (355 ml)", "latas (355 ml)", 140, 36, 0, 0, { h: 1.5 }],
+        ["Mountain Dew", "lata (355 ml)", "latas (355 ml)", 170, 46, 0, 0, { h: 2 }]
+    ] },
+    { chain: "Tés fríos", drink: true, items: [
+        ["Tropical Té Negro Melocotón", "botella (500 ml)", "botellas (500 ml)", 32, 8, 0, 0, { h: 0.5 }],
+        ["Tropical Té Cero Azúcar (todos los sabores)", "botella (500 ml)", "botellas (500 ml)", 0, 0, 0, 0, {}],
+        ["Fuze Tea Limón / Melocotón", "botella (500 ml)", "botellas (500 ml)", 120, 30, 0, 0, { h: 1.5 }]
+    ] },
+    { chain: "Arizona", drink: true, items: [
+        ["Arizona Green Tea con ginseng y miel", "lata (680 ml)", "latas (680 ml)", 190, 50, 0, 0, { h: 2.5 }],
+        ["Arizona Arnold Palmer Half & Half", "lata (680 ml)", "latas (680 ml)", 230, 58, 0, 0, { h: 3 }],
+        ["Arizona Arnold Palmer Lite", "lata (680 ml)", "latas (680 ml)", 155, 40, 0, 0, { h: 2 }],
+        ["Arizona Mucho Mango", "lata (680 ml)", "latas (680 ml)", 156, 38, 0, 0, { h: 2 }],
+        ["Arizona Sweet Tea", "lata (680 ml)", "latas (680 ml)", 200, 51, 0, 0, { h: 2.5 }],
+        ["Arizona Green Tea Zero", "lata (680 ml)", "latas (680 ml)", 0, 0, 0, 0, {}]
+    ] },
+    { chain: "Bebidas deportivas", drink: true, items: [
+        ["Gatorade", "botella (600 ml)", "botellas (600 ml)", 140, 35, 0, 0, { h: 1.5 }],
+        ["Gatorade Zero", "botella (600 ml)", "botellas (600 ml)", 5, 1, 0, 0, {}],
+        ["Powerade", "botella (600 ml)", "botellas (600 ml)", 130, 34, 0, 0, { h: 1.5 }],
+        ["Powerade Zero", "botella (600 ml)", "botellas (600 ml)", 0, 0, 0, 0, {}]
+    ] },
+    { chain: "Bebidas energéticas", drink: true, items: [
+        ["Red Bull", "lata (250 ml)", "latas (250 ml)", 110, 27, 0, 0, { h: 1.5 }],
+        ["Red Bull Sugarfree", "lata (250 ml)", "latas (250 ml)", 10, 3, 0, 0, {}],
+        ["Monster Energy original", "lata (473 ml)", "latas (473 ml)", 210, 54, 0, 0, { h: 2.5 }],
+        ["Monster Mango Loco", "lata (473 ml)", "latas (473 ml)", 210, 52, 0, 0, { h: 2.5 }],
+        ["Monster Zero Ultra", "lata (473 ml)", "latas (473 ml)", 10, 3, 0, 0, {}]
+    ] },
+    { chain: "Jugos y néctares", drink: true, items: [
+        ["Del Valle Néctar de Durazno", "vaso (250 ml)", "vasos (250 ml)", 100, 25, 0, 0, { h: 1 }],
+        ["Del Valle Néctar de Mango", "vaso (250 ml)", "vasos (250 ml)", 95, 24, 0, 0, { h: 1 }],
+        ["Del Valle Fresh Cítricos", "vaso (250 ml)", "vasos (250 ml)", 50, 11, 0, 0, { h: 0.5 }]
     ] }
 ];
 

@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "2.2.1";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "2.3.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "2.3.0",
+        items: [
+            "Nuevas bebidas en Comida, con su propio filtro \"Bebidas\": Coca-Cola, Pepsi, Sprite, Fanta, Kolita, Fresca, 7Up, Ginger Ale, tés fríos Tropical y Fuze Tea, Arizona, Gatorade, Powerade, Red Bull, Monster y néctares Del Valle.",
+            "Cada bebida va por lata, botella o vaso, con sus calorías reales. El azúcar cuenta como harinas, y las versiones cero o sin azúcar no suman porciones.",
+            "Para el café: azúcar (4 cdtas = 1 harina; 2 cdtas = media porción) y cremas Coffee-mate en polvo y líquida, media crema Nestlé y crema dulce."
+        ]
+    },
     {
         v: "2.2.0",
         items: [
