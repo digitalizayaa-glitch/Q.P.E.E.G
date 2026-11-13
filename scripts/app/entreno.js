@@ -153,7 +153,7 @@ function buildExerciseCard(routineId, dayId, exerciseId) {
         step: dir => changeWorkoutKg(routineId, dayId, exerciseId, dir * KG_STEP),
         onEdit: text => { const n = parseAmount(text); if (n === null) return "x"; setWorkoutKg(routineId, dayId, exerciseId, n); return ""; },
         onClose: refreshWorkout
-    }));
+    }), VALUE_STEP_PX, { area: kgBox });                   /* todo el cuadro, con "kg" */
     kgBox.append(kgValue, unitCap);
 
     const planValue = (value, caption) => {
@@ -249,7 +249,7 @@ function renderWorkoutSeries(routineId, dayId, exerciseId, cardEl) {
                 ? { label: "Quitar serie extra", onClick: () => { removeExtraSerie(routineId, dayId, exerciseId, index); return true; } }
                 : (index < log.reps.length - 1 ? { label: "Rellenar", onClick: () => { setWorkoutReps(routineId, dayId, exerciseId, index, current().reps[index], true); return true; } } : null),
             onClose: refreshWorkout
-        }));
+        }), VALUE_STEP_PX, { area: wrap, glow: valueBox });  /* toda la serie, con su número romano */
         row.appendChild(wrap);
     });
 

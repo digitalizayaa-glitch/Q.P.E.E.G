@@ -89,6 +89,14 @@ def main():
             pg.keyboard.press("Escape"); pg.wait_for_timeout(400)
             if pg.locator(".picker-overlay, .stepper-overlay").count(): pg.locator(".picker-close").first.click(); pg.wait_for_timeout(400)
             pg.evaluate("delete state.logs.r1[getWorkoutDateKey()].exercises.e0; saveState()")
+            # Todo el cuadro cuenta: tocar el número romano activa la serie y late el cuadro del número
+            label = pg.locator(".workout-track .wb-card").first.locator(".wb-serie .serie-label").first
+            label.click(); pg.wait_for_timeout(250)
+            r["letras_activan_el_cuadro"] = warmed()
+            drag(label, -120)
+            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); pg.wait_for_timeout(200)
+            r["desde_las_letras_arriba_sube"] = reps() > 0
+            pg.evaluate("delete state.logs.r1[getWorkoutDateKey()].exercises.e0; saveState()")
 
             # Fuera del entreno, el editor y ventanas altas: libres (una ventana que cabe)
             pg.evaluate("""() => { const { sheet } = openSheet('test-free', 'Prueba');

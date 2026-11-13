@@ -468,7 +468,7 @@ function buildRoutineExerciseCard(routineId, dayId, exerciseId) {
         step: dir => changeRoutineKg(routineId, dayId, exerciseId, dir * KG_STEP, null),
         onEdit: text => { const n = parseAmount(text); if (n === null) return "x"; setRoutineKg(routineId, dayId, exerciseId, n); return ""; },
         onClose: () => renderDaySheet()
-    }));
+    }), VALUE_STEP_PX, { area: kgField, glow: kgBox });     /* todo el cuadro (número, kg/lb y "Peso") */
     kgBox.append(kgValue, unitBtn);
     kgField.append(kgBox, kgCap);
 
@@ -491,7 +491,7 @@ function buildRoutineExerciseCard(routineId, dayId, exerciseId) {
             return "";
         },
         onClose: () => renderDaySheet()
-    }));
+    }), VALUE_STEP_PX, { area: setsField, glow: setsValue });
     setsField.append(setsValue, setsCap);
 
     /* Rango de repeticiones */
@@ -499,7 +499,8 @@ function buildRoutineExerciseCard(routineId, dayId, exerciseId) {
     const repsValue = document.createElement("div");
     repsValue.className = "reps-value rx-num";
     repsValue.textContent = fmtRange(rangeOf(exercise));
-    attachValueSwipe(repsValue, dir => shiftRoutineRange(routineId, dayId, exerciseId, dir, repsValue), () => openRangeEditor(routineId, dayId, exerciseId));
+    attachValueSwipe(repsValue, dir => shiftRoutineRange(routineId, dayId, exerciseId, dir, repsValue), () => openRangeEditor(routineId, dayId, exerciseId),
+        VALUE_STEP_PX, { area: repsField, glow: repsValue });
     repsField.append(repsValue, repsCap);
 
     const row = document.createElement("div");
@@ -687,19 +688,24 @@ const VALUE_STEP_PX = 26;
      desplazan, para no cambiarlos sin querer al desplazar. 1.er toque → se activan (pulso discreto) y se pueden deslizar; 2.º toque → abre su
      cuadro; al soltar después de deslizar, o 3 s sin tocarlos → se bloquean otra vez. */
 const VALUE_ARM_MS = 3000;
-let armedValue = null;   /* { el, timer } — solo uno activo a la vez */
+let armedValue = null;   /* { el, timer } — solo uno activo a la vez (el = zona que se desliza) */
+
+/* La zona que se desliza (todo el cuadro, letras incluidas) y el cuadro que late pueden ser distintos */
+const valueGlow = el => el._valueGlow || el;
 
 function disarmValue() {
     if (!armedValue) return;
     clearTimeout(armedValue.timer);
-    armedValue.el.classList.remove("value-armed");
+    armedValue.el.classList.remove("value-live");
+    valueGlow(armedValue.el).classList.remove("value-armed");
     armedValue = null;
 }
 
 function armValue(el) {
     if (!armedValue || armedValue.el !== el) {
         disarmValue();
-        el.classList.add("value-armed");
+        el.classList.add("value-live");
+        valueGlow(el).classList.add("value-armed");
         armedValue = { el, timer: 0 };
     }
     clearTimeout(armedValue.timer);
@@ -710,7 +716,7 @@ const isArmed = el => !!(armedValue && armedValue.el === el);
 
 /* ¿Pide un toque para activarse? Entreno diario, editor de rutinas o ventana emergente que se desplaza */
 function inScrollingPopup(el) {
-    if (el.closest("#workout, #exercises")) return true;       /* entreno diario y editor de rutinas: siempre */
+    if (el.closest("#workout, #exercises, .day-sheet")) return true;   /* entreno diario y editor de rutinas (ventana del día): siempre */
     const popup = el.closest(".picker-sheet");
     if (!popup) return false;
     for (let n = el.parentElement; n; n = n.parentElement) {
@@ -725,7 +731,19 @@ function inScrollingPopup(el) {
 /* "value-free" = se desliza sin activar (el navegador no desplaza la página con ese dedo) */
 const syncValueMode = el => { if (el.isConnected) el.classList.toggle("value-free", !inScrollingPopup(el)); };
 
-function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX) {
+/* opts.area: zona que recibe el gesto (por defecto el número); opts.glow: cuadro que late (por defecto la zona) */
+function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX, opts = {}) {
+    if (opts.area) { el = opts.area; }
+    if (opts.glow) el._valueGlow = opts.glow;
+    el.classList.add("value-zone");
+    /* El navegador del teléfono "ajusta" un toque hacia el botón más cercano (kg/lb) si lo que hay bajo el dedo
+       no parece tocable. Se marcan como tocables las partes de la zona (letras, número) para que no se lo lleve */
+    const markTappable = () => el.querySelectorAll("*").forEach(n => {
+        if (n._tappable || n.closest("button")) return;
+        n._tappable = true;
+        n.addEventListener("click", () => {});
+    });
+    requestAnimationFrame(markTappable);
     let lastY = null, pointer = null, startX = 0, startY = 0, startT = 0, moved = false, live = false, free = false;
     /* el modo se decide cuando ya está en pantalla (y otra vez cuando la ventana termina de abrir o cambia de tamaño) */
     requestAnimationFrame(() => syncValueMode(el));
@@ -736,6 +754,8 @@ function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX) {
     el.addEventListener("pointerdown", e => {
         if (e.pointerType === "mouse" && e.button !== 0) return;
         if (e.target.closest && e.target.closest("input")) return;
+        const btn = e.target.closest && e.target.closest("button");
+        if (btn && btn !== el && el.contains(btn)) return;     /* un botón dentro de la zona (kg/lb) hace lo suyo */
         lastY = startY = e.clientY;
         startX = e.clientX;
         startT = performance.now();

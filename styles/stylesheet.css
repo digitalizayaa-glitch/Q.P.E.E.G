@@ -1067,7 +1067,8 @@ main { overflow-x: hidden; }
 .section, .section * { touch-action: pan-y; }
 .kg-value, .reps-value, .stepper-value { touch-action: pan-y; }
 /* Valor libre (fuera de ventanas que se desplazan): se desliza directo */
-.value-free { touch-action: none !important; }
+.value-free, .value-live { touch-action: none !important; }
+.value-zone { cursor: pointer; }
 /* Valor activado con un toque (ventanas altas): se desliza y late suave con el color de la app */
 .value-armed {
     touch-action: none !important; cursor: ns-resize !important;
