@@ -15,6 +15,7 @@
     3. x = (MET − 1) ÷ (capacidad − 1)  → % de tu reserva. Carga por minuto = x · a · e^(b·x)
        (Banister: hombres a 0,64 b 1,92; mujeres a 0,86 b 1,67), escalada para que 40 min a x = 0,5 = 100.
     4. Carga = 100 × (TRIMP ÷ el de la sesión moderada)^0,6: lo largo y lo intenso suben, pero sin dispararse.
+       Al final, ajuste por deporte: bici +5 %, caminar +12 %, el resto +10 %.
     Ejemplos (hombre de 30, 75 kg): 45 min caminando ≈ 45 · bici 9 km/1 h/+200 m ≈ 85 · bici 15 km/50 min ≈ 105 ·
     correr 5 km/30 min ≈ 150 · correr 10 km/1 h ≈ 225 · bici 40 km/2 h/+600 m ≈ 325.
 
@@ -88,6 +89,9 @@ const SPORT_MODERATE = { min: 40, x: 0.5 };                     /* = 100 */
 /* PA-R 5 (Jackson): hace ejercicio con regularidad, como quien usa esta app.
    Potencia 0,6: el doble de minutos suma ≈ 1,5 veces, no el doble; así una salida de 3 h no se dispara a 1000 */
 const SPORT_PAR = 5, SPORT_POW = 0.6;
+/* Ajuste final por deporte (comparado con cómo se sienten las sesiones reales): bici +5 %, caminar +12 %, el resto +10 % */
+const SPORT_BOOST = { bike: 1.05, walk: 1.12 };
+const sportBoost = k => SPORT_BOOST[k] || 1.10;
 
 /* Cuerpo del perfil (sin plan: null → persona de referencia) */
 function sportBodyNow() {
@@ -154,7 +158,7 @@ function sportPaceDetail(sp) {
     return {
         expected, minutes, speed: v, met, x, zone: sportZone(x), tooFast,
         kcal: met * minutes * kg / 60,
-        load: Math.pow(minutes * trimpMin(x, sex) / unit, SPORT_POW) * 100
+        load: Math.pow(minutes * trimpMin(x, sex) / unit, SPORT_POW) * 100 * sportBoost(k)
     };
 }
 
