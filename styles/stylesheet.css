@@ -655,7 +655,7 @@ main { overflow-x: hidden; }
 .kg-value .v, .reps-value .v { display: inline-block; will-change: transform, opacity; }
 
 /* Sin flechas: los números se cambian deslizando arriba/abajo sobre ellos */
-.kg-value, .reps-value { touch-action: none; cursor: ns-resize; }
+.kg-value, .reps-value { touch-action: pan-y; cursor: pointer; }
 .kg-value { padding-top: calc(14px * var(--k)); padding-bottom: calc(14px * var(--k)); font-size: 18px; }
 .reps-value { padding: calc(14px * var(--k)) 0; font-size: 18px; }
 .serie-carousel { width: 62px; }
@@ -899,8 +899,8 @@ main { overflow-x: hidden; }
     font-size: 54px;
     font-weight: bold;
     overflow: hidden;
-    touch-action: none;
-    cursor: ns-resize;
+    touch-action: pan-y;
+    cursor: pointer;
     -webkit-user-select: none;
     user-select: none;
 }
@@ -1065,7 +1065,18 @@ main { overflow-x: hidden; }
 
 /* El deslizado horizontal debe funcionar sobre todo (incluidos botones dentro de secciones con scroll) */
 .section, .section * { touch-action: pan-y; }
-.kg-value, .reps-value, .stepper-value { touch-action: none; }
+.kg-value, .reps-value, .stepper-value { touch-action: pan-y; }
+/* Valor activado con un toque: se desliza (y ya no desplaza la página) y late con el color de la app */
+.value-armed {
+    touch-action: none !important; cursor: ns-resize !important;
+    border-color: var(--ui) !important; box-shadow: 0 0 0 1px var(--ui);
+    animation: value-armed-pulse 1s ease-in-out infinite !important;
+}
+@keyframes value-armed-pulse {
+    0%, 100% { box-shadow: 0 0 0 1px var(--ui), 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 0 1px var(--ui), 0 0 14px 2px rgba(var(--ui-rgb), .55); }
+}
+@media (prefers-reduced-motion: reduce) { .value-armed { animation: none !important; } }
 
 /* Historial */
 .history-title { text-align: center; }
@@ -1122,7 +1133,7 @@ main { overflow-x: hidden; }
 .t-tile i { font-style: normal; color: var(--muted); font-size: 12px; margin-left: 4px; }
 .t-tile.t-main { flex: 1.4; }
 .t-tile.t-main b { font-size: 30px; color: var(--ui); }
-.t-input { cursor: pointer; touch-action: none; -webkit-user-select: none; user-select: none; }
+.t-input { cursor: pointer; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
 .t-input:active, .t-input:focus-visible { border-color: var(--ui); outline: none; }
 .t-input.empty b { color: var(--faint); }
 .t-input.bad { border-color: var(--accent-red); }
@@ -1795,7 +1806,7 @@ main { overflow-x: hidden; }
 .sport-step { width: 100%; height: 46px; padding: 0; font-size: 16px; }
 .sport-value {
     height: 86px; display: flex; align-items: center; justify-content: center; overflow: hidden;
-    padding: 0 4px; border-radius: 14px; cursor: ns-resize; touch-action: none; user-select: none;
+    padding: 0 4px; border-radius: 14px; cursor: pointer; touch-action: pan-y; user-select: none;
     font-size: 19px; font-weight: bold; color: var(--text); text-align: center; line-height: 1.15; white-space: nowrap;
     background: var(--inset); border: 1px solid var(--glass-border);
 }

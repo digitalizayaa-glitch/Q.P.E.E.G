@@ -680,8 +680,35 @@ function attachLongPress(el, callback) {
 const VALUE_STEP_PX = 26;
 
 /* Deslizar sobre el número lo sube/baja (un paso cada stepPx px). Un toque corto (sin mover) llama a onTap. */
+/* Valores deslizables (kg, reps, series, rangos, deportes, metas…).
+   Para no cambiarlos sin querer al recorrer la app, empiezan bloqueados:
+   1.er toque → se activan (pulso del color de la app) y se pueden deslizar arriba/abajo;
+   2.º toque mientras están activos → abre su cuadro (onTap);
+   3 s sin tocarlos → se bloquean otra vez. Bloqueados, el gesto pasa a la página (desplazar, cambiar de ejercicio). */
+const VALUE_ARM_MS = 3000;
+let armedValue = null;   /* { el, timer } — solo uno activo a la vez */
+
+function disarmValue() {
+    if (!armedValue) return;
+    clearTimeout(armedValue.timer);
+    armedValue.el.classList.remove("value-armed");
+    armedValue = null;
+}
+
+function armValue(el) {
+    if (!armedValue || armedValue.el !== el) {
+        disarmValue();
+        el.classList.add("value-armed");
+        armedValue = { el, timer: 0 };
+    }
+    clearTimeout(armedValue.timer);
+    armedValue.timer = setTimeout(disarmValue, VALUE_ARM_MS);
+}
+
+const isArmed = el => !!(armedValue && armedValue.el === el);
+
 function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX) {
-    let lastY = null, pointer = null, startX = 0, startY = 0, startT = 0, moved = false;
+    let lastY = null, pointer = null, startX = 0, startY = 0, startT = 0, moved = false, live = false;
 
     el.addEventListener("pointerdown", e => {
         if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -691,12 +718,16 @@ function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX) {
         startT = performance.now();
         moved = false;
         pointer = e.pointerId;
+        live = isArmed(el);
+        if (!live) return;                  /* bloqueado: solo se cuenta el toque, sin quitarle el gesto a la página */
+        clearTimeout(armedValue.timer);      /* mientras el dedo está encima no se bloquea */
         try { el.setPointerCapture(pointer); } catch (err) {}
     });
 
     el.addEventListener("pointermove", e => {
         if (lastY === null || e.pointerId !== pointer) return;
         if (Math.hypot(e.clientX - startX, e.clientY - startY) > 8) moved = true;
+        if (!live) return;
 
         let dy = e.clientY - lastY;
         while (Math.abs(dy) >= stepPx) {
@@ -708,11 +739,18 @@ function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX) {
     });
 
     el.addEventListener("pointerup", () => {
-        const tap = lastY !== null && !moved && onTap && performance.now() - startT < 400;
-        lastY = null; pointer = null;
-        if (tap) onTap();
+        const tap = lastY !== null && !moved && performance.now() - startT < 400;
+        const wasLive = live;
+        lastY = null; pointer = null; live = false;
+        if (!wasLive) { if (tap) armValue(el); return; }        /* 1.er toque: activar */
+        if (tap && onTap) { disarmValue(); onTap(); return; }   /* 2.º toque: abrir el cuadro */
+        if (isArmed(el)) armValue(el);                          /* tras deslizar: otros 3 s */
     });
-    el.addEventListener("pointercancel", () => { lastY = null; pointer = null; });
+    el.addEventListener("pointercancel", () => {
+        lastY = null; pointer = null;
+        if (live && isArmed(el)) armValue(el);
+        live = false;
+    });
 }
 
 function refreshWorkout() {

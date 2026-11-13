@@ -5,9 +5,19 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "2.1.2";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "2.2.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "2.2.0",
+        items: [
+            "Los números que se deslizan (peso, series, reps, rangos, deportes y metas) ya no cambian sin querer al recorrer la app: toca uno para activarlo, late con el color de la app y ahí lo deslizas. A los 3 segundos sin usarlo se bloquea de nuevo.",
+            "Para abrir el cuadro de un número, tócalo dos veces.",
+            "En el entreno de un día y en el editor de rutinas, la casita se vuelve una flecha para regresar a la sección de antes.",
+            "Nuevo botón ✓ en el entreno del día: lo das por terminado aunque falten ejercicios por marcar (los que faltan no cuentan). Tócalo otra vez para quitarlo.",
+            "Entreno más ordenado: peso × series × reps ocupa lo mismo que las 4 series y deja todo el espacio a la imagen. La unidad (kg o lb) se cambia en Rutinas."
+        ]
+    },
     {
         v: "2.1.0",
         items: [

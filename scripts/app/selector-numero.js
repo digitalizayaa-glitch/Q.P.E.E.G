@@ -48,7 +48,7 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
 
     const hint = document.createElement("div");
     hint.className = "stepper-hint";
-    hint.textContent = onEdit ? "Desliza, usa ▲ ▼ o toca el número para escribirlo" : "Desliza sobre el número o usa ▲ ▼";
+    hint.textContent = onEdit ? "Usa ▲ ▼, toca el número para deslizarlo o dos veces para escribirlo" : "Usa ▲ ▼ o toca el número para deslizarlo";
 
     const actions = document.createElement("div");
     actions.className = "dialog-actions";

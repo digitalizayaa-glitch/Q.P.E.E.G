@@ -194,7 +194,7 @@ function initSwipe() {
 
     app.addEventListener("pointerdown", e => {
         if (SWIPE.busy || (e.pointerType === "mouse" && e.button !== 0)) return;
-        if (e.target.closest("input, textarea, select, .kg-value, .reps-value")) return;
+        if (e.target.closest("input, textarea, select, .value-armed")) return;   /* valores bloqueados: el gesto es de la página */
         g = { x: e.clientX, y: e.clientY, t: performance.now(), inHeader: !!e.target.closest("header"), axis: null, ctx: null, p: 0, dir: 0, can: false };
     });
 
