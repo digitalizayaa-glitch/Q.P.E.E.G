@@ -1516,10 +1516,11 @@ main { overflow-x: hidden; }
 /* =========================================================
     BOTONES DE INICIO, CASITA Y TÍTULO CON EL COLOR DE LA APP
 ========================================================= */
-.home-btn, .settings-btn {
+.home-btn, .settings-btn, .day-done-btn {
     color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
 }
-.home-btn:active, .settings-btn:active { background: rgba(var(--ui-rgb), .32); }
+.home-btn:active, .settings-btn:active, .day-done-btn:active { background: rgba(var(--ui-rgb), .32); }
+.day-done-btn.on { background: rgb(var(--ui-rgb)); color: var(--bg); }
 .backup-btn, .achievements-edit {
     padding: 9px 14px; font-size: 13px; font-weight: bold; border-radius: 12px;
     color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
@@ -1551,7 +1552,7 @@ main { overflow-x: hidden; }
     0%, 100% { box-shadow: 0 0 0 0 rgba(var(--ui-rgb), 0); }
     50%      { box-shadow: 0 0 11px 0 rgba(var(--ui-rgb), .33); }   /* +25 % */
 }
-.home-btn, .settings-btn, .profile-photo, .backup-btn, .achievements-edit,
+.home-btn, .settings-btn, .day-done-btn, .profile-photo, .backup-btn, .achievements-edit,
 .square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
 .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order, .food-hist-btn {
     animation: ui-pulse 3.4s ease-in-out infinite;
@@ -1566,7 +1567,7 @@ main { overflow-x: hidden; }
 .add-square.add-wide.fh-add { width: auto; height: auto; min-height: 0; aspect-ratio: auto; margin: 6px 16px 16px; padding: 10px; flex-shrink: 0; box-sizing: border-box; }
 @media (prefers-reduced-motion: reduce) {
     .food-row.editable { animation: none; }
-    .home-btn, .settings-btn, .profile-photo, .backup-btn, .achievements-edit,
+    .home-btn, .settings-btn, .day-done-btn, .profile-photo, .backup-btn, .achievements-edit,
     .square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
     .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order, .food-hist-btn { animation: none; }
 }
@@ -1621,6 +1622,17 @@ main { overflow-x: hidden; }
     animation: ui-pulse 3.4s ease-in-out infinite;
 }
 .today-btn[hidden] { display: none; }
+/* ✓ del entreno del día (a la derecha, mismo tamaño que la casita) */
+.day-done-btn {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    width: max(30px, calc(var(--hdr) * 0.4)); height: max(30px, calc(var(--hdr) * 0.4));
+    display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 10px; cursor: pointer;
+    color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.day-done-btn[hidden] { display: none; }
+.day-done-btn svg { width: 62%; height: 62%; }
+.day-done-btn:active { background: rgba(var(--ui-rgb), .32); }
+.day-done-btn.on { background: rgb(var(--ui-rgb)); color: var(--bg); }
 .today-btn:active { background: rgba(var(--ui-rgb), .32); }
 @media (prefers-reduced-motion: reduce) { .today-btn { animation: none; } }
 .header-sub .week-date { padding: 0 44px; display: block; text-align: center; line-height: 1.25; overflow: hidden; }

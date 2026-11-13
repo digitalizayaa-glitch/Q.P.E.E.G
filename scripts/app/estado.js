@@ -156,6 +156,7 @@ function sanitizeState(src) {
                 if (isObj(x)) exercises[id] = { kg: num(x.kg), reps: (Array.isArray(x.reps) ? x.reps : []).map(num), extra: Math.min(MAX_EXTRA_SERIES, Math.round(num(x.extra))) };
             }
             const entry = { dayId: typeof e.dayId === "string" ? e.dayId : "", exercises };
+            if (e.done === true) entry.done = true;   /* ✓ del entreno: día dado por terminado */
             /* metas guardadas: [mín, máx] por serie (las viejas eran un solo número) */
             if (Array.isArray(e.plan)) entry.plan = e.plan.filter(p => isObj(p) && typeof p.id === "string")
                 .map(p => ({ id: p.id, t: (Array.isArray(p.t) ? p.t : []).map(x => Array.isArray(x) ? [num(x[0]), num(x[1])] : [num(x), num(x)]) }));
@@ -436,8 +437,13 @@ function dayStatus(routine, key) {
     const plan = key !== dateKey() && entry.plan ? entry.plan : (day ? planOf(day) : null);
     if (!plan || plan.length === 0) return "empty";
 
-    const statuses = plan.map(p => exerciseStatus(p.t, entry.exercises[p.id]?.reps || []));
+    let statuses = plan.map(p => exerciseStatus(p.t, entry.exercises[p.id]?.reps || []));
 
+    /* Día dado por terminado (✓ del entreno): los ejercicios sin marcar no cuentan */
+    if (entry.done) {
+        statuses = statuses.filter(s => s !== "pending");
+        if (statuses.length === 0) return "green";
+    }
     if (statuses.every(s => s === "pending")) return "empty";
     if (statuses.some(s => s === "pending")) return "red"; // se empezó pero no se completó
     if (statuses.includes("red")) return "red";

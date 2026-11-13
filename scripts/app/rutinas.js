@@ -18,18 +18,13 @@ function findDay(routine, dayId) {
     return routine ? routine.days.find(d => d.id === dayId) : undefined;
 }
 
+/* En una sección interna (entreno de un día, días de una rutina) la casita pasa a ser "volver" */
 function setHeaderDateText(text, onBack) {
     const el = document.getElementById("weekDate");
-
-    if (onBack) {
-        el.textContent = `← ${text}`;
-        el.classList.add("clickable");
-        el.onclick = onBack;
-    } else {
-        el.textContent = text;
-        el.classList.remove("clickable");
-        el.onclick = null;
-    }
+    el.textContent = text;
+    el.classList.remove("clickable");
+    el.onclick = onBack || null;   /* el título también vuelve, pero el botón es la flecha */
+    setHeaderBack(onBack || null);
 }
 
 function renderRoutinesTab() {

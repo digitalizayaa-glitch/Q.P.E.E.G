@@ -62,6 +62,7 @@ function showSection(sectionId) {
     }
 
     updateTodayButton(sectionId);
+    updateDayDoneButton(sectionId);
     requestAnimationFrame(fitHeaderDate);
 
     const tab = TAB_ORDER.find(t => t.id === sectionId);
@@ -84,8 +85,57 @@ function renderDots(container, total, index) {
 }
 
 /* Botón de la casita (siempre visible en el encabezado): vuelve a la pantalla de inicio de toda la app,
-   la del perfil. Al volver a entrar, la app empieza en Semana. */
-document.addEventListener("DOMContentLoaded", () => { document.getElementById("homeBtn").addEventListener("click", goHome); });
+   la del perfil. Al volver a entrar, la app empieza en Semana.
+   En una sección interna (entreno de un día, días de una rutina) se vuelve flecha y regresa a la sección de antes. */
+const HOME_ICON = '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h5v-6h3v6h5V10"/>';
+const BACK_ICON = '<path d="M15 5l-7 7 7 7"/>';
+let headerBack = null;
+
+function setHeaderBack(onBack) {
+    headerBack = onBack;
+    const btn = document.getElementById("homeBtn");
+    if (!btn) return;
+    const mode = onBack ? "back" : "home";
+    if (btn.dataset.mode === mode) return;
+    btn.dataset.mode = mode;
+    btn.querySelector("svg").innerHTML = onBack ? BACK_ICON : HOME_ICON;
+    btn.setAttribute("aria-label", onBack ? "Volver" : "Ir al inicio");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("homeBtn").addEventListener("click", () => {
+        if (SWIPE.busy) return;
+        if (headerBack) headerBack(); else goHome();
+    });
+    document.getElementById("dayDoneBtn").addEventListener("click", toggleDayDone);
+});
+
+/* ✓ del entreno del día: lo da por terminado aunque falten ejercicios por marcar
+   (los que faltan no cuentan; lo marcado sigue su color). Se quita tocando otra vez. */
+function workoutEntry() {
+    if (!activeWorkout || !activeWorkout.routineId) return null;
+    return state.logs[activeWorkout.routineId]?.[getWorkoutDateKey()] || null;
+}
+
+function updateDayDoneButton(sectionId) {
+    const btn = document.getElementById("dayDoneBtn");
+    if (!btn) return;
+    const entry = sectionId === "workout" ? workoutEntry() : null;
+    btn.hidden = !entry;
+    const on = !!(entry && entry.done);
+    btn.classList.toggle("on", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    btn.setAttribute("aria-label", on ? "Quitar día terminado" : "Dar el día por terminado");
+}
+
+function toggleDayDone() {
+    const entry = workoutEntry();
+    if (!entry) return;
+    if (entry.done) delete entry.done; else entry.done = true;
+    saveState();
+    updateDayDoneButton("workout");
+    if (entry.done) glowOnce(document.getElementById("dayDoneBtn"));
+}
 
 function goHome() {
     if (SWIPE.busy) return;
