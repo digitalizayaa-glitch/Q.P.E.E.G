@@ -294,6 +294,18 @@ const FAST_FOOD = [
         ["Del Valle Néctar de Durazno", "vaso (250 ml)", "vasos (250 ml)", 100, 25, 0, 0, { h: 1 }],
         ["Del Valle Néctar de Mango", "vaso (250 ml)", "vasos (250 ml)", 95, 24, 0, 0, { h: 1 }],
         ["Del Valle Fresh Cítricos", "vaso (250 ml)", "vasos (250 ml)", 50, 11, 0, 0, { h: 0.5 }]
+    ] },
+    /* Ponches por vaso de 250 ml. Navideño con piloncillo o azúcar ≈ 250 kcal (con los trozos de fruta), natural
+       solo con la fruta ≈ 150, light con endulzante ≈ 70 (N+, Infobae); de concentrado ≈ 119 (FatSecret);
+       Hawaiian Punch: etiqueta de EE. UU. (40 kcal por 8 oz). El de leche a la tica: leche, leche
+       condensada, huevo y canela, sin licor (los con licor suman calorías del alcohol que no se cuentan aquí) */
+    { chain: "Ponches", drink: true, items: [
+        ["Ponche de frutas navideño (con azúcar o tapa de dulce)", "vaso (250 ml)", "vasos (250 ml)", 250, 62, 0.8, 0.3, { h: 3 }],
+        ["Ponche de frutas natural (sin azúcar añadida)", "vaso (250 ml)", "vasos (250 ml)", 150, 37, 0.8, 0.3, { h: 2 }],
+        ["Ponche de frutas light (con endulzante)", "vaso (250 ml)", "vasos (250 ml)", 70, 18, 0.5, 0, { h: 1 }],
+        ["Ponche de frutas de concentrado", "vaso (250 ml)", "vasos (250 ml)", 119, 30, 0.2, 0, { h: 1.5 }],
+        ["Hawaiian Punch Fruit Juicy Red", "vaso (250 ml)", "vasos (250 ml)", 42, 11.5, 0, 0, { h: 0.5 }],
+        ["Ponche de leche navideño (sin licor)", "vaso (120 ml)", "vasos (120 ml)", 140, 17, 5, 5.5, { h: 0.5, l: 0.5, g: 1 }]
     ] }
 ];
 

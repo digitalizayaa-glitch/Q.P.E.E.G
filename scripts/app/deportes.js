@@ -1,7 +1,8 @@
 /* =========================================================
     DEPORTES → "carga" (100 = una salida normal para ti)
 
-    Correr, ciclismo, caminar y nadar (SPORT_PACE): manda la DISTANCIA y el tiempo la corrige.
+    Correr, ciclismo, caminar, nadar y los de juego (SPORT_PACE): manda la DISTANCIA y el tiempo la corrige.
+    En los de juego la distancia es la que se recorre en el partido; sin ella, sale del tiempo.
     - El desnivel se pasa a km planos con la regla de Naismith/Scarf (caminar y correr: 100 m de
       subida ≈ 0,8 km; ciclismo ≈ 2 km, ya contando que la bajada devuelve parte del tiempo).
       Distancia equivalente = km + desnivel en km planos. La carga = distancia equivalente ÷ la normal.
@@ -15,8 +16,8 @@
     - Cada registro guarda el cuerpo de ese día (bp), para que bajar de peso no cambie el historial.
       Los que no lo tienen usan el perfil actual.
 
-    Fútbol, básquetbol, tenis, voleibol y "Otro": como antes (cada dato ÷ normal, promediados), con la
-    normal escalada por las calorías de mantenimiento. Referencias para 2400 kcal.
+    "Otro": como antes (cada dato ÷ normal, promediados), con la normal escalada por las calorías de
+    mantenimiento. Referencias para 2400 kcal.
 ========================================================= */
 
 const SPORT_BASE_KCAL = 2400;
@@ -25,8 +26,8 @@ const SPORT_BASE_KCAL = 2400;
 const SPORT_REF_FACTOR = 0.75;
 
 /* ref: salida normal de la tabla. Sin "km" o "up" = ese dato no aplica a ese deporte.
-   Correr, ciclismo, caminar y nadar: km y up son para la persona de referencia (su tiempo sale del ritmo, "min" no se usa).
-   Los demás: para 2400 kcal de mantenimiento */
+   Todos menos "Otro": km y up son para la persona de referencia; el tiempo normal sale del ritmo
+   (en los de juego coincide con "min"; voleibol, sin km, usa "min"). "Otro": para 2400 kcal de mantenimiento */
 const SPORTS = [
     { k: "run",    name: "Correr",     ref: { min: 45, km: 7,   up: 60 } },
     { k: "bike",   name: "Ciclismo",   ref: { min: 90, km: 35,  up: 400 } },
@@ -60,8 +61,16 @@ const SPORT_PACE = {
     run:  { v: 10, up: 0.8, sex: 0.88, age: 0.007, bmi: 0.025, h: 0.3 },
     walk: { v: 5,  up: 0.8, sex: 0.96, age: 0.004, bmi: 0.010, h: 0.5 },
     bike: { v: 25, up: 2,   sex: 0.88, age: 0.006, bmi: 0.012, h: 0 },
-    swim: { v: 2,  up: 0,   sex: 0.92, age: 0.006, bmi: 0.008, h: 0.3 }
+    swim: { v: 2,  up: 0,   sex: 0.92, age: 0.006, bmi: 0.008, h: 0.3 },
+    /* Deportes de juego: "v" es la distancia que se recorre por hora de partido con la persona de referencia
+       (fútbol 8 km en 90 min, básquetbol 4 km/h, tenis 3 km/h). Voleibol no lleva distancia: solo tiempo */
+    soccer: { v: 8 / 1.5, up: 0, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2 },
+    basket: { v: 4,       up: 0, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2 },
+    tennis: { v: 3,       up: 0, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2 },
+    volley: { v: 1,       up: 0, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2 }
 };
+/* Distancia de la salida normal de la tabla (persona de referencia); sin km en la tabla: la de su tiempo */
+const sportBaseKm = k => { const b = sportDef(k).ref; return b.km || b.min / 60 * SPORT_PACE[k].v; };
 const SPORT_FAST_MAX = 0.4, SPORT_SLOW_MAX = 0.3, SPORT_PACE_CURVE = 0.45;
 
 /* Cuerpo del perfil (sin plan: null → persona de referencia) */
@@ -100,8 +109,9 @@ function sportPaceMult(r) {
 function sportPaceDetail(sp) {
     const k = sp.k, body = sportBody(sp), base = sportDef(k).ref;
     const v = sportSpeed(k, body), f = sportPaceFactor(k, body) * SPORT_REF_FACTOR;
-    const refEq = sportEqKm(k, base.km, base.up) * f;
-    const km = sp.km > 0 ? sp.km : 0, up = sp.up > 0 ? sp.up : 0, min = sp.min > 0 ? sp.min : 0;
+    const refEq = sportEqKm(k, sportBaseKm(k), base.up) * f;
+    /* solo los datos que aplican al deporte */
+    const km = sp.km > 0 && base.km ? sp.km : 0, up = sp.up > 0 && base.up ? sp.up : 0, min = sp.min > 0 ? sp.min : 0;
     let eq, expected, mult = 1;
     if (km > 0) {
         eq = sportEqKm(k, km, up);
@@ -121,7 +131,7 @@ function sportPaceDetail(sp) {
     };
 }
 
-/* Escala de la salida normal de los deportes de juego: mantenimiento del plan ÷ 2400 (sin plan: 1) */
+/* Escala de la salida normal de "Otro": mantenimiento del plan ÷ 2400 (sin plan: 1) */
 function sportScale() {
     const n = typeof nutrition === "function" ? nutrition() : null;
     if (!n) return 1;
@@ -135,7 +145,8 @@ function sportReference(k) {
     if (SPORT_PACE[k]) {
         const body = sportBodyNow();
         const f = sportPaceFactor(k, body) * SPORT_REF_FACTOR;
-        const out = { min: sportEqKm(k, base.km, base.up) * f / sportSpeed(k, body) * 60, km: base.km * f };
+        const out = { min: sportEqKm(k, sportBaseKm(k), base.up) * f / sportSpeed(k, body) * 60 };
+        if (base.km) out.km = base.km * f;
         if (base.up) out.up = base.up * f;
         return out;
     }
@@ -145,7 +156,7 @@ function sportReference(k) {
     return out;
 }
 
-/* Deportes de juego: puntaje de cada dato puesto (dato ÷ normal × 100) */
+/* "Otro": puntaje de cada dato puesto (dato ÷ normal × 100) */
 function sportParts(sp) {
     const ref = sportReference(sp.k);
     return SPORT_FIELDS.filter(({ f }) => sp[f] > 0 && ref[f]).map(({ f }) => ({ f, pct: sp[f] / ref[f] * 100 }));
@@ -153,7 +164,7 @@ function sportParts(sp) {
 
 /* Carga (normal = 100) */
 function sportLoad(sp) {
-    if (SPORT_PACE[sp.k]) return (sp.min > 0 || sp.km > 0 || sp.up > 0) ? sportPaceDetail(sp).load : 0;
+    if (SPORT_PACE[sp.k]) return sportFields(sp.k).some(({ f }) => sp[f] > 0) ? sportPaceDetail(sp).load : 0;
     const parts = sportParts(sp);
     return parts.length ? parts.reduce((a, p) => a + p.pct, 0) / parts.length : 0;
 }

@@ -58,6 +58,8 @@ const FOOD_CATALOG = {
         ["Pasta (varias)", "1/2 taza (50 g)"],
         ["Canelón", "2 unidades"],
         ["Papa / Camote hervido", "1/2 taza (100 g)"],
+        ["Picadillo de papa con carne molida", "1/2 taza (100 g)"],
+        ["Picadillo de papa con carne mechada", "1/2 taza (100 g)"],
         ["Papa / Camote horneado", "1/3 taza (80 g)"],
         ["Ayote sazón / Calabaza", "1 taza (200 g)"],
         ["Tiquizque", "1/4 taza (50 g)"],
@@ -121,6 +123,7 @@ const FOOD_CATALOG = {
         ["Huevo (completo)", "1 unidad"],
         ["Carne de res (+15% grasa)", "28 g"],
         ["Cerdo (chuleta / beef steak)", "30 g"],
+        ["Carne mechada (en salsa)", "35 g"],
         ["Costilla de cerdo al horno o a la parrilla", "25 g (sin hueso)"],
         ["Costilla de cerdo en salsa BBQ", "35 g (sin hueso)"],
         ["Costilla de cerdo frita o en olla", "25 g (sin hueso)"],
@@ -275,6 +278,11 @@ const FOOD_CALIBRATION = {
     "Yogurt de sabor con azúcar (batido o bebible)":  { k: 163, c: 30.7, p: 6.6,  f: 1.8, pt: { l: 0.5, h: 1.5 } },
 
     /* Costillas (USDA, carne sin hueso, grasa incluida). La de res es la más grasosa. */
+    /* Picadillos de papa a la tica (papa, carne, sofrito y un poco de aceite), ≈ 140 kcal por 100 g;
+       carne mechada de res en su salsa de tomate, cebolla y chile */
+    "Picadillo de papa con carne molida":  { k: 140, c: 12, p: 7,   f: 6.4, pt: { h: 1, mg: 0.5, g: 0.5 } },
+    "Picadillo de papa con carne mechada": { k: 128, c: 12, p: 8,   f: 5.2, pt: { h: 1, bg: 1 } },
+    "Carne mechada (en salsa)":            { k: 65,  c: 1,  p: 7.5, f: 3.4, pt: { mg: 1 } },
     "Costilla de cerdo al horno o a la parrilla": { k: 73,  c: 0,   p: 5.8, f: 5.4,  pt: { mg: 1 } },
     "Costilla de cerdo en salsa BBQ":             { k: 120, c: 4.5, p: 7.5, f: 7.8,  pt: { mg: 1, h: 0.5 } },
     "Costilla de cerdo frita o en olla":          { k: 99,  c: 0,   p: 7.3, f: 7.6,  pt: { mg: 1, g: 0.5 } },

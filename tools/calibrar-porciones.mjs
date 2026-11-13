@@ -20,7 +20,7 @@ const kcalOf = ([c, p, f]) => 4 * c + 4 * p + 9 * f;
 
 /* Qué grupos puede usar cada tipo de producto (super = sección de supermercado) */
 function groupsFor(name, isSuper) {
-    if (isSuper === "drink") return ["h"];                                                   /* bebidas: solo azúcar → harinas */
+    if (isSuper === "drink") return /leche/i.test(name) ? ["h", "l", "g"] : ["h"];          /* bebidas: solo azúcar → harinas (con leche: también lácteo y grasa) */
     if (isSuper) return /Maní/i.test(name) ? ["h", "bg", "g"] : ["h", "g"];   /* galletas, snacks y chocolates: harinas y grasas */
     if (/Refresco|Crazy Sauce/i.test(name)) return ["h"];                                   /* azúcar → harinas, como la miel */
     if (/Salsa de ajo/i.test(name)) return ["g"];
