@@ -78,6 +78,7 @@ const FOOD_CATALOG = {
         ["Galleta soda / María / Rice crispy", "1 paquete"],
         ["Harina de maíz (Juana / Maseca)", "2 cdas (24 g)"],
         ["Mezcla pancakes Tosh", "2 cdas (23 g)"],
+        ["Azúcar (blanca o morena)", "4 cdtas (16 g)"],
         ["Miel", "1 cda (25 ml)"],
         ["Mermelada con azúcar", "1 cda (25 g)"],
         ["Pasas", "1 cda (20 g)"],
@@ -157,7 +158,11 @@ const FOOD_CATALOG = {
         ["Leche de coco de cartón (con azúcar)", "1 taza (240 ml)"],
         ["Leche de coco de lata", "2 cdas (30 ml)"],
         ["Leche de coco de lata light", "1/4 taza (60 ml)"],
-        ["Chimichurri argentino (con aceite)", "1/2 cda (8 g)"]
+        ["Chimichurri argentino (con aceite)", "1/2 cda (8 g)"],
+        ["Crema para café Coffee-mate en polvo", "6 cdtas (16 g)"],
+        ["Crema para café Coffee-mate líquida", "4 cdas (60 ml)"],
+        ["Media crema Nestlé", "1 1/2 cdas (22 g)"],
+        ["Crema dulce (para batir)", "1 cda (15 g)"]
     ],
     v: [
         ["Vegetales frescos (ensalada)", "1 taza"],
@@ -221,7 +226,14 @@ const FOOD_CALIBRATION = {
     "Nuggets de pollo Pipasa":   { k: 100, c: 5.6,  p: 5.6, f: 6,   pt: { h: 0.5, mg: 0.5, g: 0.5 } },
     "Queso ricotta":             { k: 70,  c: 1.2,  p: 4.5, f: 5.2, pt: { mg: 1 } },
     "Chocolate Dark 75% o más":  { k: 60,  c: 4.6,  p: 0.8, f: 4.3, pt: { h: 0.5, g: 0.5 } },
+    /* Azúcar: carbohidrato puro (15–16 g = 1 harina). 2 cdtas = 1/2 porción */
+    "Azúcar (blanca o morena)":  { k: 62,  c: 16,   p: 0,   f: 0,   pt: { h: 1 } },
     "Miel":                      { k: 108, c: 29,   p: 0.1, f: 0,   pt: { h: 1.5 } },
+    /* Cremas para café (etiquetas Nestlé). Las Coffee-mate traen azúcar del jarabe de maíz: grasa + 1/2 harina */
+    "Crema para café Coffee-mate en polvo": { k: 87, c: 9.1, p: 0.3, f: 5.5, pt: { g: 1, h: 0.5 } },
+    "Crema para café Coffee-mate líquida":  { k: 80, c: 10,  p: 0,   f: 4.4, pt: { g: 1, h: 0.5 } },
+    "Media crema Nestlé":                   { k: 49, c: 0.8, p: 0.4, f: 5,   pt: { g: 1 } },
+    "Crema dulce (para batir)":             { k: 50, c: 0.5, p: 0.2, f: 5.3, pt: { g: 1 } },
     "Mermelada con azúcar":      { k: 70,  c: 17,   p: 0.1, f: 0,   pt: { h: 1 } },
     "Pasas":                     { k: 60,  c: 15.9, p: 0.6, f: 0.1, pt: { h: 1 } },
     "Leche condensada":          { k: 241, c: 40.7, p: 5.9, f: 6.5, pt: { l: 0.5, h: 2, g: 0.5 } },
