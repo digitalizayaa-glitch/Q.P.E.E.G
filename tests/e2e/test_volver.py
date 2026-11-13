@@ -64,7 +64,7 @@ def main():
             r["plan_sin_cambio_kg_lb"] = not any(x["toggle"] for x in rows) and [x["unit"] for x in rows] == ["kg", "kg", "lb"]
             r["cifras_caben_3_digitos_y_rango"] = all(x["fits"] for x in rows) and len(rows[1]["reps"]) == 5
 
-            # Deslizables fuera de ventanas emergentes: libres (se deslizan directo, un toque abre el cuadro)
+            # Entreno diario: bloqueados hasta un toque; al soltar tras deslizar dejan de latir; 2 toques abren el cuadro
             box = pg.locator(".workout-track .wb-card").first.locator(".wb-serie .reps-value").first
             reps = lambda: pg.evaluate("(state.logs.r1[getWorkoutDateKey()].exercises.e0 || { reps: [0] }).reps[0]")
             def drag(loc, dy):
@@ -73,16 +73,36 @@ def main():
                 for i in range(1, 9): pg.mouse.move(x, y + dy * i / 8)
                 pg.mouse.up(); pg.wait_for_timeout(300)
             pg.wait_for_timeout(500)
-            r["entreno_libre"] = box.evaluate("e => e.classList.contains('value-free')")
+            warmed = lambda: box.evaluate("e => e.classList.contains('value-armed')")
+            r["entreno_bloqueado"] = not box.evaluate("e => e.classList.contains('value-free')")
             drag(box, -120)
             pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); pg.wait_for_timeout(200)
-            r["libre_se_desliza_directo"] = reps() > 0 and not pg.evaluate("!!document.querySelector('.value-armed')")
-            box.click(); pg.wait_for_timeout(500)
-            r["libre_un_toque_abre_el_cuadro"] = pg.locator(".picker-overlay, .stepper-overlay").count() > 0
+            r["entreno_bloqueado_no_cambia"] = reps() == 0
+            box.click(); pg.wait_for_timeout(250)
+            r["entreno_un_toque_activa"] = warmed() and pg.locator(".stepper-overlay, .picker-overlay").count() == 0
+            drag(box, -120)
+            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); pg.wait_for_timeout(200)
+            r["entreno_activo_se_desliza_y_deja_de_latir"] = reps() > 0 and not warmed()
+            box.click(); pg.wait_for_timeout(200); box.click(); pg.wait_for_timeout(500)
+            r["entreno_dos_toques_abren"] = pg.locator(".picker-overlay, .stepper-overlay").count() > 0
             shot(pg, "volver_4_cuadro")
             pg.keyboard.press("Escape"); pg.wait_for_timeout(400)
             if pg.locator(".picker-overlay, .stepper-overlay").count(): pg.locator(".picker-close").first.click(); pg.wait_for_timeout(400)
             pg.evaluate("delete state.logs.r1[getWorkoutDateKey()].exercises.e0; saveState()")
+
+            # Fuera del entreno, el editor y ventanas altas: libres (una ventana que cabe)
+            pg.evaluate("""() => { const { sheet } = openSheet('test-free', 'Prueba');
+                const v = document.createElement('div'); v.className = 'sport-value'; v.id = 'fv'; v.textContent = '0'; window.__fv = 0;
+                sheet.appendChild(v); attachValueSwipe(v, d => { window.__fv += d; }, () => { window.__ftap = true; }); }""")
+            pg.wait_for_timeout(600)
+            fv = pg.locator("#fv")
+            r["ventana_que_cabe_libre"] = fv.evaluate("e => e.classList.contains('value-free')")
+            drag(fv, -120)
+            r["libre_se_desliza_directo"] = pg.evaluate("window.__fv") > 0
+            fv.click(); pg.wait_for_timeout(300)
+            r["libre_un_toque_abre"] = pg.evaluate("!!window.__ftap")
+            pg.keyboard.press("Escape"); pg.wait_for_timeout(400)
+            if pg.locator(".picker-overlay").count(): pg.locator(".picker-close").first.click(); pg.wait_for_timeout(400)
 
             # En una ventana emergente alta que se desplaza: bloqueados hasta un toque, laten suave, al soltar dejan de latir
             pg.evaluate("""() => {

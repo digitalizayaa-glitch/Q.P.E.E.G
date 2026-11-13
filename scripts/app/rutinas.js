@@ -681,10 +681,10 @@ const VALUE_STEP_PX = 26;
 
 /* Deslizar sobre el número lo sube/baja (un paso cada stepPx px). Un toque corto (sin mover) llama a onTap. */
 /* Valores deslizables (kg, reps, series, rangos, deportes, metas…).
-   - Fuera de ventanas emergentes, o en una ventana que no necesita desplazarse: libres. Se deslizan
-     directo y un toque abre su cuadro (onTap).
-   - En una ventana emergente alta que se desplaza: empiezan bloqueados, para no cambiarlos sin querer
-     al desplazarla. 1.er toque → se activan (pulso discreto) y se pueden deslizar; 2.º toque → abre su
+   - Libres en el resto de la app y en ventanas que no necesitan desplazarse: se deslizan directo y un
+     toque abre su cuadro (onTap).
+   - Bloqueados en el entreno diario, en el editor de rutinas y en ventanas emergentes altas que se
+     desplazan, para no cambiarlos sin querer al desplazar. 1.er toque → se activan (pulso discreto) y se pueden deslizar; 2.º toque → abre su
      cuadro; al soltar después de deslizar, o 3 s sin tocarlos → se bloquean otra vez. */
 const VALUE_ARM_MS = 3000;
 let armedValue = null;   /* { el, timer } — solo uno activo a la vez */
@@ -708,8 +708,9 @@ function armValue(el) {
 
 const isArmed = el => !!(armedValue && armedValue.el === el);
 
-/* ¿Está dentro de una ventana emergente que se desplaza (contenido más alto que la ventana)? */
+/* ¿Pide un toque para activarse? Entreno diario, editor de rutinas o ventana emergente que se desplaza */
 function inScrollingPopup(el) {
+    if (el.closest("#workout, #exercises")) return true;       /* entreno diario y editor de rutinas: siempre */
     const popup = el.closest(".picker-sheet");
     if (!popup) return false;
     for (let n = el.parentElement; n; n = n.parentElement) {
