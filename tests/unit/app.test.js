@@ -299,6 +299,18 @@ test("bebidas: refrescos, tés, Arizona, deportivas, energéticas y jugos", () =
         assert.match(names, new RegExp(want), want);
 });
 
+test("bebidas: suman su agua al contador", () => {
+    assert.equal(ev("drinkWaterMl('Refrescos · Coca-Cola (lata 355 ml)')"), 330);
+    assert.equal(ev("drinkWaterMl('Refrescos · Coca-Cola Sin Azúcar')"), 355);
+    assert.equal(ev("drinkWaterMl('Bebidas deportivas · Gatorade')"), 580);
+    assert.equal(ev("drinkWaterMl('Pollo Frito · nada')"), 0);
+    for (const [key, f] of ev("[...FAST_FOOD_BY_KEY]").filter(([, f]) => f.drink))
+        assert.ok(ev(`drinkWaterMl(${JSON.stringify(key)})`) > 100, `${key}: sin ml en la unidad`);
+    assert.equal(ev("entryWaterMl({ g: 'agua', p: 2 })"), 500);
+    assert.equal(ev("entryWaterMl({ g: FAST_GROUP, n: 'Refrescos · Coca-Cola (lata 355 ml)', q: 2, p: 2 })"), 660);
+    assert.equal(ev("entryWaterMl({ g: 'h', p: 1 })"), 0);
+});
+
 test("comida rápida: cada pizzería tiene pizza de jamón y queso", () => {
     const pizzerias = ev("FAST_FOOD").filter(c => c.items.some(i => /^Pizza /.test(i[0]) && i[1] === "slice"));
     assert.ok(pizzerias.length >= 5);

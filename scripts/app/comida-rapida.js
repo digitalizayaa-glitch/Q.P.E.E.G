@@ -299,4 +299,13 @@ const FAST_FOOD = [
 
 /* Búsqueda rápida por clave "Cadena · Nombre" (para Frecuentes y para volver a agregar) */
 const FAST_FOOD_BY_KEY = new Map();
-FAST_FOOD.forEach(({ chain, items }) => items.forEach(it => FAST_FOOD_BY_KEY.set(`${chain} · ${it[0]}`, { chain, item: it })));
+FAST_FOOD.forEach(({ chain, items, drink }) => items.forEach(it => FAST_FOOD_BY_KEY.set(`${chain} · ${it[0]}`, { chain, item: it, drink: !!drink })));
+
+/* Agua de una bebida por envase (ml): el envase menos lo que ocupa el azúcar disuelta (≈ 0,62 ml por g).
+   Una lata de Coca-Cola (355 ml, 38 g) ≈ 330 ml de agua. 0 si no es bebida */
+function drinkWaterMl(key) {
+    const f = FAST_FOOD_BY_KEY.get(key);
+    if (!f || !f.drink) return 0;
+    const ml = Number((/\((\d+)\s*ml\)/.exec(f.item[1]) || [])[1]) || 0;
+    return Math.max(0, Math.round((ml - f.item[4] * 0.62) / 5) * 5);
+}

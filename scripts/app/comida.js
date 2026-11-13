@@ -34,6 +34,9 @@ const TIME_BANDS = [
     { k: "n", name: "Noche",    hint: "18:01 – 4:59",  from: 1081, to: 1799 }
 ];
 const WATER_ML = 250;   /* 1 vaso */
+/* ml de agua de un registro: los vasos de agua y el agua que traen las bebidas */
+const entryWaterMl = e => e.g === "agua" ? e.p * WATER_ML
+    : e.g === FAST_GROUP ? drinkWaterMl(e.n) * (e.q ?? e.p ?? 0) : 0;
 function bandOf(ts) {
     if (!ts) return null;
     const d = new Date(ts);
@@ -431,7 +434,7 @@ function renderFood() {
     const entries = foodEntries();
     const t = foodTotals(entries);
     const pct = Math.min(100, (t.kcal / kcalGoal) * 100);
-    const water = entries.filter(e => e.g === "agua").reduce((s, e) => s + e.p, 0);
+    const mlHave = entries.reduce((s, e) => s + entryWaterMl(e), 0);
     const hasFood = entries.some(e => e.g !== "agua");
     const dayGiven = entries.some(e => e.g === FREE_GROUP);
 
@@ -446,7 +449,6 @@ function renderFood() {
             <i style="width:${ratio}%"></i>
         </button>`;
     };
-    const mlHave = water * WATER_ML;
     const waterChip = `<button class="food-chip" data-water="1" style="--c:#4aa8d8">
             <span class="fc-name">Agua</span>
             <span class="fc-val"><b>${fmtNum(mlHave / 1000, 2)}</b> / ${fmtNum(plan.water / 1000, 2)} L</span>
@@ -512,7 +514,7 @@ function openFoodHistory(groupKey = null) {
         const editable = e.g !== FREE_GROUP;
         return `<div class="food-row${editable ? " editable" : ""}" style="--c:${color}"${editable ? ` data-edit="${esc(e.id)}" role="button" tabindex="0" aria-label="Cambiar ${esc(e.n)}"` : ""}>
             <span class="fr-dot"></span>
-            <span class="fr-name">${esc(e.n)}<small>${e.ts ? fmtTime(e.ts) + " · " : ""}${esc(e.t)}${e.pt || e.g === FAST_GROUP ? " = " + esc(portionsText(entryPortions(e))) : ""}</small></span>
+            <span class="fr-name">${esc(e.n)}<small>${e.ts ? fmtTime(e.ts) + " · " : ""}${esc(e.t)}${e.pt || e.g === FAST_GROUP ? " = " + esc(portionsText(entryPortions(e))) : ""}${!isWater && entryWaterMl(e) ? ` · ${fmtNum(entryWaterMl(e), 0)} ml de agua` : ""}</small></span>
             <span class="fr-kcal">${isWater ? fmtNum(e.p * WATER_ML, 0) + " ml" : fmtNum(kcalOf(e), 0) + " kcal"}</span>
             <button class="fr-del" data-id="${esc(e.id)}" aria-label="Quitar">✕</button>
         </div>`;
