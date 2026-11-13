@@ -1,20 +1,25 @@
 /* =========================================================
-    DEPORTES → "carga": esfuerzo en una sola escala para todos los deportes.
-    100 = una corrida normal (≈ 34 min a tu ritmo). Así una caminata larga y suave queda por
-    debajo de una salida en bici dura, aunque cada una sea "normal" para su deporte.
+    DEPORTES → "carga" (TRIMP de Banister): minutos × peso de la intensidad.
+    100 = una sesión moderada: 40 min al 50 % de tu capacidad. Cuenta como trabajo para la salud,
+    no pide descanso ni mucha carga nerviosa. Lo suave queda debajo de 100; lo intenso sube rápido
+    (el peso de la intensidad crece en exponencial, como el pulso y el cansancio).
 
-    Esfuerzo = minutos × intensidad (MET netos: lo que se gasta por encima de estar sentado).
-    - Intensidad según la velocidad (fórmulas ACSM para caminar y correr; tabla de MET para bici,
-      natación y deportes de juego). Ir más rápido sube la intensidad.
-    - Desnivel: energía de subir el cuerpo (≈ 0,9 kcal por kg cada 100 m), aparte del plano.
-      A pie, 100 m de subida ≈ 1,9 km de caminata en plano; en bici ≈ 2,5 km a 22 km/h.
-    - Sin tiempo: se usa el que tardaría tu cuerpo a su ritmo esperado (altura, peso, sexo y edad).
-      Con tiempo: tu velocidad real da la intensidad (topes: no más de 2,2 veces tu ritmo esperado).
-    - Carga = esfuerzo ÷ el de una corrida normal × √(intensidad ÷ la de correr). La raíz hace que lo
-      suave pese menos que lo intenso aunque gaste lo mismo (2 h caminando no es 1 h corriendo).
-    - El cuerpo cambia el ritmo esperado; tu "nivel" mueve la escala solo a la mitad (pesa poco).
-    - Cada registro guarda el cuerpo de ese día (bp), para que bajar de peso no cambie el historial.
-      Los que no lo tienen usan el perfil actual.
+    1. Intensidad (MET) de la sesión:
+       - Plano según la velocidad: ACSM para caminar y correr (caminar a más de 7 km/h se cuenta
+         como trote), Compendio de actividades físicas para bici, natación y deportes de juego.
+       - Desnivel: el oxígeno de subir el cuerpo (ACSM: 1,8 ml/kg por metro a pie y en bici;
+         0,9 corriendo), repartido en el tiempo de la sesión.
+       - Sin tiempo: el que tardaría tu cuerpo a su ritmo esperado (Naismith alarga con la subida).
+    2. Capacidad (MET máximo) según el cuerpo: fórmula sin ejercicio de Jackson (edad, IMC, sexo),
+       como alguien que entrena con regularidad. Tu nivel mueve la capacidad solo a la mitad (pesa poco).
+    3. x = (MET − 1) ÷ (capacidad − 1)  → % de tu reserva. Carga por minuto = x · a · e^(b·x)
+       (Banister: hombres a 0,64 b 1,92; mujeres a 0,86 b 1,67), escalada para que 40 min a x = 0,5 = 100.
+    4. Carga = 100 × (TRIMP ÷ el de la sesión moderada)^0,6: lo largo y lo intenso suben, pero sin dispararse.
+    Ejemplos (hombre de 30, 75 kg): 45 min caminando ≈ 45 · bici 9 km/1 h/+200 m ≈ 85 · bici 15 km/50 min ≈ 105 ·
+    correr 5 km/30 min ≈ 150 · correr 10 km/1 h ≈ 225 · bici 40 km/2 h/+600 m ≈ 325.
+
+    Cada registro guarda el cuerpo de ese día (bp), para que bajar de peso no cambie el historial.
+    Los que no lo tienen usan el perfil actual.
 ========================================================= */
 
 /* Salida típica = 75 % de la tabla (solo para las pistas "Típico ..." al registrar) */
@@ -48,37 +53,41 @@ function fmtDuration(min) {
     return h ? `${h} h${m ? ` ${m} min` : ""}` : `${m} min`;
 }
 
-/* Ritmo en plano de la persona de referencia y cuánto lo mueve cada dato del cuerpo.
-   v: km/h · up: km planos por cada 100 m de subida, solo para el TIEMPO esperado (Naismith/Scarf) ·
-   sex: mujer × · age: −x por año pasados los 30 · bmi: −x por punto de IMC fuera de 18,5–25 ·
-   h: (altura ÷ 175)^h · met: MET de juego (Compendio de actividades físicas), sin velocidad propia.
-   En los de juego "v" es la distancia por hora de partido (fútbol 8 km en 90 min) */
+/* Ritmo en plano de la persona de referencia (hombre, 30 años, 175 cm, 75 kg) y cuánto lo mueve cada dato
+   del cuerpo; se usa para el tiempo esperado cuando no se pone tiempo.
+   v: km/h · up: km planos por cada 100 m de subida, para el TIEMPO (Naismith/Scarf) · o2: ml/kg por metro
+   subido (ACSM) · sex: mujer × · age: −x por año pasados los 30 · bmi: −x por punto de IMC fuera de 18,5–25 ·
+   h: (altura ÷ 175)^h · met: MET del Compendio para los de juego (en ellos "v" = km por hora de partido) */
 const SPORT_PACE = {
-    run:    { v: 10,      up: 0.8, sex: 0.88, age: 0.007, bmi: 0.025, h: 0.3 },
-    walk:   { v: 5,       up: 0.8, sex: 0.96, age: 0.004, bmi: 0.010, h: 0.5 },
-    bike:   { v: 22,      up: 2,   sex: 0.88, age: 0.006, bmi: 0.012, h: 0 },
-    swim:   { v: 2,       up: 0,   sex: 0.92, age: 0.006, bmi: 0.008, h: 0.3 },
-    soccer: { v: 8 / 1.5, up: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 8 },
-    basket: { v: 4,       up: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 7.5 },
-    tennis: { v: 3,       up: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 7.3 },
-    volley: { v: 1,       up: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 4 },
-    custom: { v: 5,       up: 0.8, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 6 }
+    run:    { v: 10,      up: 0.8, o2: 0.9, sex: 0.88, age: 0.007, bmi: 0.025, h: 0.3 },
+    walk:   { v: 5,       up: 0.8, o2: 1.8, sex: 0.96, age: 0.004, bmi: 0.010, h: 0.5 },
+    bike:   { v: 20,      up: 2,   o2: 1.8, sex: 0.88, age: 0.006, bmi: 0.012, h: 0 },
+    swim:   { v: 2,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.008, h: 0.3 },
+    soccer: { v: 8 / 1.5, up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 7 },
+    basket: { v: 4,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 6.5 },
+    tennis: { v: 3,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 6.8 },
+    volley: { v: 1,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 4 },
+    custom: { v: 5,       up: 0.8, o2: 1.8, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 5 }
 };
 
-/* MET netos (por encima de 1 = sentado) a una velocidad v en km/h. Juego: su MET, que sube o baja
-   un poco si se recorrió más o menos distancia por minuto que lo esperado (relV) */
-function sportNetMet(k, v, relV = 1) {
+/* MET (totales) en plano a una velocidad v en km/h. Juego: su MET, que sube o baja un poco si se recorrió
+   más o menos distancia por minuto que lo esperado (relV) */
+function sportFlatMet(k, v, relV = 1) {
     const mmin = v * 1000 / 60;
-    if (k === "run") return 0.2 * mmin / 3.5;                  /* ACSM: 10 km/h ≈ 9,5 */
-    if (k === "walk") return 0.1 * mmin / 3.5;                 /* ACSM: 5 km/h ≈ 2,4 */
-    if (k === "bike") return Math.max(2, 0.45 * v - 2.3);      /* Compendio: 20 km/h ≈ 6,7 · 25 ≈ 9 · 30 ≈ 11 */
-    if (k === "swim") return Math.max(2, 4 * v - 1);           /* 2 km/h (3 min/100 m) ≈ 7 */
-    return (SPORT_PACE[k].met - 1) * Math.min(1.4, Math.max(0.7, Math.sqrt(relV)));
+    if (k === "run" || (k === "walk" && v > 7)) return Math.max(6, (0.2 * mmin + 3.5) / 3.5);   /* ACSM: 10 km/h ≈ 10,5 */
+    if (k === "walk") return Math.max(2, (0.1 * mmin + 3.5) / 3.5);    /* ACSM: 5 km/h ≈ 3,4 */
+    if (k === "bike") return Math.max(3.5, 0.45 * v - 1.3);            /* Compendio: paseo ≈ 3,5–4 · 20 km/h ≈ 7,7 · 25 ≈ 10 */
+    if (k === "swim") return Math.max(4, 4 * v);                       /* 2 km/h (3 min/100 m) ≈ 8 */
+    return 1 + (SPORT_PACE[k].met - 1) * Math.min(1.3, Math.max(0.75, Math.sqrt(relV)));
 }
-const SPORT_RUN_MET = 0.2 * 10000 / 60 / 3.5;                  /* intensidad de correr de la persona de referencia */
-const SPORT_NORMAL_MIN = 34;                                   /* una corrida normal */
-const SPORT_UP_METMIN = 0.54;                                  /* MET·min por cada metro subido (≈ 0,9 kcal/kg cada 100 m) */
 const SPORT_TOO_FAST = 2.2;
+/* Banister: carga por minuto a una fracción x de la reserva */
+const SPORT_TRIMP = { m: [0.64, 1.92], f: [0.86, 1.67] };
+const trimpMin = (x, s) => { const [a, b] = SPORT_TRIMP[s === "f" ? "f" : "m"]; return x * a * Math.exp(b * x); };
+const SPORT_MODERATE = { min: 40, x: 0.5 };                     /* = 100 */
+/* PA-R 5 (Jackson): hace ejercicio con regularidad, como quien usa esta app.
+   Potencia 0,6: el doble de minutos suma ≈ 1,5 veces, no el doble; así una salida de 3 h no se dispara a 1000 */
+const SPORT_PAR = 5, SPORT_POW = 0.6;
 
 /* Cuerpo del perfil (sin plan: null → persona de referencia) */
 function sportBodyNow() {
@@ -88,6 +97,7 @@ function sportBodyNow() {
     return { s: p.sex === "m" ? "m" : "f", a: Math.round(p.age) || 30, h: p.height, w: p.weight };
 }
 const sportBody = sp => (sp && sp.bp) || sportBodyNow();
+const SPORT_REF_BODY = { s: "m", a: 30, h: 175, w: 75 };
 
 /* Ritmo de este cuerpo ÷ el de referencia (entre 0,4 y 1,2) */
 function sportPaceFactor(k, body) {
@@ -100,11 +110,23 @@ function sportPaceFactor(k, body) {
     return Math.min(1.2, Math.max(0.4, f));
 }
 const sportSpeed = (k, body) => SPORT_PACE[k].v * sportPaceFactor(k, body);     /* km/h en plano */
-/* Nivel de la persona: la mitad de lo que su cuerpo cambia el ritmo de correr (pesa poco) */
-const sportLevel = body => 1 + 0.5 * (sportPaceFactor("run", body) - 1);
 
-/* Tiempo esperado (min) para una distancia con su desnivel, a ritmo esperado (Naismith alarga con la subida) */
+/* Capacidad (MET máximo): Jackson 1990 sin ejercicio, actividad media (PA-R 3); el nivel cuenta a la mitad */
+function sportMaxMet(body) {
+    const est = b => {
+        const bmi = b.w / ((b.h / 100) ** 2);
+        return (56.363 + 1.921 * SPORT_PAR - 0.381 * b.a - 0.754 * bmi + (b.s === "m" ? 10.987 : 0)) / 3.5;
+    };
+    const ref = est(SPORT_REF_BODY);
+    const own = body ? Math.min(20, Math.max(5, est(body))) : ref;
+    return ref + 0.5 * (own - ref);
+}
+
+/* Tiempo esperado (min) para una distancia con su desnivel a ritmo esperado */
 const sportExpectedMin = (k, km, up, body) => ((km || 0) + (up || 0) / 100 * SPORT_PACE[k].up) / sportSpeed(k, body) * 60;
+
+/* Zona según la fracción de la reserva */
+const sportZone = x => x < 0.4 ? "suave" : x < 0.6 ? "moderada" : x < 0.85 ? "intensa" : "muy intensa";
 
 /* Cálculo completo de un registro */
 function sportPaceDetail(sp) {
@@ -113,26 +135,26 @@ function sportPaceDetail(sp) {
     const km = sp.km > 0 && base.km ? sp.km : 0, up = sp.up > 0 && base.up ? sp.up : 0, min = sp.min > 0 ? sp.min : 0;
     const vExp = sportSpeed(k, body);
     const expected = km > 0 || up > 0 ? sportExpectedMin(k, km, up, body) : min;
-    let minutes, v, tooFast = false;
-    if (min > 0) {
-        minutes = min;
-        v = km > 0 ? km / (min / 60) : vExp;
+    const minutes = Math.max(1, min > 0 ? min : expected);
+    let v = vExp, tooFast = false;
+    if (km > 0 && min > 0) {
+        v = km / (min / 60);
         if (v > vExp * SPORT_TOO_FAST) { tooFast = true; v = vExp * SPORT_TOO_FAST; }
-    } else {
-        minutes = (km || 0) / vExp * 60;          /* sin tiempo: el plano a ritmo esperado; la subida va aparte */
-        v = vExp;
     }
-    const net = c.met ? sportNetMet(k, v, km > 0 && min > 0 ? v / vExp : 1) : sportNetMet(k, v);
-    const effort = minutes * net + up * SPORT_UP_METMIN;             /* MET·min netos */
-    const level = sportLevel(body);
-    const ref = SPORT_NORMAL_MIN * SPORT_RUN_MET * level;          /* una corrida normal de esta persona */
-    const allMin = Math.max(1, min > 0 ? min : expected);           /* con la subida dentro (Naismith) */
-    const intensity = Math.min(2, Math.max(0.05, effort / allMin / (SPORT_RUN_MET * level)));
+    /* minutos en plano: con tiempo, todos (la subida ya va dentro y baja la velocidad); sin tiempo, solo los km */
+    const flatMin = min > 0 ? min : (km > 0 ? km / vExp * 60 : (c.met ? minutes : 0));
+    const flat = sportFlatMet(k, v, km > 0 && min > 0 ? v / vExp : 1);
+    const upMetMin = up * c.o2 / 3.5;                                   /* MET·min extra de subir */
+    const met = 1 + ((flat - 1) * flatMin + upMetMin) / minutes;        /* MET promedio de la sesión */
+    const max = sportMaxMet(body);
+    const x = Math.min(1, Math.max(0, (met - 1) / (max - 1)));
+    const sex = body ? body.s : "m";
+    const unit = SPORT_MODERATE.min * trimpMin(SPORT_MODERATE.x, sex);
     const kg = body ? body.w : 75;
     return {
-        expected, minutes: allMin, speed: v, net, effort, tooFast,
-        kcal: (effort + allMin) * kg / 60,
-        load: effort > 0 ? effort / ref * Math.sqrt(intensity) * 100 : 0
+        expected, minutes, speed: v, met, x, zone: sportZone(x), tooFast,
+        kcal: met * minutes * kg / 60,
+        load: Math.pow(minutes * trimpMin(x, sex) / unit, SPORT_POW) * 100
     };
 }
 
@@ -147,7 +169,7 @@ function sportReference(k) {
     return out;
 }
 
-/* Carga (100 = una corrida normal) */
+/* Carga (100 = una sesión moderada de 40 min) */
 function sportLoad(sp) {
     const k = sportDef(sp.k).k;
     return sportFields(k).some(({ f }) => sp[f] > 0) ? sportPaceDetail({ ...sp, k }).load : 0;
@@ -221,14 +243,14 @@ function askSportData(sport, editing) {
         let sub = "";
         if (any) {
             const d = sportPaceDetail(sp);
-            const bits = [];
+            const bits = [`intensidad ${d.zone}`];
             if (vals.km > 0 && !(vals.min > 0)) bits.push(`sin tiempo: ${fmtDuration(d.expected)}`);
             if (vals.km > 0 && vals.min > 0) bits.push(`${fmtNum(d.speed, 1)} km/h`);
             bits.push(`≈ ${fmtNum(Math.round(d.kcal / 10) * 10, 0)} kcal`);
             if (d.tooFast) bits.push("¿seguro? es muy rápido");
             sub = bits.join(" · ");
         }
-        load.innerHTML = any ? `Carga <b>${Math.round(sportLoad(sp))}</b><span>${sub}</span><span>100 = una corrida normal</span>` : `<span>Pon al menos un dato</span>`;
+        load.innerHTML = any ? `Carga <b>${Math.round(sportLoad(sp))}</b><span>${sub}</span><span>100 = 40 min de ejercicio moderado</span>` : `<span>Pon al menos un dato</span>`;
         saveBtn.disabled = !any;
         hints.forEach(fn => fn());
     };
