@@ -137,16 +137,14 @@ function buildExerciseCard(routineId, dayId, exerciseId) {
     kgValue.className = "kg-value";
     kgValue.id = `kg-${exerciseId}`;
     kgValue.textContent = String(log.kg);
-    const unitBtn = document.createElement("button");
-    unitBtn.type = "button";
-    unitBtn.className = "rx-unit";
-    const paintUnit = () => {
-        const u = unitOf(ex());
-        unitBtn.innerHTML = `<span class="${u === "kg" ? "on" : ""}">kg</span>/<span class="${u === "lb" ? "on" : ""}">lb</span>`;
-        unitBtn.setAttribute("aria-label", `Unidad: ${u}. Toca para cambiar a ${u === "kg" ? "lb" : "kg"}`);
-    };
-    paintUnit();
-    unitBtn.onclick = () => { const e = ex(); e.unit = unitOf(e) === "kg" ? "lb" : "kg"; saveState(); paintUnit(); };
+    /* La unidad solo se muestra (se cambia en Rutinas): así la fila del plan mide siempre lo mismo que las 4 series */
+    const unitCap = document.createElement("small");
+    unitCap.className = "wb-unit";
+    unitCap.textContent = unitOf(e0);
+    /* Caben 3 dígitos; con decimales (22.5, 102.5) la cifra se achica un poco para no salirse */
+    const fitKg = () => kgValue.classList.toggle("long", kgValue.textContent.trim().length > 3);
+    fitKg();
+    new MutationObserver(fitKg).observe(kgValue, { childList: true, subtree: true, characterData: true });
     attachValueSwipe(kgValue, dir => changeWorkoutKg(routineId, dayId, exerciseId, dir * KG_STEP), () => openStepper({
         title: e0.name,
         subtitle: "Peso",
@@ -156,7 +154,7 @@ function buildExerciseCard(routineId, dayId, exerciseId) {
         onEdit: text => { const n = parseAmount(text); if (n === null) return "x"; setWorkoutKg(routineId, dayId, exerciseId, n); return ""; },
         onClose: refreshWorkout
     }));
-    kgBox.append(kgValue, unitBtn);
+    kgBox.append(kgValue, unitCap);
 
     const planValue = (value, caption) => {
         const d = document.createElement("div");

@@ -13,7 +13,7 @@ SHOTS = os.environ.get("SHOTS")
 VER = re.search(r'APP_VERSION = "([^"]+)"', open(os.path.join(ROOT, "scripts/core/version.js"), encoding="utf-8").read()).group(1)
 
 ex = lambda i, n: {"id": i, "name": n, "kg": 40, "unit": "kg", "series": [{"min": 8, "max": 12}] * 3}
-STATE = {"routines": [{"id": "r1", "name": "PPL", "days": [{"id": "d1", "name": "Push", "exercises": [ex("e0", "Press banca"), ex("e1", "Aperturas"), ex("e2", "Fondos")]}]}],
+STATE = {"routines": [{"id": "r1", "name": "PPL", "days": [{"id": "d1", "name": "Push", "exercises": [ex("e0", "Press banca"), dict(ex("e1", "Aperturas"), kg=100, series=[{"min": 10, "max": 15}] * 4), dict(ex("e2", "Fondos"), kg=102.5, unit="lb")]}]}],
          "activeRoutineId": "r1", "logs": {}, "food": {"log": {}}, "achievements": [],
          "settings": {"theme": "dark", "glow": "verde", "bright": "mid", "speed": "mid", "font": "arial"}}
 
@@ -53,6 +53,16 @@ def main():
             hb, cb = pg.locator("#homeBtn").bounding_box(), pg.locator("#dayDoneBtn").bounding_box()
             r["check_a_la_derecha_mismo_tamano"] = cb["x"] > 300 and abs(cb["width"] - hb["width"]) < 1 and abs(cb["y"] - hb["y"]) < 1
             shot(pg, "volver_1_entreno")
+
+            # Fila del plan (peso × series × reps): termina donde termina la 4.ª serie, sin kg/lb y sin cortar cifras
+            rows = pg.evaluate("""[...document.querySelectorAll('.workout-track .wb-card')].map(c => {
+                const plan = c.querySelector('.wb-plan').getBoundingClientRect(), sets = c.querySelector('.wb-sets').getBoundingClientRect();
+                const fits = [...c.querySelectorAll('.wb-plan .kg-value, .wb-plan .wb-pv b')].every(e => e.scrollWidth <= e.clientWidth + 1);
+                return { d: Math.abs(plan.left + plan.width - (sets.left + sets.width)), fits, unit: c.querySelector('.wb-unit')?.textContent,
+                         toggle: !!c.querySelector('.wb-plan .rx-unit'), reps: c.querySelector('.wb-plan .wb-pv:last-child b').textContent }; })""")
+            r["plan_termina_en_la_4a_serie"] = len(rows) == 3 and all(x["d"] < 1 for x in rows)
+            r["plan_sin_cambio_kg_lb"] = not any(x["toggle"] for x in rows) and [x["unit"] for x in rows] == ["kg", "kg", "lb"]
+            r["cifras_caben_3_digitos_y_rango"] = all(x["fits"] for x in rows) and len(rows[1]["reps"]) == 5
 
             # Un ejercicio en verde y los demás sin marcar: rojo; con ✓: verde
             pg.evaluate("state.logs.r1[getWorkoutDateKey()].exercises.e0 = { kg: 40, reps: [10, 10, 10], extra: 0 }; saveState()")
