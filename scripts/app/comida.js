@@ -65,6 +65,10 @@ const FOOD_CATALOG = {
         ["Ayote sazón / Calabaza", "1 taza (200 g)"],
         ["Tiquizque", "1/4 taza (50 g)"],
         ["Plátano maduro", "1/4 taza (45 g)"],
+        ["Patacón casero (frito)", "1 patacón (35 g)"],
+        ["Patacones de paquete (prefritos, al horno o air fryer)", "1 patacón (28 g)"],
+        ["Patacones de paquete (prefritos, vueltos a freír)", "1 patacón (32 g)"],
+        ["Patacones o tajadas de plátano de bolsa (snack)", "1 bolsa pequeña (30 g)"],
         ["Elote / Maíz dulce", "1 mediano (85 g)"],
         ["Quinoa", "1/2 taza (65 g)"],
         ["Avena / Nestum / Granola", "1/4 taza (20 g)"],
@@ -286,6 +290,13 @@ const FOOD_CALIBRATION = {
     /* Ensalada fría de caracolitos: caracolitos, atún y mayonesa juntos (por 100 g ≈ 60 g de pasta cocida,
        25 g de atún escurrido y 15 g de mayonesa) */
     "Ensalada fría de caracolitos con atún y mayonesa": { k: 225, c: 19, p: 10, f: 12, pt: { h: 1.5, mg: 0.5, g: 1.5 } },
+    /* Patacones: casero ≈ 1/4 de plátano verde aplastado y frito (≈ 3 g de aceite cada uno). De paquete del súper:
+       prefritos congelados ≈ 180 kcal por 100 g; si se vuelven a freír absorben ≈ 1,5 g más de aceite cada uno.
+       Snack de bolsa (tipo chips de plátano): ≈ 160 kcal por 30 g */
+    "Patacón casero (frito)":                                  { k: 85,  c: 14,  p: 0.5, f: 3.2, pt: { h: 1 } },
+    "Patacones de paquete (prefritos, al horno o air fryer)": { k: 50,  c: 9.2, p: 0.3, f: 1.4, pt: { h: 0.5 } },
+    "Patacones de paquete (prefritos, vueltos a freír)":      { k: 64,  c: 9.2, p: 0.3, f: 2.9, pt: { h: 0.5, g: 0.5 } },
+    "Patacones o tajadas de plátano de bolsa (snack)":        { k: 160, c: 18,  p: 1,   f: 9,   pt: { h: 1, g: 1.5 } },
     "Carne mechada (en salsa)":            { k: 65,  c: 1,  p: 7.5, f: 3.4, pt: { mg: 1 } },
     "Costilla de cerdo al horno o a la parrilla": { k: 73,  c: 0,   p: 5.8, f: 5.4,  pt: { mg: 1 } },
     "Costilla de cerdo en salsa BBQ":             { k: 120, c: 4.5, p: 7.5, f: 7.8,  pt: { mg: 1, h: 0.5 } },
