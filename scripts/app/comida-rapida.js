@@ -203,21 +203,25 @@ const FAST_FOOD = [
        Calorías y macros de la etiqueta (Costa Rica cuando existe; si no, la de EE. UU.).
        Si la etiqueta solo publica calorías (Ranchitas, Picaritas, Papiolas, Zambos, Maní Yummies),
        los carbohidratos, proteína y grasa se estimaron con productos del mismo tipo. */
+    /* Galletas por PAQUETE individual (lo que trae el empaque), no por galleta suelta.
+       Chiky: etiqueta, 6 galletas 40 g = 195 kcal. Cremas 4 (31,5 g), Club Extra 2 (25 g), Integrales 3 (28 g),
+       María 5 (21 g), Soda 4 (22 g): FatSecret / Open Food Facts. Oreo 36 g, Chips Ahoy 4 (37 g), Sponch 3 (45 g),
+       Ritz 6 (20 g): tamaño del paquete individual de la región, con sus valores por 100 g */
     { chain: "Galletas", super: true, items: [
-        ["Chiky (Pozuelo)", "galleta", "galletas", 35, 5, 0.4, 1.6, { h: 0.5 }],
-        ["Yipy (Pozuelo)", "unidad", "unidades", 145, 18, 1, 8, { h: 1, g: 1.5 }],
-        ["Oreo", "galleta", "galletas", 54, 8, 0.6, 2.2, { h: 0.5, g: 0.5 }],
-        ["Sponch fresa / piña (Marinela)", "galleta", "galletas", 57, 11, 1, 1, { h: 0.5, g: 0.5 }],
-        ["Sponch chocolate (Marinela)", "galleta", "galletas", 62, 11, 1, 1.5, { h: 0.5, g: 0.5 }],
-        ["Chips Ahoy! original", "galleta", "galletas", 53, 7.5, 0.7, 2.7, { h: 0.5, g: 0.5 }],
-        ["Cremas (Pozuelo)", "galleta", "galletas", 38, 5.5, 0.2, 1.5, { h: 0.5 }],
-        ["Club Extra (Pozuelo)", "galleta", "galletas", 58, 8, 1, 2.5, { h: 0.5, g: 0.5 }],
-        ["Merendina (Pozuelo)", "unidad", "unidades", 80, 11, 1, 3, { h: 1 }],
-        ["María (Pozuelo)", "porción (5 galletas)", "porciones (5 galletas)", 90, 16, 1, 2.5, { h: 1 }],
-        ["Soda (Pozuelo)", "porción (4 galletas)", "porciones (4 galletas)", 90, 16, 2, 2, { h: 1 }],
-        ["Soda integral (Pozuelo)", "porción (4 galletas)", "porciones (4 galletas)", 85, 14, 3, 2, { h: 1 }],
-        ["Integrales con ajonjolí (Pozuelo)", "galleta", "galletas", 35, 5.5, 1, 1, { h: 0.5 }],
-        ["Ritz", "porción (5 galletas)", "porciones (5 galletas)", 80, 10, 1, 4.5, { h: 0.5, g: 1 }]
+        ["Chiky (Pozuelo)", "paquete (6 galletas, 40 g)", "paquetes (6 galletas, 40 g)", 195, 27, 2, 9, { h: 1.5, g: 1.5 }],
+        ["Yipy (Pozuelo)", "paquete (1 unidad)", "paquetes (1 unidad)", 145, 18, 1, 8, { h: 1, g: 1.5 }],
+        ["Oreo", "paquete (4 galletas, 36 g)", "paquetes (4 galletas, 36 g)", 170, 25, 1.5, 7, { h: 1.5, g: 1 }],
+        ["Sponch fresa / piña (Marinela)", "paquete (3 galletas, 45 g)", "paquetes (3 galletas, 45 g)", 165, 31.4, 1.9, 3.5, { h: 2 }],
+        ["Sponch chocolate (Marinela)", "paquete (3 galletas, 45 g)", "paquetes (3 galletas, 45 g)", 185, 33, 3, 4.5, { h: 2, g: 0.5 }],
+        ["Chips Ahoy! original", "paquete (4 galletas, 37 g)", "paquetes (4 galletas, 37 g)", 179, 23.8, 2, 8.4, { h: 1.5, g: 1.5 }],
+        ["Cremas (Pozuelo)", "paquete (4 galletas, 31,5 g)", "paquetes (4 galletas, 31,5 g)", 150, 22, 1, 6, { h: 1.5, g: 0.5 }],
+        ["Club Extra (Pozuelo)", "paquete (2 galletas, 25 g)", "paquetes (2 galletas, 25 g)", 115, 16, 2, 5, { h: 1, g: 1 }],
+        ["Merendina (Pozuelo)", "paquete (20 g)", "paquetes (20 g)", 80, 11, 1, 3, { h: 1 }],
+        ["María (Pozuelo)", "paquete (5 galletas, 21 g)", "paquetes (5 galletas, 21 g)", 90, 16, 1, 2.5, { h: 1 }],
+        ["Soda (Pozuelo)", "paquete (4 galletas, 22 g)", "paquetes (4 galletas, 22 g)", 90, 16, 2, 2, { h: 1 }],
+        ["Soda integral (Pozuelo)", "paquete (4 galletas, 22 g)", "paquetes (4 galletas, 22 g)", 85, 14, 3, 2, { h: 1 }],
+        ["Integrales con ajonjolí (Pozuelo)", "paquete (3 galletas, 28 g)", "paquetes (3 galletas, 28 g)", 105, 17, 3, 3, { h: 1, g: 0.5 }],
+        ["Ritz", "paquete (6 galletas, 20 g)", "paquetes (6 galletas, 20 g)", 100, 12.5, 1.4, 5, { h: 1, g: 0.5 }]
     ] },
     { chain: "Snacks y paquetes", super: true, items: [
         ["Ranchitas naturales (Yummies)", "porción de 28 g", "porciones de 28 g", 140, 18, 2, 7, { h: 1, g: 1.5 }],
@@ -239,7 +243,7 @@ const FAST_FOOD = [
         ["Maní con limón y chile (Yummies)", "porción de 25 g", "porciones de 25 g", 155, 3, 6, 13, { bg: 1, g: 2.5 }]
     ] },
     { chain: "Chocolates", super: true, items: [
-        ["Milka (4 cuadritos, 25 g)", "porción", "porciones", 131, 15, 1.8, 7, { h: 1, g: 1 }],
+        ["Milka (tableta 100 g)", "tableta (100 g)", "tabletas (100 g)", 530, 59, 6.3, 29, { h: 3.5, g: 5.5 }],
         ["M&M's de chocolate (bolsita 48 g)", "bolsita", "bolsitas", 240, 34, 2, 10, { h: 2, g: 1.5 }],
         ["Snickers (52 g)", "barra", "barras", 250, 33, 4, 12, { h: 2, g: 2 }],
         ["Kit Kat (4 barritas, 42 g)", "unidad", "unidades", 210, 27, 3, 11, { h: 1.5, g: 2 }]
