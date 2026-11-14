@@ -37,12 +37,13 @@ export function calibrate(kcal, c, p, f, keys) {
         return { [keys[0]]: v };
     }
     let best = null, bestErr = Infinity;
+    /* tope de cada grupo por su macro principal (harinas y lácteos: carbohidratos; proteínas: proteína;
+       grasas: grasa). Con el tope por el macro más bajo, una bolsa grande de papas (casi sin proteína)
+       no podía pasar de 2,5 harinas */
+    const MAIN = { h: 0, l: 0, v: 0, fr: 0, bg: 1, mg: 1, g: 2 };
     const ub = keys.map(k => {
-        const [gc, gp, gf] = G[k];
-        let u = 30;
-        if (gc) u = Math.min(u, c / gc + 1.5);
-        if (gp) u = Math.min(u, p / gp + 1.5);
-        if (gf) u = Math.min(u, f / gf + 1.5);
+        const per = G[k][MAIN[k] ?? 0], have = [c, p, f][MAIN[k] ?? 0];
+        const u = per ? Math.min(30, have / per + 1.5) : 30;
         return Math.max(0.5, Math.floor(u * 2) / 2);
     });
     const cur = keys.map(() => 0);
