@@ -60,6 +60,8 @@ const FOOD_CATALOG = {
         ["Papa / Camote hervido", "1/2 taza (100 g)"],
         ["Picadillo de papa con carne molida", "1/2 taza (100 g)"],
         ["Picadillo de papa con carne mechada", "1/2 taza (100 g)"],
+        ["Ensalada fría de caracolitos (con mayonesa)", "1/2 taza (100 g)"],
+        ["Ensalada fría de caracolitos con atún", "1/2 taza (100 g)"],
         ["Papa / Camote horneado", "1/3 taza (80 g)"],
         ["Ayote sazón / Calabaza", "1 taza (200 g)"],
         ["Tiquizque", "1/4 taza (50 g)"],
@@ -282,6 +284,10 @@ const FOOD_CALIBRATION = {
        carne mechada de res en su salsa de tomate, cebolla y chile */
     "Picadillo de papa con carne molida":  { k: 140, c: 12, p: 7,   f: 6.4, pt: { h: 1, mg: 0.5, g: 0.5 } },
     "Picadillo de papa con carne mechada": { k: 128, c: 12, p: 8,   f: 5.2, pt: { h: 1, bg: 1 } },
+    /* Ensalada fría de caracolitos a la tica: pasta, mayonesa, zanahoria, chile dulce, apio y cebolla
+       (≈ 180 kcal por 100 g); con atún suma proteína */
+    "Ensalada fría de caracolitos (con mayonesa)": { k: 180, c: 20, p: 4, f: 9,   pt: { h: 1.5, g: 1.5 } },
+    "Ensalada fría de caracolitos con atún":       { k: 190, c: 17, p: 9, f: 9.5, pt: { h: 1, mg: 1.5 } },
     "Carne mechada (en salsa)":            { k: 65,  c: 1,  p: 7.5, f: 3.4, pt: { mg: 1 } },
     "Costilla de cerdo al horno o a la parrilla": { k: 73,  c: 0,   p: 5.8, f: 5.4,  pt: { mg: 1 } },
     "Costilla de cerdo en salsa BBQ":             { k: 120, c: 4.5, p: 7.5, f: 7.8,  pt: { mg: 1, h: 0.5 } },
