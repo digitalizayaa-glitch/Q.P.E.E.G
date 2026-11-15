@@ -4,7 +4,7 @@
    el nombre lleva un hash del contenido, así cada cambio publica una caché nueva sola. */
 
 /* <generado> */
-const CACHE_NAME = "qpeeg-7db6370e2a";
+const CACHE_NAME = "qpeeg-7a50b41408";
 const CORE_ASSETS = [
     "./",
     "./fonts/atkinson-400.woff",
@@ -21,9 +21,13 @@ const CORE_ASSETS = [
     "./manifest.json",
     "./scripts/app/ajustes.js",
     "./scripts/app/arranque.js",
+    "./scripts/app/comida-agregar.js",
+    "./scripts/app/comida-datos.js",
+    "./scripts/app/comida-historial.js",
     "./scripts/app/comida-rapida.js",
     "./scripts/app/comida.js",
     "./scripts/app/cuenta.js",
+    "./scripts/app/deportes-modelo.js",
     "./scripts/app/deportes.js",
     "./scripts/app/dialogos.js",
     "./scripts/app/entreno.js",
@@ -38,6 +42,8 @@ const CORE_ASSETS = [
     "./scripts/app/navegacion.js",
     "./scripts/app/novedades.js",
     "./scripts/app/nutricion.js",
+    "./scripts/app/rutinas-dia.js",
+    "./scripts/app/rutinas-piezas.js",
     "./scripts/app/rutinas.js",
     "./scripts/app/selector-numero.js",
     "./scripts/app/semana.js",
@@ -48,7 +54,11 @@ const CORE_ASSETS = [
     "./scripts/core/sincronizacion.js",
     "./scripts/core/tema.js",
     "./scripts/core/version.js",
-    "./styles/stylesheet.css"
+    "./styles/1-base.css",
+    "./styles/2-pantallas.css",
+    "./styles/3-ventanas.css",
+    "./styles/4-ajustes-finos.css",
+    "./styles/5-accesibilidad-y-guias.css"
 ];
 /* </generado> */
 

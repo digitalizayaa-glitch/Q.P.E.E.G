@@ -1,0 +1,131 @@
+/* 1-base.css — Base: variables, temas, fuentes y contenedor principal.
+   Las hojas se cargan en orden (1 → 5) desde index.html: el orden importa, las de después afinan a las de antes. */
+
+/* =========================================================
+    BASE
+========================================================= */
+
+/* Fuentes de la app (Ajustes → Fuente). Vienen igualadas a Arial en ancho y alto de línea
+   (tools/fuentes.py), así cambiar de fuente no mueve ningún renglón. Licencia SIL OFL (fonts/). */
+@font-face { font-family: "QP Atkinson"; src: url("../fonts/atkinson-400.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Atkinson"; src: url("../fonts/atkinson-700.woff") format("woff"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Grotesk"; src: url("../fonts/grotesk-400.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Grotesk"; src: url("../fonts/grotesk-700.woff") format("woff"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Saira"; src: url("../fonts/saira-400.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "QP Saira"; src: url("../fonts/saira-700.woff") format("woff"); font-weight: 700; font-style: normal; font-display: swap; }
+
+:root { --app-font: Arial, sans-serif; }
+:root[data-font="atkinson"] { --app-font: "QP Atkinson", Arial, sans-serif; }
+:root[data-font="grotesk"]  { --app-font: "QP Grotesk", Arial, sans-serif; }
+:root[data-font="saira"]    { --app-font: "QP Saira", Arial, sans-serif; }
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--app-font);
+}
+
+:root {
+    --fg: 255, 255, 255;               /* color de los velos (blanco en oscuro) */
+    --bg: #141414;
+    --bg-outer: #111;
+    --text: #fff;
+    --text-2: #ddd;
+    --muted: #a8a8a8;                  /* contraste AA (4,5:1) sobre el fondo oscuro */
+    --faint: #828282;                  /* texto pequeño secundario: contraste AA */
+    --inset: rgba(0, 0, 0, 0.3);       /* fondo de campos y cajas hundidas */
+    --sheet-bg: rgba(30, 30, 30, 0.9);
+    --primary-bg: rgba(255, 255, 255, 0.92);
+    --primary-text: #111;
+    --glow1: 76, 175, 109;             /* destello del fondo (se cambia en Ajustes) */
+    --ui-rgb: 76, 175, 109;            /* color de botones y selecciones: sigue al destello */
+    --ui: rgb(var(--ui-rgb));
+    --glow2: 224, 192, 64;
+    --ga1: 0.085;
+    --ga2: 0.055;
+    --glass-bg: rgba(var(--fg), 0.055);
+    --glass-bg-strong: rgba(var(--fg), 0.085);
+    --glass-border: rgba(var(--fg), 0.09);
+    --glass-blur: blur(14px);
+    --accent: #4caf6d;
+    --accent-gold: #e0c040;
+    --accent-red: #e05555;
+}
+
+/* ---------- Tema claro ---------- */
+:root[data-theme="light"] {
+    --fg: 20, 20, 20;
+    --bg: #f4f4f1;
+    --bg-outer: #e6e6e2;
+    --text: #1b1b1b;
+    --text-2: #333;
+    --muted: #555;                     /* contraste AA sobre el fondo claro */
+    --faint: #696969;                  /* texto pequeño secundario: contraste AA */
+    --inset: rgba(0, 0, 0, 0.06);
+    --sheet-bg: rgba(250, 250, 247, 0.97);
+    --primary-bg: #1f1f1f;
+    --primary-text: #fff;
+    --ga1: 0.2;
+    --ga2: 0.14;
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-bg-strong: rgba(255, 255, 255, 0.92);
+    --glass-border: rgba(0, 0, 0, 0.11);
+    --accent: #2f9a53;
+    --accent-gold: #c9a227;
+    --accent-red: #d64545;
+    color-scheme: light;
+}
+
+body {
+    background: var(--bg-outer);
+    color: var(--text);
+}
+
+/* =========================================================
+    CONTENEDOR PRINCIPAL
+========================================================= */
+
+.app {
+    max-width: 500px;
+    height: 100vh;
+    margin: auto;
+    background:
+        radial-gradient(circle at 15% 0%, rgba(var(--glow1), var(--ga1)), transparent 45%),
+        radial-gradient(circle at 85% 100%, rgba(var(--glow2), var(--ga2)), transparent 45%),
+        var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+header {
+    padding: 16px 20px;
+    flex-shrink: 0;
+    background: rgba(var(--fg), 0.02);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+main {
+    padding: 20px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.section { display: none; width: 100%; }
+
+.section.active {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+h2 { margin-bottom: 15px; }

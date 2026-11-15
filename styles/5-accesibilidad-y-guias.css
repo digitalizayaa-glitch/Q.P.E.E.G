@@ -1,0 +1,160 @@
+/* 5-accesibilidad-y-guias.css — Accesibilidad, acuerdos y guía para instalar.
+   Las hojas se cargan en orden (1 → 5) desde index.html: el orden importa, las de después afinan a las de antes. */
+
+/* =========================================================
+    ACCESIBILIDAD
+========================================================= */
+/* Área de toque de al menos ~44 px sin cambiar el tamaño que se ve */
+.ex-gear, .food-done, .picker-filter, .app-version { position: relative; }
+.ex-gear::after, .food-done::after { content: ""; position: absolute; inset: -8px; }
+.picker-filter::after { content: ""; position: absolute; inset: -7px -3px; }
+.app-version::after { content: ""; position: absolute; inset: -11px -6px; }
+
+/* Añadir / cambiar deporte: tiempo, distancia y desnivel en columnas; ▲ arriba y ▼ abajo de cada campo,
+   del mismo ancho; el campo se desliza o se toca para escribir. Carga en vivo debajo */
+.sport-form { display: flex; flex-direction: column; gap: 12px; padding: 0 16px 16px; overflow-y: auto; min-height: 0; }
+.sport-fields { display: grid; gap: 10px; }
+.sport-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sport-col-label { text-align: center; font-size: 15px; font-weight: bold; color: var(--text); }
+.sport-col-hint { text-align: center; font-size: 12px; color: var(--muted); min-height: 15px; white-space: nowrap; overflow: hidden; }
+.sport-step { width: 100%; height: 46px; padding: 0; font-size: 16px; }
+.sport-value {
+    height: 86px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+    padding: 0 4px; border-radius: 14px; cursor: pointer; touch-action: pan-y; user-select: none;
+    font-size: 19px; font-weight: bold; color: var(--text); text-align: center; line-height: 1.15; white-space: nowrap;
+    background: var(--inset); border: 1px solid var(--glass-border);
+}
+.sport-value .stepper-input { width: 100%; font-size: 20px; text-align: center; }
+.sport-load {
+    padding: 10px 14px; border-radius: 12px; text-align: center; font-size: 15px; color: var(--text);
+    background: rgba(var(--ui-rgb), .14); border: 1px solid var(--ui);
+}
+.sport-load b { font-size: 24px; margin-left: 4px; }
+.sport-load span { display: block; font-size: 12px; color: var(--muted); }
+.sport-form .dialog-btn:disabled { opacity: .4; }
+.sport-chip-text { cursor: pointer; }
+
+/* =========================================================
+    ACUERDOS: formulario "Importante" (primera vez) y "Mis acuerdos" (Ajustes)
+========================================================= */
+.agree-form { display: flex; flex-direction: column; gap: 10px; padding: 0 16px 16px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.agree-form > * { flex-shrink: 0; }
+.agree-intro { margin: 0 2px 2px; font-size: 13px; line-height: 1.45; color: var(--text-2); }
+.agree-row {
+    display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 14px;
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+}
+.agree-check {
+    flex-shrink: 0; width: 30px; height: 30px; padding: 0; margin: 0; border-radius: 9px; cursor: pointer;
+    display: grid; place-items: center; background: var(--inset); border: 1.5px solid rgba(var(--ui-rgb), .7);
+    animation: ui-pulse 3.4s ease-in-out infinite;
+}
+.agree-check svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.agree-check.on { background: var(--ui); border-color: var(--ui); animation: none; }
+.agree-check.on svg { opacity: 1; }
+.agree-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.agree-text b { font-size: 14px; line-height: 1.3; cursor: pointer; }
+.agree-text small { font-size: 12px; line-height: 1.4; color: var(--muted); }
+.agree-opt {
+    display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px; vertical-align: 1px;
+    font-size: 10px; font-weight: bold; letter-spacing: .5px; text-transform: uppercase; color: var(--text-2);
+    border: 1px solid var(--glass-border);
+}
+.agree-read {
+    align-self: flex-start; margin: 2px 0 0; padding: 0; background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 12px; font-weight: bold; color: var(--ui); text-decoration: underline; text-underline-offset: 2px;
+}
+.agree-need { margin: 0 2px; font-size: 12px; line-height: 1.4; color: var(--muted); text-align: center; }
+.agree-need:empty { display: none; }
+.agree-form .dialog-actions { margin-top: 2px; }
+.agree-form .dialog-btn:disabled { opacity: .45; animation: none; }
+@media (prefers-reduced-motion: reduce) { .agree-check { animation: none; } }
+.picker-close[hidden] { display: none; }
+
+/* Sin el destello azul del navegador al tocar, ni el contorno al tocar con el dedo (sí con teclado) */
+html, body, button, a, input, [role="button"] { -webkit-tap-highlight-color: transparent; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* =========================================================
+    INSTALAR LA APP: guía paso a paso
+========================================================= */
+.install-body { display: flex; flex-direction: column; gap: 12px; padding: 0 16px 16px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; }
+.install-body > * { flex-shrink: 0; }
+.install-body svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.install-hero {
+    display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px;
+    background: linear-gradient(135deg, rgba(var(--ui-rgb), .26), rgba(var(--ui-rgb), .06));
+    border: 1px solid rgba(var(--ui-rgb), .55);
+}
+.install-logo { width: 58px; height: 58px; border-radius: 14px; flex-shrink: 0; box-shadow: 0 6px 18px rgba(0, 0, 0, .35), 0 0 0 1px rgba(255, 255, 255, .08); }
+.install-hero b { display: block; font-size: 17px; line-height: 1.25; }
+.install-hero small { display: block; margin-top: 3px; font-size: 12.5px; line-height: 1.35; color: var(--text-2); }
+.install-perks { display: flex; gap: 6px; }
+.install-perks span {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 9px 4px;
+    border-radius: 12px; background: var(--glass-bg); border: 1px solid var(--glass-border);
+    font-size: 11px; font-weight: bold; text-align: center; color: var(--text-2);
+}
+.install-perks svg { width: 20px; height: 20px; color: var(--ui); }
+.install-warn {
+    display: flex; gap: 10px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 12px;
+    background: rgba(var(--ui-rgb), .1); border: 1px solid rgba(var(--ui-rgb), .45); font-size: 12.5px; line-height: 1.4; color: var(--text);
+}
+.install-warn svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.install-tabs { margin: 0; }
+.install-tabs .seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 13px; padding-left: 4px; padding-right: 4px; }
+.install-tabs .seg-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.install-now { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.install-now svg { width: 18px; height: 18px; }
+.install-or { margin: -4px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+.install-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; position: relative; }
+.install-step { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.install-step + .install-step::before {      /* línea que une los pasos */
+    content: ""; position: absolute; left: 13px; top: -10px; height: 20px; width: 2px; background: rgba(var(--ui-rgb), .45);
+}
+.install-num {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--ui); color: #fff; font-size: 14px; font-weight: bold; box-shadow: 0 0 0 4px rgba(var(--ui-rgb), .18);
+}
+.install-ico {
+    flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+    background: var(--inset); border: 1px solid var(--glass-border); color: var(--text);
+}
+.install-ico svg { width: 22px; height: 22px; }
+.install-ico circle { fill: currentColor; }
+.install-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.install-txt b { font-size: 14px; font-weight: normal; line-height: 1.3; }
+.install-txt b b { font-weight: bold; }
+.install-txt small { font-size: 12px; line-height: 1.35; color: var(--muted); }
+.install-txt small b { font-size: inherit; font-weight: bold; color: var(--text-2); }
+.install-body .dialog-actions { margin-top: 0; }
+
+/* Mudanza (app vieja) y bienvenida (app nueva) */
+.move-hero { background: linear-gradient(135deg, rgba(var(--ui-rgb), .34), rgba(var(--ui-rgb), .08)); }
+.move-link {
+    display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 12px; border-radius: 12px;
+    background: var(--inset); border: 1px dashed rgba(var(--ui-rgb), .7);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 14px; color: var(--text);
+}
+.move-link svg { width: 18px; height: 18px; color: var(--ui); flex-shrink: 0; }
+.move-sheet .install-step { align-items: flex-start; }
+.move-sheet .install-step + .install-step::before { top: -6px; height: 16px; }
+.move-code {
+    align-self: flex-start; margin-top: 6px; padding: 5px 10px; border-radius: 9px; background: var(--inset); border: 1px solid var(--glass-border);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; letter-spacing: .5px; color: var(--text);
+}
+.dialog-btn.move-mini { align-self: flex-start; margin-top: 8px; padding: 8px 14px; min-height: 0; font-size: 13px; width: auto; flex: none; }
+.welcome-h { display: flex; align-items: center; gap: 10px; margin: 4px 0 -2px; font-size: 15px; }
+.welcome-h .install-num { width: 24px; height: 24px; font-size: 13px; box-shadow: none; }
+.welcome-box { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 14px; background: var(--glass-bg); border: 1px solid var(--glass-border); }
+.welcome-label { font-size: 13px; font-weight: bold; line-height: 1.35; }
+.welcome-code { display: flex; gap: 8px; }
+.welcome-code .dialog-input { flex: 1; min-width: 0; padding: 10px 10px; font-size: 13.5px; letter-spacing: 0; text-transform: uppercase; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.welcome-code .dialog-btn { flex: none; width: auto; padding: 0 16px; }
+.welcome-err { margin: 0; font-size: 12px; color: var(--accent-red); }
+.welcome-err:empty { display: none; }
+.welcome-hint { font-size: 12px; line-height: 1.4; color: var(--muted); }
+.welcome-ok { display: flex; align-items: center; gap: 12px; }
+.welcome-ok svg { width: 30px; height: 30px; padding: 5px; border-radius: 50%; background: var(--ui); stroke: #fff; stroke-width: 3; flex-shrink: 0; }
+.welcome-ok b { display: block; font-size: 14px; }
+.welcome-ok small { display: block; font-size: 12px; color: var(--muted); }

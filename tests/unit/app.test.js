@@ -319,8 +319,16 @@ test("catálogo: INISA sin repetidos y con su medida en tazas, cucharadas o unid
 
 test("pan cuadrado: se cuenta por rebanada (1 rebanada = 1 harina)", () => {
     const item = ev("FOOD_CATALOG.h.find(i => i[0] === 'Pan cuadrado blanco Bimbo')");
-    assert.deepEqual(item, ["Pan cuadrado blanco Bimbo", "1 rebanada (31 g)", "rebanadas", 1]);
+    assert.deepEqual(item.slice(0, 4), ["Pan cuadrado blanco Bimbo", "1 rebanada (31 g)", "rebanadas", 1]);
     assert.deepEqual(ev("FOOD_CALIBRATION['Pan cuadrado blanco Bimbo'].pt"), { h: 1 });
+});
+
+test("catálogo: la calibración vive en la misma línea del alimento (sin nombres repetidos en otra lista)", () => {
+    const withCal = ev("Object.values(FOOD_CATALOG).flat().filter(i => typeof i[i.length - 1] === 'object').length");
+    assert.equal(withCal, ev("Object.keys(FOOD_CALIBRATION).length"));
+    assert.ok(withCal >= 40);
+    const names = ev("Object.values(FOOD_CATALOG).flat().map(i => i[0])");
+    assert.equal(new Set(names).size, names.length, "nombres repetidos en el catálogo");
 });
 
 test("supermercado: galletas y snacks pedidos están en el catálogo", () => {

@@ -1,0 +1,622 @@
+/* 4-ajustes-finos.css — Capas posteriores que afinan lo anterior (x única, ventana del día, logros, entreno, gráficas, pulsos, calendario).
+   Las hojas se cargan en orden (1 → 5) desde index.html: el orden importa, las de después afinan a las de antes. */
+
+/* =========================================================
+    ✕ ÚNICA PARA TODA LA APP (tarjetas, ventanas, listas)
+========================================================= */
+.day-delete-x, .picker-close, .fr-del, .food-row .fr-del {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; padding: 0; margin: 0;
+    border: none; border-radius: 50%; background: none;
+    color: var(--muted); font-size: 17px; line-height: 1; font-weight: normal;
+    cursor: pointer; flex-shrink: 0; z-index: 2;
+}
+.day-delete-x { position: absolute; top: 2px; right: 2px; }
+.day-delete-x:active, .picker-close:active, .fr-del:active { background: rgba(var(--fg), .1); color: var(--text); }
+.day-delete-x:hover, .fr-del:hover { color: var(--accent-red); }
+
+/* =========================================================
+    BOTONES CUADRADOS DE AÑADIR
+========================================================= */
+.add-square.add-wide {
+    aspect-ratio: auto; width: 100%; min-height: 64px; flex-shrink: 0;
+    flex-direction: column; gap: 2px; padding: calc(8px * var(--k)) 12px;
+}
+.add-square.add-wide .add-square-plus { font-size: 26px; line-height: 1; }
+.add-square.add-compact { width: 96px; padding: 6px; gap: 2px; margin: 0 auto; }
+.add-square.add-compact .add-square-plus { font-size: 26px; line-height: 1; }
+.add-square.add-compact small { font-size: 11px; }
+
+/* "+" que se desvanece al convertirse en la tarjeta nueva */
+.convert-ghost {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 30px; color: var(--text-2); pointer-events: none;
+}
+
+/* =========================================================
+    VENTANA DEL DÍA (creador de rutinas)
+========================================================= */
+.day-sheet { max-height: 88vh; max-height: min(88dvh, 760px); }
+.day-sheet-list {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 2px 14px 16px; overflow-y: auto; min-height: 0; scrollbar-width: none;
+}
+.day-sheet-list::-webkit-scrollbar { display: none; }
+
+.rx-card { flex-shrink: 0; padding: 10px 12px 12px; }
+.rx-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: -4px -6px 6px 0; }
+.rx-head .exercise-name { text-align: left; font-size: 15px; }
+.rx-head .rx-x { position: static; }
+
+.rx-row { display: flex; align-items: flex-start; gap: 6px; }
+.rx-field { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
+.rx-field small { font-size: 10px; color: var(--muted); letter-spacing: .5px; }
+.rx-weight { flex: 1.6; }
+.rx-sets { flex: .8; }
+.rx-reps { flex: 1.3; }
+.rx-times { align-self: center; margin-top: -16px; color: var(--muted); font-size: 16px; }
+
+.rx-kg {
+    display: flex; align-items: stretch; width: 100%;
+    background: var(--inset); border: 1px solid var(--glass-border); border-radius: 8px; overflow: hidden;
+}
+.rx-kg .kg-value { flex: 1; min-width: 0; border: none; border-radius: 0; background: none; padding: 10px 4px; font-size: 18px; }
+.rx-card .rx-num, .rx-card .rx-kg .kg-value { width: 100%; padding: 10px 4px; font-size: 18px; }
+.rx-unit {
+    flex: none; margin: 0; padding: 0 9px; border: none; border-left: 1px solid var(--glass-border);
+    background: rgba(var(--fg), .05); color: var(--muted); font-size: 12px; cursor: pointer;
+}
+.rx-unit span.on { color: var(--ui); font-weight: bold; }
+[data-theme="light"] .rx-unit span.on { color: rgb(var(--ui-rgb)); color: color-mix(in srgb, var(--ui) 55%, #000); }   /* legible en claro */
+.rx-unit:active { background: rgba(var(--fg), .12); }
+
+/* =========================================================
+    RANGO DE REPETICIONES (mínimo y máximo)
+========================================================= */
+.range-sheet { padding-bottom: 16px; }
+.range-sheet .stepper-sub { text-align: center; margin: -4px 0 8px; }
+.range-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 18px; }
+.range-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.range-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.range-col .stepper-btn { width: 100%; }
+.range-value { width: 100%; height: 90px; font-size: 40px; }
+.range-sheet .stepper-hint { margin: 10px 18px 12px; text-align: center; }
+.range-done { margin: 0 18px; flex: none; }
+
+/* =========================================================
+    LOGROS: completados y editor
+========================================================= */
+.achievement-chip.done { border-color: var(--accent); background: rgba(76, 175, 109, .16); }
+.achievement-chip.done::before { content: "✓ "; color: var(--accent); }
+#achievementsControl { gap: 8px; }
+.achievements-edit {
+    margin: 0; padding: 6px 14px; border-radius: 999px; font-size: 12px; cursor: pointer;
+    color: var(--text-2); background: var(--glass-bg); border: 1px solid var(--glass-border);
+}
+
+.ach-overlay {
+    position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: rgba(0, 0, 0, .7);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.ach-editor { width: 100%; max-width: 380px; max-height: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; overflow-y: auto; }
+.ach-title { margin: 0; font-size: 20px; color: #fff; letter-spacing: 2px; }
+.ach-help { margin: 0 0 4px; font-size: 12px; color: rgba(255, 255, 255, .7); }
+.ach-help .g { color: var(--accent); }
+.ach-help .r { color: var(--accent-red); }
+.ach-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.ach-row { display: flex; align-items: center; gap: 6px; width: 100% !important; padding: 10px 8px 10px 14px !important; text-align: left !important; }
+.ach-row::before { content: none !important; }
+.ach-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.ach-row.remove { border-color: var(--accent-red); background: rgba(224, 85, 85, .16); }
+.ach-row.remove .ach-text { text-decoration: line-through; opacity: .7; }
+.ach-btn {
+    width: 36px; height: 36px; margin: 0; padding: 0; flex-shrink: 0; border-radius: 50%; cursor: pointer;
+    border: 1px solid var(--glass-border); background: var(--inset); color: var(--muted); font-size: 16px;
+}
+.ach-btn.ok.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ach-btn.del.on { background: var(--accent-red); border-color: var(--accent-red); color: #fff; }
+.ach-editor .achievements-limit { color: rgba(255, 255, 255, .75); text-align: center; }
+.ach-actions { width: 100%; margin-top: 4px; }
+
+/* ---- Avatares (en lugar de foto) ---- */
+.profile-avatar, .profile-avatar svg { width: 100%; height: 100%; display: block; }
+.avatar-options { display: flex; justify-content: center; gap: 14px; margin-top: 10px; }
+.avatar-options[hidden] { display: none; }
+.avatar-option {
+    width: 62px; height: 62px; padding: 0; margin: 0; border-radius: 50%; overflow: hidden; cursor: pointer;
+    border: 1px solid var(--glass-border); background: var(--glass-bg);
+}
+.avatar-option svg { width: 100%; height: 100%; display: block; }
+.avatar-option.active { border-color: var(--ui); box-shadow: 0 0 0 2px var(--ui); }
+.settings-photo { display: flex; flex-direction: column; gap: 8px; }
+
+/* Botones de añadir (rutina, día, ejercicio, comida, logro): mismo estilo que "Empezar test" */
+.square-card.add-square { background: rgba(var(--ui-rgb), 0.18); border-color: var(--ui); color: var(--text); font-weight: bold; }
+.square-card.add-square .add-square-plus { color: var(--text); }
+.square-card.add-square small { color: var(--text); font-weight: bold; }
+.square-card.add-square:active { background: rgba(var(--ui-rgb), 0.3); }
+
+/* =========================================================
+    ENTRENO: tarjeta con insignia de estado, plan del día y series teñidas
+========================================================= */
+.wb-card { display: flex; flex-direction: column; }
+.wb-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wb-head .exercise-name { font-size: 16px; }
+.wb-badge {
+    display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+    padding: 4px 10px; border-radius: 999px; font-size: 11px; white-space: nowrap;
+    border: 1px solid var(--glass-border); color: var(--muted);
+}
+.wb-badge i { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.wb-badge.green { border-color: rgba(76, 175, 109, .6); background: rgba(76, 175, 109, .14); color: var(--text); }
+.wb-badge.green i { background: var(--accent); }
+.wb-badge.gold { border-color: rgba(224, 192, 64, .6); background: rgba(224, 192, 64, .14); color: var(--text); }
+.wb-badge.gold i { background: var(--accent-gold); }
+.wb-badge.red { border-color: rgba(224, 85, 85, .6); background: rgba(224, 85, 85, .14); color: var(--text); }
+.wb-badge.red i { background: var(--accent-red); }
+
+.wb-plan { display: flex; align-items: center; gap: 6px; margin: calc(10px * var(--k)) 0 calc(12px * var(--k)); }
+.wb-kg { width: auto; flex: 0 1 auto; }
+.wb-kg .kg-value { min-width: 58px; padding: 10px 12px; font-size: 20px; border: none; border-radius: 0; background: none; }
+.wb-times { margin-top: 0; }
+.wb-pv {
+    display: flex; flex-direction: column; align-items: center; line-height: 1.15;
+    padding: 5px 10px; border-radius: 8px; border: 1px dashed var(--glass-border); color: var(--text-2);
+}
+.wb-pv b { font-size: 15px; }
+.wb-pv small { font-size: 9px; color: var(--muted); }
+
+.wb-sets { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.wb-serie { flex: 1; min-width: 52px; max-width: 68px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.wb-serie .serie-label { margin: 0; }
+.wb-serie .reps-value { border-radius: 8px; transition: background-color .25s, border-color .25s; }
+.wb-serie.green .reps-value { background: rgba(76, 175, 109, .16); border-color: rgba(76, 175, 109, .55); }
+.wb-serie.gold .reps-value { background: rgba(224, 192, 64, .14); border-color: rgba(224, 192, 64, .55); }
+.wb-serie.red .reps-value { background: rgba(224, 85, 85, .15); border-color: rgba(224, 85, 85, .55); }
+.wb-serie.extra .serie-label { color: var(--accent-gold); }
+
+/* "Añadir serie extra": ocupa el espacio libre de abajo de la tarjeta */
+.wb-extra { margin-top: auto; min-height: 48px; }
+.wb-sets { margin-bottom: 12px; }
+.wb-card .wb-extra { flex-direction: row; gap: 8px; }
+.wb-card .wb-extra .add-square-plus { font-size: 20px; }
+.wb-card .wb-extra small { font-size: 13px; }
+
+/* =========================================================
+    SEMANA SIN RUTINA
+========================================================= */
+#week.no-series .series-title, #week.no-series .series-panel { display: none; }
+#weekRoutineContent:has(.week-empty) { flex: 1; display: flex; }
+.week-empty {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; gap: 10px; padding: 24px 22px; margin: 4px 0 10px;
+    border-radius: 18px; background: var(--glass-bg); border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+}
+.week-empty-icon {
+    width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    color: var(--ui); background: radial-gradient(circle at 30% 25%, rgba(var(--ui-rgb), .35), rgba(var(--ui-rgb), .08));
+    border: 1px solid rgba(var(--ui-rgb), .45); box-shadow: 0 0 24px rgba(var(--ui-rgb), .18);
+}
+.week-empty-icon svg { width: 40px; height: 40px; }
+.week-empty h3 { margin: 6px 0 0; font-size: 20px; }
+.week-empty p { margin: 0; max-width: 280px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.week-empty-btn { width: auto; margin-top: 8px; padding: 12px 22px; }
+
+/* =========================================================
+    HISTORIAL: gráfica
+========================================================= */
+.history-chart-btn { width: 100%; flex: none; margin-top: 10px; }
+.history-chart { display: flex; flex-direction: column; gap: 8px; min-height: 250px; }
+.history-chart[hidden] { display: none; }
+.chart-caption { min-height: 20px; text-align: center; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.chart-caption b { color: var(--text); }
+.chart-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-grid { stroke: rgba(var(--fg), .08); stroke-width: 1; }
+.chart-base { stroke: rgba(var(--fg), .25); stroke-width: 1; }
+.chart-tick, .chart-label { fill: var(--muted); font-size: 10px; }
+.chart-line { fill: none; stroke-width: 1.5; opacity: .45; }
+.chart-pt { transform-box: fill-box; transform-origin: center; cursor: pointer; transition: opacity .2s; }
+.chart-halo { fill: var(--c); fill-opacity: .12; stroke: var(--c); stroke-opacity: .55; stroke-width: 1.5; }
+.chart-dot { fill: var(--c); stroke: var(--bg); stroke-width: 2; paint-order: stroke; }
+.chart-hit { fill: transparent; }
+.chart-svg.has-selection .chart-pt { opacity: .3; }
+.chart-svg.has-selection .chart-pt.selected { opacity: 1; }
+.chart-pt.selected .chart-halo { fill-opacity: .25; stroke-opacity: 1; }
+.chart-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font-size: 12px; color: var(--text-2); }
+.chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.chart-legend svg { width: 14px; height: 14px; }
+.chart-goal { stroke: var(--text-2); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: .7; }
+.chart-goal-label { fill: var(--text-2); font-size: 10px; }
+.chart-empty { margin: auto; text-align: center; color: var(--muted); font-size: 14px; }
+.history-grid[hidden] { display: none; }
+
+/* ---- Entreno: series a la izquierda, figura del ejercicio a la derecha ---- */
+.wb-body { flex: 1; min-height: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; margin-top: calc(10px * var(--k)); }
+.wb-left { display: flex; flex-direction: column; min-width: 0; }
+.wb-body .wb-plan { margin: 0 0 calc(10px * var(--k)); gap: 4px; }
+.wb-body .wb-kg .kg-value { min-width: 44px; padding: 9px 8px; font-size: 18px; }
+.wb-body .wb-pv { padding: 4px 7px; }
+.wb-body .wb-sets { display: grid; grid-template-columns: repeat(4, 50px); justify-content: start; gap: 8px 6px; margin-bottom: 0; }
+.wb-body .wb-serie { min-width: 0; max-width: none; }
+.wb-figure {
+    display: flex; align-items: center; justify-content: center; min-height: 110px; overflow: hidden;
+    border-radius: 12px; background: radial-gradient(circle at 50% 35%, rgba(var(--ui-rgb), .14), transparent 70%), var(--inset);
+    border: 1px solid var(--glass-border);
+}
+.fig-svg { width: 100%; height: 100%; max-height: 170px; display: block; }
+.fig-prop { fill: none; stroke: rgba(var(--fg), .28); stroke-width: 3; stroke-linecap: round; }
+.fig-limb { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.fig-glow { opacity: .55; }
+.fig-back { opacity: .45; }
+.fig-shine { fill: none; stroke: rgba(255, 255, 255, .55); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; transform: translate(-1px, -1.2px); }
+.fig-head { stroke: rgba(255, 255, 255, .7); stroke-width: 1.2; }
+.fig-plate { fill: rgba(255, 255, 255, .18); stroke: rgba(255, 255, 255, .75); stroke-width: 1.3; }
+.wb-card .wb-extra { margin-top: calc(12px * var(--k)); }
+
+/* ---- Comida: Objetivo | Dieta, y Calibración debajo ---- */
+.food-plan-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: calc(10px * var(--k)); }
+.food-plan-row .food-plan { margin: 0; }
+.food-plan-row + .food-plan { margin-top: 8px; }
+.plan-opt { padding: 12px 14px; font-size: 15px; }
+.plan-opt small { font-size: 12px; text-align: right; }
+.t-actions { flex-shrink: 0; margin: 2px 0 0; }
+.t-actions .dialog-btn { flex: 1; }
+.fig-arrow { fill: none; stroke: var(--text-2); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+.fig-bar { fill: none; stroke: rgba(255, 255, 255, .7); stroke-width: 1.6; stroke-linecap: round; }
+.fig-disc { fill: rgba(255, 255, 255, .06); stroke-width: 2.4; stroke-dasharray: none; }
+.fig-hub { fill: rgba(255, 255, 255, .85); }
+
+/* =========================================================
+    ENTRENO EN VERTICAL: 2 tarjetas completas y la mitad de la siguiente
+========================================================= */
+#workoutExercises { flex: 1 1 0; min-height: 0; overflow: hidden; display: block; touch-action: none; }
+.workout-track { display: flex; flex-direction: column; gap: 10px; will-change: transform; }
+.workout-track > .exercise { flex: none; min-height: var(--card-h, 200px); padding: 10px 12px; margin: 0; }
+.workout-track .wb-head .exercise-name { font-size: 15px; }
+.workout-track .wb-badge { padding: 3px 9px; }
+.workout-track .wb-body { margin-top: 6px; gap: 8px; }
+.workout-track .wb-plan { margin-bottom: 6px; }
+.workout-track .wb-kg .kg-value { padding: 6px 8px; font-size: 16px; }
+.workout-track .wb-pv { padding: 2px 7px; }
+.workout-track .wb-pv b { font-size: 14px; }
+.workout-track .wb-sets { grid-template-columns: repeat(4, 46px); gap: 4px 6px; }
+.workout-track .wb-serie { gap: 2px; }
+.workout-track .wb-serie .serie-label { font-size: 12px; }
+.workout-track .wb-serie .reps-value { padding: 7px 0; font-size: 16px; }
+.workout-track .wb-figure { min-height: 0; }
+.workout-track .fig-svg { max-height: 120px; }
+.workout-track .wb-extra { min-height: 34px; margin-top: 8px; padding: 4px 10px; }
+.workout-track .wb-extra small { font-size: 12px; }
+.workout-track .workout-add { min-height: 56px; }
+.wb-head .wb-x { position: static; width: 30px; height: 30px; margin: -4px -6px -4px 0; }
+.wb-pv.editable { cursor: pointer; border-style: solid; border-color: rgba(var(--ui-rgb), .7); }
+.wb-pv.editable:active { background: rgba(var(--ui-rgb), .2); }
+
+/* =========================================================
+    SEMANA: entreno extraordinario, deporte y deportes del día
+========================================================= */
+#weekRoutineContent:has(.week-empty) { flex-direction: column; }
+.week-actions { flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.week-actions-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.week-actions .week-act { min-height: calc(58px * var(--k)); padding: 6px 8px; }
+.week-actions .week-act small { font-size: 12px; line-height: 1.2; }
+.sport-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.sport-chip {
+    display: inline-flex; align-items: center; gap: 2px; padding: 2px 2px 2px 12px; border-radius: 999px; font-size: 13px;
+    background: rgba(var(--ui-rgb), .14); border: 1px solid rgba(var(--ui-rgb), .6); color: var(--text-2);
+}
+.sport-chip b { color: var(--text); }
+.sport-chip .sport-x { position: static; width: 28px; height: 28px; font-size: 14px; }
+
+/* =========================================================
+    HISTORIAL: días con deporte y gráfica de deportes
+========================================================= */
+.history-cell { position: relative; }
+.history-cell.has-sport::after {
+    content: ""; position: absolute; left: 50%; bottom: 4px; width: 5px; height: 5px; margin-left: -2.5px;
+    border-radius: 50%; background: var(--ui); box-shadow: 0 0 0 1.5px var(--bg);
+}
+.history-cell.sport { background: rgba(var(--ui-rgb), .35); border-color: var(--ui); color: var(--text); }
+.chart-panel { display: flex; flex-direction: column; gap: 6px; }
+.chart-panel + .chart-panel { margin-top: 6px; }
+.chart-heading { text-align: center; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+
+/* ---- Entreno: textos y series más grandes; el "+" de serie extra va junto a las series ---- */
+.workout-track .wb-head .exercise-name { font-size: 17px; }
+.workout-track .wb-badge { font-size: 12px; padding: 4px 10px; }
+.workout-track .wb-plan { margin-bottom: 8px; }
+.workout-track .wb-kg .kg-value { padding: 8px 10px; font-size: 19px; }
+.workout-track .rx-unit { font-size: 13px; }
+.workout-track .wb-pv b { font-size: 16px; }
+.workout-track .wb-pv small { font-size: 10px; }
+.workout-track .wb-sets { grid-template-columns: repeat(4, 52px); gap: 6px 7px; }
+.workout-track .wb-serie .serie-label { font-size: 14px; }
+.workout-track .wb-serie .reps-value { padding: 10px 0; font-size: 19px; }
+.workout-track .fig-svg { max-height: 150px; }
+.wb-add-serie .serie-label { color: var(--muted); font-weight: normal; font-size: 11px !important; }
+/* Los cuadros de las series quedan siempre a la misma altura, aunque "Extra" use letra más pequeña que I, II, III */
+.wb-serie { justify-content: flex-end; }
+.wb-add-btn {
+    width: 100%; margin: 0; cursor: pointer; font-weight: bold; color: var(--text);
+    background: rgba(var(--ui-rgb), .18); border: 1px dashed var(--ui); border-radius: 8px;
+}
+.wb-add-btn:active { background: rgba(var(--ui-rgb), .32); }
+
+/* ---- Entreno: fila del plan (peso × series × reps) al mismo nivel que las series ---- */
+.workout-track .wb-plan { gap: 5px; align-items: stretch; }
+.workout-track .wb-kg { min-height: 42px; }
+.workout-track .wb-kg .kg-value { display: flex; align-items: center; justify-content: center; min-width: 46px; padding: 0 9px; font-size: 21px; font-weight: bold; }
+.workout-track .rx-unit { font-size: 14px; padding: 0 9px; }
+.workout-track .wb-times { align-self: center; font-size: 17px; color: var(--text-2); }
+.workout-track .wb-pv {
+    justify-content: center; min-width: 46px; padding: 1px 9px;
+    border: 1px solid var(--glass-border); background: var(--inset); color: var(--text);
+}
+.workout-track .wb-pv b { font-size: 19px; }
+.workout-track .wb-pv small { font-size: 11px; color: var(--muted); }
+.workout-track .wb-pv.editable { border-color: rgba(var(--ui-rgb), .7); }
+
+/* ---- Entreno: la fila del plan mide exactamente lo mismo que las 4 series (no invade la figura).
+   Peso: 3 dígitos · Series: 1 dígito · Reps: rangos de 5 caracteres (10–15) ---- */
+.workout-track .wb-plan {
+    display: grid; grid-template-columns: minmax(0, 1.3fr) auto minmax(0, .8fr) auto minmax(0, 1.6fr);
+    width: calc(4 * 52px + 3 * 7px); box-sizing: border-box;
+}
+.workout-track .wb-kg {
+    min-width: 0; flex-direction: column; justify-content: center; align-items: center; line-height: 1.1;
+}
+.workout-track .wb-kg .kg-value { min-width: 0; width: 100%; padding: 0 2px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.workout-track .wb-kg .kg-value.long { font-size: 16px; }
+.workout-track .wb-unit { font-size: 11px; color: var(--muted); padding-bottom: 2px; }
+.workout-track .wb-pv { min-width: 0; padding: 1px 2px; }
+.workout-track .wb-pv b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* =========================================================
+    BOTONES DE INICIO, CASITA Y TÍTULO CON EL COLOR DE LA APP
+========================================================= */
+.home-btn, .settings-btn, .day-done-btn {
+    color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.home-btn:active, .settings-btn:active, .day-done-btn:active { background: rgba(var(--ui-rgb), .32); }
+.day-done-btn.on { background: rgb(var(--ui-rgb)); color: var(--bg); }
+.backup-btn, .achievements-edit {
+    padding: 9px 14px; font-size: 13px; font-weight: bold; border-radius: 12px;
+    color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.backup-btn:active, .achievements-edit:active { background: rgba(var(--ui-rgb), .32); }
+.profile-photo { border-color: var(--ui); }
+
+/* el título del día o ejercicio (con ←) es un botón para volver */
+.week-date.clickable {
+    width: fit-content; max-width: 72%; margin-left: auto; margin-right: auto; padding: 0 16px;
+    border-radius: 12px; color: var(--text); white-space: nowrap; text-overflow: ellipsis;
+    background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.week-date.clickable:active { background: rgba(var(--ui-rgb), .32); }
+
+/* Activar rutina: solo un check, el doble de grande, del color de la app */
+.routine-activate {
+    width: 34px; height: 34px; padding: 0; bottom: 8px; right: 8px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--inset); border: 1.5px solid rgba(var(--ui-rgb), .7); color: rgba(var(--ui-rgb), .45);
+}
+.routine-activate svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+.routine-active .routine-activate { background: var(--ui); border-color: var(--ui); color: #fff; }
+
+/* =========================================================
+    PULSO DISCRETO: indica que se puede pulsar (solo un brillo; no agranda ni mueve nada)
+========================================================= */
+@keyframes ui-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 11px 0 rgba(var(--ui-rgb), .33); }   /* +25 % */
+}
+.home-btn, .settings-btn, .day-done-btn, .profile-photo, .backup-btn, .achievements-edit,
+.square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
+.wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order, .food-hist-btn {
+    animation: ui-pulse 3.4s ease-in-out infinite;
+}
+/* Pulso mínimo (25 % del de los botones): filas que se pueden tocar para cambiarlas */
+@keyframes ui-pulse-min {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 6px 0 rgba(var(--ui-rgb), .09); }
+}
+.food-row.editable { cursor: pointer; animation: ui-pulse-min 3.4s ease-in-out infinite; }
+.food-row.editable:active { background: rgba(var(--ui-rgb), .12); }
+.add-square.add-wide.fh-add { width: auto; height: auto; min-height: 0; aspect-ratio: auto; margin: 6px 16px 16px; padding: 10px; flex-shrink: 0; box-sizing: border-box; }
+@media (prefers-reduced-motion: reduce) {
+    .food-row.editable { animation: none; }
+    .home-btn, .settings-btn, .day-done-btn, .profile-photo, .backup-btn, .achievements-edit,
+    .square-card.add-square, .history-btn, .food-start, .food-plan, .week-date.clickable,
+    .wb-add-btn, .routine-activate, .wb-pv.editable, .dialog-btn.accept, .fh-order, .food-hist-btn { animation: none; }
+}
+
+/* Cuenta y sincronización (Ajustes) */
+.settings-note { margin: 0 2px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+.dialog-btn.account-code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 15px; letter-spacing: 1px; color: var(--text); }
+
+/* Versión al pie de la pantalla de inicio (toca para ver novedades) */
+.app-version {
+    margin: 14px auto 0; padding: 4px 12px; border-radius: 999px; cursor: pointer;
+    background: none; border: 1px solid transparent; color: var(--faint);
+    font-size: 11px; letter-spacing: .5px; font-family: inherit;
+}
+.app-version:active { border-color: var(--glass-border); color: var(--muted); }
+
+/* Potencial muscular: fila de 3 pesos (más pequeña) */
+.t-row + .t-row { margin-top: 8px; }
+.t-tile.t-sm { padding: 7px 8px; }
+.t-tile.t-sm b { font-size: 20px; }
+.t-tile.t-sm i { margin-left: 2px; font-size: 11px; }
+
+/* Rutinas y días (pestañas Rutinas y Semana) con color de botón */
+.day-card, .split-card { background: rgba(var(--ui-rgb), 0.14); border-color: var(--ui); }
+.day-card:active, .split-card:active { background: rgba(var(--ui-rgb), 0.28); }
+
+/* Menú de comida: lo ya agregado sin salir del menú */
+.picker-item.picked { background: rgba(var(--ui-rgb), 0.2); border-color: var(--ui); }
+.picker-item.picked span::after { content: " ✓"; color: var(--ui); font-weight: bold; }
+
+/* Barra de calorías con el botón "dar el día" (volumen sucio) a la par */
+.food-bar-row { display: flex; align-items: center; gap: 8px; margin: calc(8px * var(--k)) 0; }
+.food-bar-row .food-bar { flex: 1; margin: 0; }
+.food-done {
+    flex-shrink: 0; width: 30px; height: 30px; padding: 0; border-radius: 9px; cursor: pointer;
+    display: grid; place-items: center; color: var(--text);
+    background: rgba(var(--ui-rgb), 0.14); border: 1px solid var(--ui);
+}
+.food-done svg { width: 16px; height: 16px; }
+.food-done:active { background: rgba(var(--ui-rgb), 0.3); }
+.food-done.on { background: var(--ui); color: var(--bg); }
+
+/* Historial: la equivalencia en porciones de la comida rápida puede ocupar dos renglones */
+.fh-list .fr-name small { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
+
+/* Botón "Hoy": a la derecha del título, solo al ver otro día (mismo tamaño que la casita) */
+.today-btn {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    height: max(30px, calc(var(--hdr) * 0.4)); padding: 0 12px; border-radius: 10px; cursor: pointer;
+    font-size: 13px; font-weight: bold; color: var(--text);
+    background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+    animation: ui-pulse 3.4s ease-in-out infinite;
+}
+.today-btn[hidden] { display: none; }
+/* ✓ del entreno del día (a la derecha, mismo tamaño que la casita) */
+.day-done-btn {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    width: max(30px, calc(var(--hdr) * 0.4)); height: max(30px, calc(var(--hdr) * 0.4));
+    display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 10px; cursor: pointer;
+    color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.day-done-btn[hidden] { display: none; }
+.day-done-btn svg { width: 62%; height: 62%; }
+.day-done-btn:active { background: rgba(var(--ui-rgb), .32); }
+.day-done-btn.on { background: rgb(var(--ui-rgb)); color: var(--bg); }
+.today-btn:active { background: rgba(var(--ui-rgb), .32); }
+@media (prefers-reduced-motion: reduce) { .today-btn { animation: none; } }
+.header-sub .week-date { padding: 0 44px; display: block; text-align: center; line-height: 1.25; overflow: hidden; }
+/* con el botón "Hoy" visible el título deja su espacio a la derecha; sin él queda centrado */
+.header-sub:has(.today-btn:not([hidden])) .week-date { padding-right: 64px; }
+/* Día que se está viendo en el calendario */
+.history-grid .viewing { outline: 2px solid var(--ui); outline-offset: -2px; }
+
+/* Buscador con lupa (cierra el teclado) */
+.picker-search-row { position: relative; margin: 4px 16px 8px; flex-shrink: 0; display: flex; }
+.picker-search-row .picker-search { margin: 0; flex: 1; padding-right: 46px; }
+.picker-lens {
+    position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 34px; border-radius: 9px; padding: 0; cursor: pointer;
+    display: grid; place-items: center; color: var(--text);
+    background: rgba(var(--ui-rgb), .16); border: 1px solid var(--ui);
+}
+.picker-lens svg { width: 18px; height: 18px; }
+.picker-lens:active { background: rgba(var(--ui-rgb), .32); }
+.picker-search::-webkit-search-cancel-button { margin-right: 4px; }
+
+/* Filtros por grupo bajo el buscador (se deslizan de lado) */
+.picker-filters {
+    display: flex; gap: 6px; padding: 0 16px 8px; flex-shrink: 0;
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.picker-filters::-webkit-scrollbar { display: none; }
+.picker-filter {
+    flex-shrink: 0; padding: 6px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    font-size: 13px; color: var(--text-2); background: var(--glass-bg); border: 1px solid var(--glass-border);
+}
+.picker-filter.active { color: var(--text); font-weight: bold; background: rgba(var(--ui-rgb), .2); border-color: var(--ui); }
+
+/* Semana con más de 4 días: dos columnas; el día impar de abajo, mismo ancho y centrado */
+.split-picker.two-cols { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 12px; }
+.split-picker.two-cols .split-card { padding: 8px 10px; font-size: 16px; line-height: 1.25; overflow-wrap: anywhere; }
+.split-picker.two-cols .split-card.odd-last { grid-column: 1 / -1; justify-self: center; width: calc((100% - 12px) / 2); }
+
+/* Historial: el calendario y las gráficas ocupan todo el alto libre de la pantalla (el mismo para
+   todas las gráficas y periodos), así los botones de abajo quedan siempre en su sitio */
+.history-chart { flex: 1 1 0; min-height: 250px; overflow: hidden; }
+.history-chart .chart-panel { flex: 1 1 0; min-height: 0; }
+.history-grid { flex: 0 0 auto; align-content: start; }
+
+/* Flechas ▲ ▼ de todos los cuadros de cantidad, con el color de la app */
+.stepper-btn { background: rgba(var(--ui-rgb), .14); border-color: var(--ui); color: var(--text); }
+.stepper-btn:active { background: rgba(var(--ui-rgb), .3); }
+
+/* Tuerca de ajustes junto al nombre del ejercicio */
+.ex-name-row { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; }
+.ex-name-row .exercise-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ex-gear {
+    flex-shrink: 0; width: 28px; height: 28px; padding: 0; border-radius: 8px; cursor: pointer;
+    display: grid; place-items: center; color: var(--text-2);
+    background: rgba(var(--ui-rgb), .12); border: 1px solid rgba(var(--ui-rgb), .55);
+}
+.ex-gear svg { width: 16px; height: 16px; }
+.ex-gear:active { background: rgba(var(--ui-rgb), .3); color: var(--text); }
+
+/* Ventana de ajustes del ejercicio */
+.ex-settings { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 16px; overflow-y: auto; min-height: 0; }
+.ex-rename {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer;
+    border-radius: 12px; font-size: 16px; font-weight: bold; color: var(--text);
+    background: rgba(var(--ui-rgb), .14); border: 1px solid var(--ui); text-align: left;
+}
+.ex-rename small { font-weight: normal; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.ex-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ex-tile {
+    position: relative; aspect-ratio: 5 / 6; padding: 4px; cursor: pointer; border-radius: 12px;
+    background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; flex-direction: column; align-items: center;
+}
+.ex-tile .fig-svg { flex: 1; min-height: 0; max-height: none; }
+.ex-tile small { font-size: 10px; color: var(--text-2); line-height: 1.2; padding-bottom: 2px; }
+.ex-tile.selected { background: rgba(var(--ui-rgb), .2); border: 2px solid var(--ui); }
+.fig-eq { fill: rgba(255, 255, 255, .12); stroke-width: 3.5; }
+.fig-thin { stroke-width: 3.5; }
+
+/* =========================================================
+    CALENDARIO DEL HISTORIAL: título del tipo, colores vivos y día de hoy con pulso
+========================================================= */
+.history-kind {
+    align-self: center; margin: auto; padding: 4px 0;   /* centrado en el espacio libre bajo el calendario; texto, no botón */
+    font-size: 12px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-2);
+}
+.history-kind[hidden] { display: none; }
+
+/* Verde, amarillo y rojo más vivos y con más contraste; brillo arriba y un filtro del color de la app */
+:root { --cal-green: #19d35c; --cal-gold: #ffc81a; --cal-red: #ff3b3b; }
+.history-cell.green, .history-cell.gold, .history-cell.red {
+    --cal: var(--cal-green);
+    color: #0b0b0b; border: 1.5px solid rgba(0, 0, 0, .3);   /* iOS < 16.2 */
+    border-color: color-mix(in srgb, var(--cal) 70%, #000);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 48%),
+        linear-gradient(135deg, rgba(var(--ui-rgb), .26), rgba(var(--ui-rgb), 0) 75%),
+        var(--cal);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+}
+.history-cell.gold { --cal: var(--cal-gold); }
+.history-cell.red { --cal: var(--cal-red); color: #fff; text-shadow: 0 1px 1px rgba(0, 0, 0, .35); }
+
+/* Hoy: en vez del borde negro, un contorno con pulso del color de la app (el doble del de los botones) */
+@keyframes today-pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(var(--ui-rgb), .55), 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 0 2px var(--ui), 0 0 22px 2px rgba(var(--ui-rgb), .66); }
+}
+.history-cell.today { outline: none; position: relative; z-index: 1; animation: today-pulse 3.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .history-cell.today { animation: none; box-shadow: 0 0 0 2px var(--ui); } }
+
+/* Título del día con tuerca y ventana para ordenar ejercicios */
+.day-title-row { justify-content: flex-start; }
+.day-title-row .picker-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 16px; overflow-y: auto; min-height: 0; }
+.order-row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border-radius: 14px;
+    background: var(--glass-bg); border: 1px solid var(--glass-border); transition: background .25s, border-color .25s;
+}
+.order-row.moved { background: rgba(var(--ui-rgb), .16); border-color: var(--ui); }
+.order-num { width: 22px; text-align: center; font-weight: bold; color: var(--muted); }
+.order-name { flex: 1; min-width: 0; font-size: 16px; font-weight: bold; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-btn { width: 46px; height: 42px; font-size: 16px; padding: 0; }
+.order-btn:disabled { opacity: .3; }
+
+/* Versiones anteriores de la cuenta */
+.versions-list .version-btn { width: 100%; text-transform: capitalize; }

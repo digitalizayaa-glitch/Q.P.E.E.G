@@ -1,0 +1,514 @@
+/* 2-pantallas.css — Pantallas: semana, rutinas, ejercicios, inicio, entreno e historial.
+   Las hojas se cargan en orden (1 → 5) desde index.html: el orden importa, las de después afinan a las de antes. */
+
+/* =========================================================
+    SEMANA: HEADER + SELECTOR DE DÍA
+========================================================= */
+
+.week-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-shrink: 0;
+}
+
+.week-tab-label {
+    flex: 1;
+    width: 100%;
+    height: 93px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-align: center;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    font-weight: bold;
+    font-size: 29px;
+    letter-spacing: 1px;
+}
+
+.week-tab-label.clickable { cursor: pointer; }
+
+.week-date {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-align: center;
+    color: var(--muted);
+    font-size: 23px;
+    margin-top: 10px;
+    flex-shrink: 0;
+}
+
+.split-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 10px;
+    flex: 1;
+    min-height: 0;
+}
+
+.split-card {
+    width: 100%;
+    flex: 1;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.split-card:active { background: var(--glass-bg-strong); }
+
+.split-caption {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 25px;
+    flex-shrink: 0;
+}
+
+.series-title { text-align: center; flex-shrink: 0; }
+
+.series-panel {
+    display: flex;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 15px;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.series-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.series-divider { width: 1px; background: var(--glass-border); }
+.series-line { display: flex; justify-content: space-between; font-size: 13px; }
+.series-line span:last-child { color: var(--muted); }
+
+/* =========================================================
+    CREADOR DE RUTINAS - PÁGINAS DE EJERCICIOS
+========================================================= */
+
+#routinesContainer { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+
+.routine-page { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+
+.page-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.page-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--glass-border); }
+.page-dot.active { background: var(--text-2); }
+
+.routine-help {
+    text-align: center;
+    color: var(--faint);
+    font-size: 10px;
+    line-height: 1.4;
+    margin-top: 8px;
+    flex-shrink: 0;
+    padding: 0 8px;
+}
+
+/* Grid de días: ocupa el espacio restante sin scroll */
+
+.day-grid-wrapper { flex: 1; min-height: 0; overflow: hidden; display: flex; }
+
+.day-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.day-grid.two-columns { grid-template-columns: repeat(2, 1fr); }
+.day-grid .add-square { width: 140px; justify-self: center; align-self: center; }
+.add-day-full-row { grid-column: 1 / span 2; }
+.day-grid-wrapper.empty-wrapper { align-items: center; }
+.day-grid.empty-grid { height: 50%; }
+
+.day-card,
+.square-card {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    color: var(--text);
+    font-weight: bold;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px;
+    cursor: pointer;
+    text-align: center;
+    overflow: hidden;
+}
+
+.square-card { aspect-ratio: 1 / 1; padding: 8px; }
+
+.day-card:active,
+.square-card:active { background: var(--glass-bg-strong); }
+
+.day-delete-x {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 11px;
+    color: var(--faint);
+    cursor: pointer;
+}
+
+.day-delete-x:hover { color: var(--accent-red); }
+
+.add-square { color: var(--muted); font-weight: normal; }
+.add-square-plus { font-size: 30px; color: var(--text-2); }
+.add-square small { font-size: 12px; }
+
+.hint-text {
+    text-align: center;
+    color: var(--faint);
+    font-size: 12px;
+    margin-top: 20px;
+    flex-shrink: 0;
+}
+
+.routine-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 15px;
+}
+
+/* =========================================================
+    EJERCICIOS (tarjeta)
+========================================================= */
+
+.exercise {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 12px;
+    margin-top: 0;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.exercise-top { display: flex; justify-content: space-between; align-items: center; }
+.exercise-name { font-weight: bold; }
+
+/* =========================================================
+    SEMÁFORO
+========================================================= */
+
+.semaphore-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--faint);
+}
+
+.dot-red { background: var(--accent-red); }
+.dot-yellow { background: var(--accent-gold); }
+.dot-green { background: var(--accent); }
+
+/* =========================================================
+    CARRUSEL DE KG
+========================================================= */
+
+.kg-carousel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 140px;
+    margin: 14px auto 10px auto;
+}
+
+.kg-value {
+    width: 100%;
+    text-align: center;
+    background: var(--inset);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 10px 0;
+    font-weight: bold;
+}
+
+/* =========================================================
+    SERIES / CARRUSEL DE REPS
+========================================================= */
+
+.series-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.serie-carousel { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 56px; }
+.serie-label { font-weight: bold; font-size: 14px; margin-bottom: 2px; }
+
+.reps-value {
+    width: 100%;
+    text-align: center;
+    background: var(--inset);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 8px 0;
+    font-weight: bold;
+}
+
+/* =========================================================
+    BOTONES
+========================================================= */
+
+button.primary {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: var(--primary-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--primary-text);
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+/* =========================================================
+    PANTALLA DE INICIO (LANDING)
+========================================================= */
+
+.landing {
+    max-width: 500px;
+    min-height: 100vh;
+    margin: auto;
+    background:
+        radial-gradient(circle at 20% 10%, rgba(var(--glow1), var(--ga1)), transparent 45%),
+        radial-gradient(circle at 80% 90%, rgba(var(--glow2), var(--ga2)), transparent 45%),
+        var(--bg);
+    padding: 50px 25px 30px 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.landing-title { font-size: 26px; letter-spacing: 2px; margin-bottom: 50px; }
+
+.profile-wrap { position: relative; margin-bottom: 25px; }
+
+.profile-photo {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.profile-photo img { width: 100%; height: 100%; object-fit: cover; }
+#profilePlaceholder { font-size: 34px; color: var(--faint); }
+
+.tooltip {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+
+.tooltip.visible { opacity: 1; }
+
+.tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--text);
+}
+
+.achievements-panel {
+    position: relative;
+    width: 100%;
+    padding: 25px 15px 10px 15px;
+    margin-top: 5px;
+    border-radius: 18px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    -webkit-mask-image: linear-gradient(180deg, transparent, black 25%, black 85%, transparent);
+    mask-image: linear-gradient(180deg, transparent, black 25%, black 85%, transparent);
+}
+
+.achievements-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 12px; }
+
+.achievement-chip {
+    background: rgba(var(--fg), 0.08);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+.achievements-limit { font-size: 12px; color: var(--muted); max-width: 300px; margin: 0 auto; line-height: 1.5; }
+
+.footer-note { margin-top: auto; padding-top: 40px; font-size: 11px; color: var(--faint); line-height: 1.6; }
+
+/* =========================================================
+    ENTRENO
+========================================================= */
+
+#workout.section.active { overflow: hidden; }
+#workoutExercises { flex: 1; min-height: 0; overflow: hidden; }
+
+.workout-page { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+.workout-page .exercise { flex: 1; min-height: 0; }
+
+/* =========================================================
+    RUTINAS: ACTIVAR
+========================================================= */
+
+.routine-activate {
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    font-size: 9px;
+    padding: 3px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: var(--inset);
+    color: var(--muted);
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.routine-active .routine-activate {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #111;
+    font-weight: bold;
+}
+
+/* =========================================================
+    SEMANA: días ocupan el espacio restante, Series fijo abajo
+========================================================= */
+
+#week.section.active { overflow: hidden; }
+#weekRoutineContent { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+#weekRoutineContent .split-picker { flex: 1; min-height: 0; }
+#weekRoutineContent .split-caption { margin-bottom: 10px; }
+
+/* =========================================================
+    HISTORIAL
+========================================================= */
+
+.history-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.history-weekday { text-align: center; color: var(--faint); font-size: 11px; }
+
+.history-cell {
+    aspect-ratio: 1 / 1;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.history-cell.green { background: var(--accent); color: #111; border-color: var(--accent); }
+.history-cell.red { background: var(--accent-red); border-color: var(--accent-red); }
+.history-cell.gold { background: var(--accent-gold); color: #111; border-color: var(--accent-gold); }
+.history-cell.future { opacity: .35; cursor: default; }
+.history-cell.blank { visibility: hidden; }
+
+/* =========================================================
+    AJUSTE AUTOMÁTICO AL ESPACIO DISPONIBLE
+    - Las tarjetas ya no se recortan: tienen siempre su tamaño completo.
+    - Si el contenido no cabe, scripts.js (fitLayout) achica primero el
+      encabezado (--hdr) y luego los espacios internos (--k) hasta que
+      todo quepa. Como último recurso, la zona principal se desplaza.
+========================================================= */
+
+:root {
+    --hdr: clamp(52px, 11vh, 93px); /* tamaño de los botones del encabezado */
+    --k: 1;                          /* factor de espaciado interno */
+}
+
+/* 100vh en celulares incluye la barra del navegador y tapa el borde inferior */
+.app { height: 100vh; height: 100dvh; }
+
+header { padding: calc(var(--hdr) * 0.17) 20px; }
+.week-tabs { margin-bottom: calc(var(--hdr) * 0.15); }
+.week-tab-label { height: var(--hdr); font-size: calc(var(--hdr) * 0.31); border-radius: calc(var(--hdr) * 0.17); }
+.week-date { height: calc(var(--hdr) * 0.32); font-size: calc(var(--hdr) * 0.25); margin-top: calc(var(--hdr) * 0.1); }
+
+main { padding: calc(20px * var(--k)) 20px; overflow-y: auto; scrollbar-width: none; }
+main::-webkit-scrollbar { display: none; }
+
+/* Las tarjetas nunca se comprimen por debajo de su contenido */
+.workout-page .exercise { flex: 1 0 auto; min-height: auto; overflow: visible; }
+.routine-page { overflow: visible; min-height: auto; flex: 1 0 auto; }
+#workoutExercises { flex: 1 0 auto; min-height: auto; overflow: visible; }
+.workout-page { height: auto; min-height: 100%; gap: calc(12px * var(--k)); }
+#workout.section.active { overflow: visible; }
+
+.exercise { container-type: normal; padding: calc(12px * var(--k)); }
+.exercise .kg-carousel { margin: calc(14px * var(--k)) auto calc(10px * var(--k)) auto; gap: calc(4px * var(--k)); }
+.exercise .kg-value { padding-top: calc(14px * var(--k)); padding-bottom: calc(14px * var(--k)); }
+.exercise .reps-value { padding: calc(14px * var(--k)) 0; }
+.exercise .series-row { margin-top: calc(8px * var(--k)); gap: calc(8px * var(--k)); }
+
+/* Rutinas y Entreno: el contenido define su altura (no se recorta);
+   si aun así no cupiera, la zona principal se desplaza. */
+#exercises.section.active,
+#workout.section.active { flex: 1 0 auto; min-height: auto; overflow: visible; }
+#routinesContainer { flex: 1 0 auto; min-height: auto; overflow: visible; }
