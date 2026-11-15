@@ -15,6 +15,8 @@ DATA = {"routines": [{"id": "r1", "name": "Push", "days": []}], "logs": {}, "foo
 
 def page(b, errors, data=None, seen=None, consent=True):
     ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
+    # sin red real: el servidor de compartir responde vacío (WebKit marca como error la petición bloqueada por CORS)
+    ctx.route("**/rest/v1/rpc/*", lambda route: route.fulfill(status=200, content_type="application/json", body="null"))
     pg = ctx.new_page()
     pg.on("pageerror", lambda e: errors.append(str(e)))
     init = "localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false}));localStorage.setItem('qpeeg_install_seen','1');" if consent else ""

@@ -69,17 +69,22 @@ def main():
             r["comida_sigue"] = pg.evaluate("foodKey()") == PK
 
             # "Hoy" vuelve a hoy en todas
+            diag = lambda: pg.evaluate("({ vis: document.visibilityState, navFading, busy: SWIPE.busy, view: viewDate(), food: foodKey(), btnHidden: document.getElementById('todayBtn').hidden, sec: document.querySelector('.section.active').id, anims: document.getAnimations().length })")
+            r_diag = {"antes_de_hoy": diag()}
             pg.locator("#todayBtn").click()
-            try: pg.wait_for_function("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()", timeout=4000); pg.wait_for_timeout(300)
+            # polling por intervalo (no por cuadro): si el motor pausa los cuadros, igual se revisa
+            try: pg.wait_for_function("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()", timeout=4000, polling=100); pg.wait_for_timeout(300)
             except Exception: pass
             r["hoy_vuelve"] = pg.evaluate("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()") and not today_btn()
+            if not r["hoy_vuelve"]: r_diag["despues_de_hoy"] = diag(); print("DIAGNÓSTICO", json.dumps(r_diag, ensure_ascii=False))
 
             # Desde el calendario de entreno lleva al día y también a su comida
             pg.evaluate(f"setViewDate(null); showSection('history'); historyMode = 'workout'; openHistoryDay('{PK}')"); pg.wait_for_timeout(600)
             pg.evaluate("showSection('food')")
-            try: pg.wait_for_function(f"foodKey() === '{PK}'", timeout=4000)
+            try: pg.wait_for_function(f"foodKey() === '{PK}'", timeout=4000, polling=100)
             except Exception: pass
             r["entreno_luego_comida_mismo_dia"] = pg.evaluate("foodKey()") == PK
+            if not r["entreno_luego_comida_mismo_dia"]: print("DIAGNÓSTICO 2", json.dumps(diag(), ensure_ascii=False))
             ctx.close(); b.close()
     finally:
         srv.terminate()
