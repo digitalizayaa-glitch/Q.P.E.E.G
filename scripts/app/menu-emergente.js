@@ -210,7 +210,7 @@ function closePicker(immediate) {
     const sheet = overlay.firstElementChild;
     overlay.style.pointerEvents = "none";
     sheetCollapse(sheet, 140);
-    overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
+    overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" }).settled.then(() => overlay.remove());
 }
 
 /* Con un cuadro de cantidad abierto encima, Escape cierra solo ese cuadro */

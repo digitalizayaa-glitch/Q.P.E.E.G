@@ -5,6 +5,8 @@ Uso:  python3 tests/e2e/test_compartir.py            (desde la raíz del reposit
 """
 import json, os, re, subprocess, sys, time
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 sys.path.insert(0, os.path.dirname(__file__))
 import test_sync as S
@@ -48,9 +50,7 @@ def main():
     r, errors = {}, []
     try:
         with sync_playwright() as p:
-            opts = {"args": ["--no-sandbox", "--no-proxy-server"]}
-            if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
-            b = p.chromium.launch(**opts)
+            b = navegador.launch(p)
 
             # A sin cuenta: comparte con el número al azar del teléfono
             ctxA, A = phone(b, {"routines": [{"id": "r1", "name": "Push", "days": []}], "logs": {}, "food": {"log": {}}, "achievements": []}, errors)

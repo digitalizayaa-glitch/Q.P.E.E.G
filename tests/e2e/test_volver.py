@@ -5,6 +5,8 @@ Variables opcionales: CHROME=/ruta/a/chrome  PORT=8809  SHOTS=carpeta
 """
 import json, os, re, subprocess, sys, time
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8809")
@@ -30,9 +32,7 @@ def main():
     r, errors = {}, []
     try:
         with sync_playwright() as p:
-            opts = {"args": ["--no-sandbox", "--no-proxy-server"]}
-            if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
-            b = p.chromium.launch(**opts)
+            b = navegador.launch(p)
             ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
             ctx.add_init_script("localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false}));localStorage.setItem('qpeeg_install_seen','1');"
                                 "localStorage.setItem('qpeeg_seen_version','%s');localStorage.setItem('qpeeg_tip_settings','1');"

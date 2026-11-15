@@ -5,6 +5,8 @@ Variables opcionales: CHROME=/ruta/a/chrome  PORT=8808  SHOTS=carpeta
 """
 import json, os, re, subprocess, sys, time
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8808")
@@ -35,9 +37,7 @@ def main():
     r, errors = {}, []
     try:
         with sync_playwright() as p:
-            opts = {"args": ["--no-sandbox", "--no-proxy-server"]}
-            if os.environ.get("CHROME"): opts["executable_path"] = os.environ["CHROME"]
-            b = p.chromium.launch(**opts)
+            b = navegador.launch(p)
 
             # 1) App nueva: fuente al azar entre las 3, la misma al reabrir, y el globo a la vista
             seen = set()

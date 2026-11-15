@@ -72,7 +72,7 @@ function openDialog({ title, message, input, buttons, validate }) {
 
             overlay.style.pointerEvents = "none";
             sheetCollapse(sheet, 130);
-            overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
+            overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).settled.then(() => overlay.remove());
             resolve(value);
         };
 
@@ -212,7 +212,7 @@ function openSheet(className, title, onClose, { locked = false } = {}) {
         if (onClose) onClose();
         overlay.style.pointerEvents = "none";
         sheetCollapse(sheet, 130);
-        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
+        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).settled.then(() => overlay.remove());
     };
     /* Escape cierra solo la ventana de más arriba (no si hay otra encima o si se está escribiendo) */
     const onKey = e => {

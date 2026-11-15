@@ -59,7 +59,7 @@ function setWorkoutOffset(y, animate) {
     track.style.transform = `translateY(${-y}px)`;
     if (!animate) return Promise.resolve();
     return track.animate([{ transform: `translateY(${-from}px)` }, { transform: `translateY(${-y}px)` }],
-        { duration: 340 * NAV_SPEED, easing: "cubic-bezier(.2,.8,.2,1)" }).finished.catch(() => {});
+        { duration: 340 * NAV_SPEED, easing: "cubic-bezier(.2,.8,.2,1)" }).settled;
 }
 
 function renderWorkoutDots() {

@@ -70,7 +70,7 @@ function enterApp(animated) {
 /* Inicio <-> app: un desvanecimiento corto y discreto */
 async function switchScreen(fromEl, toEl, toDisplay, after) {
     SWIPE.busy = true;
-    await fromEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).finished.catch(() => {});
+    await fromEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).settled;
 
     fromEl.style.display = "none";
     fromEl.getAnimations().forEach(a => a.cancel());
@@ -78,7 +78,7 @@ async function switchScreen(fromEl, toEl, toDisplay, after) {
     if (after) after();
     fitLayout(true);
 
-    await toEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 170 * NAV_SPEED, easing: "ease-out" }).finished.catch(() => {});
+    await toEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 170 * NAV_SPEED, easing: "ease-out" }).settled;
     SWIPE.busy = false;
 }
 
@@ -89,7 +89,7 @@ async function navFade(change) {
     if (navFading || SWIPE.busy) return;
     navFading = true;
     const targets = [document.querySelector("main"), document.querySelector(".week-tab-label"), document.getElementById("weekDate")].filter(Boolean);
-    await Promise.all(targets.map(t => t.animate([{ opacity: 1 }, { opacity: .2 }], { duration: 70 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).finished.catch(() => {})));
+    await Promise.all(targets.map(t => t.animate([{ opacity: 1 }, { opacity: .2 }], { duration: 70 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).settled));
     try { change(); } finally {
         targets.forEach(t => {
             t.getAnimations().forEach(a => a.cancel());
@@ -239,7 +239,7 @@ function openAchievementsEditor() {
             renderAchievements();
         }
         overlay.style.pointerEvents = "none";
-        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
+        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" }).settled.then(() => overlay.remove());
     };
     const onKey = e => { if (e.key === "Escape" && !dialogOverlay) { e.preventDefault(); close(false); } };
     window.addEventListener("keydown", onKey, true);

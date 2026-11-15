@@ -242,7 +242,7 @@ function openSettings() {
         window.removeEventListener("keydown", onKey, true);
         overlay.style.pointerEvents = "none";
         sheetCollapse(sheet, 130);
-        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
+        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).settled.then(() => overlay.remove());
     };
     const onKey = e => { if (dialogOverlay) return; if (e.key === "Escape") { e.preventDefault(); close(); } };
     window.addEventListener("keydown", onKey, true);

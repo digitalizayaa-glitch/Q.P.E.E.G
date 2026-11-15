@@ -142,7 +142,7 @@ function dayAriaLabel(key, d, status) {
 /* Calendario <-> gráfica: el contenido se desvanece y aparece el otro */
 async function fadeHistoryView(next) {
     const parts = ["historyKind", "historyTitle", "historyGrid", "historyChart"].map(id => document.getElementById(id));
-    await Promise.all(parts.map(p => p.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).finished.catch(() => {})));
+    await Promise.all(parts.map(p => p.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).settled));
     historyView = next;
     renderHistory(false);
     parts.forEach(p => { p.getAnimations().forEach(a => a.cancel()); p.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 * NAV_SPEED, easing: "ease-out" }); });

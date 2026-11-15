@@ -11,13 +11,13 @@ if ("serviceWorker" in navigator) {
         const hadController = !!navigator.serviceWorker.controller;
         navigator.serviceWorker.register("./service-worker.js").then(reg => {
             document.addEventListener("visibilitychange", () => {
-                if (document.visibilityState === "visible") reg.update().catch(() => {});
+                if (document.visibilityState === "visible" && reg && reg.update) reg.update().catch(() => {});
             });
         }).catch(() => {});
         navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadController) swUpdated = true; });
     });
     document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "hidden" && swUpdated) location.reload();
+        if (document.visibilityState === "hidden" && swUpdated) flushSave().finally(() => location.reload());   /* primero lo pendiente */
     });
 }
 
@@ -286,24 +286,62 @@ function targetsFor(routineId, key, ex) {
 }
 
 let saveWarned = false;
-/* Guarda en los dos sitios. Devuelve una promesa que se cumple con true si quedó guardado
-   en al menos uno (la mayoría de llamadas no necesitan esperarla). */
+
+/* Guardar agrupado: cada cambio (cada paso al deslizar un valor) marca el estado y lo escribe ~0,4 s
+   después del último cambio, en una sola escritura. Antes se serializaba TODO el estado en cada paso
+   (11–20 ms en PC y ≈ 50–100 ms en un teléfono con un año de datos): deslizar daba tirones.
+   La fecha de guardado (savedAt) se pone al momento, para que la sincronización vea el cambio enseguida.
+   Al ocultar o cerrar la app se escribe de inmediato (flushSave). */
+const SAVE_DELAY = 400;
+/* Espejo en localStorage solo mientras quepa holgado (su tope ronda 5 MB y escribe bloqueando);
+   más grande, la copia completa queda solo en IndexedDB */
+const LOCAL_MIRROR_MAX = 1_500_000;
+let saveTimer = null, savePending = null;
+
 function saveState() {
     refreshTodayPlans();
     state.meta.savedAt = Math.max(Date.now(), (state.meta.savedAt || 0) + 1);
+    if (!savePending) {
+        let resolve;
+        savePending = { promise: new Promise(r => { resolve = r; }), resolve };
+    }
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, SAVE_DELAY);
+    return savePending.promise;
+}
+
+/* Escribe ya lo pendiente (si hay). Devuelve si quedó guardado en algún lado. */
+function flushSave() {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+    const pending = savePending;
+    if (!pending) return QStore.flush();
+    savePending = null;
     const json = JSON.stringify(state);
     let localOk = true;
-    try { localStorage.setItem(STORAGE_KEY, json); } catch (e) { localOk = false; }
+    try {
+        if (json.length <= LOCAL_MIRROR_MAX) localStorage.setItem(STORAGE_KEY, json);
+        else { localStorage.removeItem(STORAGE_KEY); localOk = false; }
+    } catch (e) { localOk = false; }
     try { localStorage.setItem(THEME_KEY, state.settings.theme === "light" ? "light" : "dark"); } catch (e) { /* nada */ }
     try { localStorage.setItem(FONT_KEY, state.settings.font || "arial"); } catch (e) { /* nada */ }
     if (typeof scheduleSync === "function") scheduleSync();   /* cuenta.js: sube el cambio en unos segundos */
-    return QStore.queueSave(json, state.meta.savedAt).then(idbOk => {
+    const done = QStore.queueSave(json, state.meta.savedAt).then(idbOk => {
         if (!idbOk && !localOk && !saveWarned) {
             saveWarned = true;
             showMessage({ title: "No se pudo guardar", message: "El almacenamiento del teléfono está lleno o bloqueado. Exporta un respaldo y libera espacio." });
         }
         return idbOk || localOk;
     });
+    done.then(pending.resolve, () => pending.resolve(localOk));
+    return done;
+}
+
+/* Lo pendiente se escribe al salir, ocultar o congelar la app */
+if (typeof document !== "undefined" && typeof window !== "undefined") {
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flushSave(); });
+    window.addEventListener("pagehide", () => flushSave());
+    document.addEventListener("freeze", () => flushSave());
 }
 
 /* Reduce la foto a ~320px (JPEG) para que ocupe pocos KB */

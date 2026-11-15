@@ -116,7 +116,7 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
 
         overlay.style.pointerEvents = "none";
         sheetCollapse(sheet, 130);
-        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).finished.then(() => overlay.remove()).catch(() => overlay.remove());
+        overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, fill: "forwards" }).settled.then(() => overlay.remove());
         if (onClose) onClose(confirmed);
     };
 

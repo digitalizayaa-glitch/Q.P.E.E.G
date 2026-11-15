@@ -110,7 +110,7 @@ function clearFrame(el) {
 
 function playFrames(el, from, to, ms, easing) {
     const anim = el.animate([frameStyle(from), frameStyle(to)], { duration: ms, easing, fill: "forwards" });
-    return anim.finished.then(() => anim.cancel()).catch(() => {});
+    return anim.settled.then(() => anim.cancel());
 }
 
 /* Completa el cambio: sale la pantalla actual, se actualiza el contenido y entra la nueva */
