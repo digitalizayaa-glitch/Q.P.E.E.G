@@ -5,6 +5,8 @@ Variables opcionales: CHROME=/ruta/a/chrome  PORT=8804  SHOTS=carpeta
 """
 import json, os, subprocess, sys, time
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8804")
@@ -49,11 +51,11 @@ def main():
             r["muestra_version"] = pg.locator("#versionBtn").inner_text() == f"Versión {version}"
             r["aviso_al_actualizar"] = dialog(pg) and pg.evaluate("notesVersion()") in pg.locator(".dialog-title").inner_text()
             if SHOTS: pg.screenshot(path=f"{SHOTS}/novedades_aviso.png")
-            pg.locator(".dialog-btn", has_text="Entendido").click(); pg.wait_for_timeout(500)
+            pg.locator(".dialog-btn", has_text="Entendido").click(); navegador.quieto(pg)
             if SHOTS: pg.screenshot(path=f"{SHOTS}/novedades_inicio.png")
             pg.reload(); pg.wait_for_timeout(1300)
             r["solo_una_vez"] = not dialog(pg)
-            pg.locator("#versionBtn").click(); pg.wait_for_timeout(500)
+            pg.locator("#versionBtn").click(); navegador.quieto(pg)
             r["tocar_version_lo_muestra"] = dialog(pg)
             ctx.close()
 
@@ -68,11 +70,11 @@ def main():
             r["acuerdos_primera_vez"] = form.count() == 1 and "Importante" in form.locator(".picker-title").inner_text() and not dialog(pg)
             ok = form.locator(".dialog-btn.accept")
             r["acuerdos_sin_cerrar"] = ok.is_disabled() and not form.locator(".picker-close").is_visible()
-            pg.keyboard.press("Escape"); pg.mouse.click(5, 5); pg.wait_for_timeout(400)
+            pg.keyboard.press("Escape"); pg.mouse.click(5, 5); navegador.quieto(pg)
             r["acuerdos_no_se_escapa"] = pg.locator(".agree-sheet").count() == 1
             if SHOTS: pg.screenshot(path=f"{SHOTS}/acuerdos.png")
             checks = form.locator(".agree-check")
-            checks.nth(1).click(); checks.nth(2).click(); pg.wait_for_timeout(200)
+            checks.nth(1).click(); checks.nth(2).click(); navegador.quieto(pg)
             r["acuerdos_opcional"] = not ok.is_disabled() and checks.nth(0).get_attribute("aria-checked") == "false"
             ok.click(); pg.wait_for_timeout(1200)
             c = pg.evaluate("JSON.parse(localStorage.getItem('qpeeg_consent'))")
@@ -80,10 +82,10 @@ def main():
             r["novedades_despues"] = dialog(pg)                      # quien ya usaba la app ve después las novedades
             pg.reload(); pg.wait_for_timeout(1300)
             r["acuerdos_una_vez"] = pg.locator(".agree-sheet").count() == 0
-            pg.evaluate("openSettings()"); pg.wait_for_timeout(500)
-            pg.locator(".dialog-btn", has_text="Mis acuerdos").click(); pg.wait_for_timeout(500)
+            pg.evaluate("openSettings()"); navegador.quieto(pg)
+            pg.locator(".dialog-btn", has_text="Mis acuerdos").click(); navegador.quieto(pg)
             pg.locator(".agree-sheet .agree-check").nth(0).click()
-            pg.locator(".agree-sheet .dialog-btn.accept", has_text="Guardar").click(); pg.wait_for_timeout(500)
+            pg.locator(".agree-sheet .dialog-btn.accept", has_text="Guardar").click(); navegador.quieto(pg)
             r["compartir_desde_ajustes"] = pg.evaluate("getConsent().share") is True and \
                 "Compartes" in pg.locator(".settings-sheet").inner_text()
             ctx.close()

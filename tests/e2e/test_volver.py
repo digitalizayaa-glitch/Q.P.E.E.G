@@ -39,14 +39,14 @@ def main():
                                 "if(!localStorage.getItem('qpeeg_state_v1'))localStorage.setItem('qpeeg_state_v1',%s)" % (VER, json.dumps(json.dumps(STATE))))
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
             pg.set_default_timeout(6000)
-            pg.goto(URL); pg.wait_for_timeout(900)
-            pg.evaluate("enterApp(false)"); pg.wait_for_timeout(400)
+            pg.goto(URL); navegador.quieto(pg)
+            pg.evaluate("enterApp(false)"); navegador.quieto(pg)
 
             # Semana: casita normal, sin ✓
             r["semana_casita"] = mode(pg) == "home" and not check_shown(pg)
 
             # Entreno del día: flecha de volver y ✓ a la derecha
-            pg.locator(".split-card", has_text="Push").click(); pg.wait_for_timeout(700)
+            pg.locator(".split-card", has_text="Push").click(); navegador.quieto(pg)
             r["entreno_flecha"] = section(pg) == "workout" and mode(pg) == "back" and pg.get_attribute("#homeBtn", "aria-label") == "Volver"
             r["entreno_check"] = check_shown(pg)
             r["titulo_sin_flecha_de_texto"] = "←" not in pg.inner_text("#weekDate")
@@ -71,30 +71,30 @@ def main():
                 bb = loc.bounding_box(); x, y = bb["x"] + bb["width"] / 2, bb["y"] + bb["height"] / 2
                 pg.mouse.move(x, y); pg.mouse.down()
                 for i in range(1, 9): pg.mouse.move(x, y + dy * i / 8)
-                pg.mouse.up(); pg.wait_for_timeout(300)
-            pg.wait_for_timeout(500)
+                pg.mouse.up(); navegador.quieto(pg)
+            navegador.quieto(pg)
             warmed = lambda: box.evaluate("e => e.classList.contains('value-armed')")
             r["entreno_bloqueado"] = not box.evaluate("e => e.classList.contains('value-free')")
             drag(box, -120)
-            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); pg.wait_for_timeout(200)
+            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); navegador.quieto(pg)
             r["entreno_bloqueado_no_cambia"] = reps() == 0
-            box.click(); pg.wait_for_timeout(250)
+            box.click(); navegador.quieto(pg)
             r["entreno_un_toque_activa"] = warmed() and pg.locator(".stepper-overlay, .picker-overlay").count() == 0
             drag(box, -120)
-            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); pg.wait_for_timeout(200)
+            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); navegador.quieto(pg)
             r["entreno_activo_se_desliza_y_deja_de_latir"] = reps() > 0 and not warmed()
-            box.click(); pg.wait_for_timeout(200); box.click(); pg.wait_for_timeout(500)
+            box.click(); navegador.quieto(pg); box.click(); navegador.quieto(pg)
             r["entreno_dos_toques_abren"] = pg.locator(".picker-overlay, .stepper-overlay").count() > 0
             shot(pg, "volver_4_cuadro")
-            pg.keyboard.press("Escape"); pg.wait_for_timeout(400)
-            if pg.locator(".picker-overlay, .stepper-overlay").count(): pg.locator(".picker-close").first.click(); pg.wait_for_timeout(400)
+            pg.keyboard.press("Escape"); navegador.quieto(pg)
+            if pg.locator(".picker-overlay, .stepper-overlay").count(): pg.locator(".picker-close").first.click(); navegador.quieto(pg)
             pg.evaluate("delete state.logs.r1[getWorkoutDateKey()].exercises.e0; saveState()")
             # Todo el cuadro cuenta: tocar el número romano activa la serie y late el cuadro del número
             label = pg.locator(".workout-track .wb-card").first.locator(".wb-serie .serie-label").first
-            label.click(); pg.wait_for_timeout(250)
+            label.click(); navegador.quieto(pg)
             r["letras_activan_el_cuadro"] = warmed()
             drag(label, -120)
-            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); pg.wait_for_timeout(200)
+            pg.evaluate("setWorkoutOffset(0, false); workoutPage = 0"); navegador.quieto(pg)
             r["desde_las_letras_arriba_sube"] = reps() > 0
             pg.evaluate("delete state.logs.r1[getWorkoutDateKey()].exercises.e0; saveState()")
 
@@ -102,15 +102,15 @@ def main():
             pg.evaluate("""() => { const { sheet } = openSheet('test-free', 'Prueba');
                 const v = document.createElement('div'); v.className = 'sport-value'; v.id = 'fv'; v.textContent = '0'; window.__fv = 0;
                 sheet.appendChild(v); attachValueSwipe(v, d => { window.__fv += d; }, () => { window.__ftap = true; }); }""")
-            pg.wait_for_timeout(600)
+            navegador.quieto(pg)
             fv = pg.locator("#fv")
             r["ventana_que_cabe_libre"] = fv.evaluate("e => e.classList.contains('value-free')")
             drag(fv, -120)
             r["libre_se_desliza_directo"] = pg.evaluate("window.__fv") > 0
-            fv.click(); pg.wait_for_timeout(300)
+            fv.click(); navegador.quieto(pg)
             r["libre_un_toque_abre"] = pg.evaluate("!!window.__ftap")
-            pg.keyboard.press("Escape"); pg.wait_for_timeout(400)
-            if pg.locator(".picker-overlay").count(): pg.locator(".picker-close").first.click(); pg.wait_for_timeout(400)
+            pg.keyboard.press("Escape"); navegador.quieto(pg)
+            if pg.locator(".picker-overlay").count(): pg.locator(".picker-close").first.click(); navegador.quieto(pg)
 
             # En una ventana emergente alta que se desplaza: bloqueados hasta un toque, laten suave, al soltar dejan de latir
             pg.evaluate("""() => {
@@ -121,55 +121,55 @@ def main():
                 wrap.append(v, filler); sheet.appendChild(wrap);
                 attachValueSwipe(v, d => { window.__tv += d; v.textContent = window.__tv; }, () => { window.__tapped = true; });
             }""")
-            pg.wait_for_timeout(600)
+            navegador.quieto(pg)
             tv = pg.locator("#tv")
             val = lambda: pg.evaluate("window.__tv")
             armed = lambda: tv.evaluate("e => e.classList.contains('value-armed')")
             r["alta_bloqueada"] = not tv.evaluate("e => e.classList.contains('value-free')")
             drag(tv, -120)
             r["bloqueado_no_cambia"] = val() == 0 and not armed()
-            tv.click(); pg.wait_for_timeout(250)
+            tv.click(); navegador.quieto(pg)
             r["un_toque_activa_y_late"] = armed() and tv.evaluate("e => getComputedStyle(e).animationName") == "value-armed-pulse"
             r["sin_cuadro_al_primer_toque"] = not pg.evaluate("!!window.__tapped")
             drag(tv, -120)
             r["activo_se_desliza"] = val() > 0
             r["al_soltar_deja_de_latir"] = not armed()
-            tv.click(); pg.wait_for_timeout(200); tv.click(); pg.wait_for_timeout(300)
+            tv.click(); navegador.quieto(pg); tv.click(); navegador.quieto(pg)
             r["dos_toques_abren_el_cuadro"] = pg.evaluate("!!window.__tapped")
             tv.click(); pg.wait_for_timeout(3300)
             r["3_segundos_se_bloquea"] = not armed()
-            pg.keyboard.press("Escape"); pg.wait_for_timeout(400)
-            if pg.locator(".picker-overlay").count(): pg.locator(".picker-close").first.click(); pg.wait_for_timeout(400)
+            pg.keyboard.press("Escape"); navegador.quieto(pg)
+            if pg.locator(".picker-overlay").count(): pg.locator(".picker-close").first.click(); navegador.quieto(pg)
 
             # Un ejercicio en verde y los demás sin marcar: rojo; con ✓: verde
             pg.evaluate("state.logs.r1[getWorkoutDateKey()].exercises.e0 = { kg: 40, reps: [10, 10, 10], extra: 0 }; saveState()")
             r["sin_check_rojo"] = status(pg) == "red"
-            pg.click("#dayDoneBtn"); pg.wait_for_timeout(300)
+            pg.click("#dayDoneBtn"); navegador.quieto(pg)
             r["con_check_verde"] = status(pg) == "green" and pg.evaluate("document.getElementById('dayDoneBtn').classList.contains('on')")
             shot(pg, "volver_2_check")
-            pg.reload(); pg.wait_for_timeout(800)
+            pg.reload(); navegador.quieto(pg)
             r["check_se_guarda"] = pg.evaluate("state.logs.r1[getWorkoutDateKey()].done === true") and status(pg) == "green"
-            pg.evaluate("enterApp(false)"); pg.wait_for_timeout(400)
-            pg.locator(".split-card", has_text="Push").click(); pg.wait_for_timeout(700)
+            pg.evaluate("enterApp(false)"); navegador.quieto(pg)
+            pg.locator(".split-card", has_text="Push").click(); navegador.quieto(pg)
             r["check_encendido_al_volver"] = pg.evaluate("document.getElementById('dayDoneBtn').classList.contains('on')")
-            pg.click("#dayDoneBtn"); pg.wait_for_timeout(300)
+            pg.click("#dayDoneBtn"); navegador.quieto(pg)
             r["check_se_quita"] = status(pg) == "red" and pg.evaluate("!('done' in state.logs.r1[getWorkoutDateKey()])")
 
             # La flecha vuelve a Semana y la casita regresa
-            pg.click("#homeBtn"); pg.wait_for_timeout(700)
+            pg.click("#homeBtn"); navegador.quieto(pg)
             r["flecha_vuelve_a_semana"] = section(pg) == "week" and mode(pg) == "home" and not check_shown(pg)
 
             # Rutinas → días de una rutina (editor): flecha; volver → lista de rutinas con casita
-            pg.evaluate("showSection('exercises')"); pg.wait_for_timeout(400)
+            pg.evaluate("showSection('exercises')"); navegador.quieto(pg)
             r["rutinas_casita"] = mode(pg) == "home"
-            pg.evaluate("routineNav = { level: 'days', routineId: 'r1', dayId: null }; renderRoutinesTab()"); pg.wait_for_timeout(400)
+            pg.evaluate("routineNav = { level: 'days', routineId: 'r1', dayId: null }; renderRoutinesTab()"); navegador.quieto(pg)
             r["editor_flecha"] = mode(pg) == "back" and not check_shown(pg)
             shot(pg, "volver_3_editor")
-            pg.click("#homeBtn"); pg.wait_for_timeout(700)
+            pg.click("#homeBtn"); navegador.quieto(pg)
             r["editor_vuelve"] = section(pg) == "exercises" and pg.evaluate("routineNav.level") == "root" and mode(pg) == "home"
 
             # Casita en una sección principal: sale a la pantalla de inicio
-            pg.click("#homeBtn"); pg.wait_for_timeout(900)
+            pg.click("#homeBtn"); navegador.quieto(pg)
             r["casita_va_al_inicio"] = pg.evaluate("getComputedStyle(document.getElementById('landing')).display") != "none"
             b.close()
     finally:

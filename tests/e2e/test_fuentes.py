@@ -44,10 +44,10 @@ def main():
             for _ in range(8):
                 ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
                 pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
-                pg.add_init_script(BASE); pg.goto(URL); pg.wait_for_timeout(700)
+                pg.add_init_script(BASE); pg.goto(URL); navegador.quieto(pg)
                 f = font(pg); seen.add(f)
                 if len(seen) == 1:
-                    pg.reload(); pg.wait_for_timeout(700)
+                    pg.reload(); navegador.quieto(pg)
                     r["misma_al_reabrir"] = font(pg) == f
                     r["globo_visible"] = tip_visible(pg)
                     gear = pg.locator("#settingsBtn").bounding_box(); tip = pg.locator("#settingsTip").bounding_box()
@@ -60,13 +60,13 @@ def main():
 
             # 2) Tuerca: el globo se va, sale el selector con las 4 y cada una se aplica sin mover renglones
             ctx, pg = first
-            pg.click("#settingsBtn"); pg.wait_for_timeout(400)
+            pg.click("#settingsBtn"); navegador.quieto(pg)
             r["globo_se_va"] = not tip_visible(pg)
             btns = pg.locator(".settings-font .seg-btn")
             r["selector_4_fuentes"] = btns.count() == 4 and btns.all_inner_texts() == ["Atkinson", "Grotesk", "Saira", "Arial"]
             heights, loaded = {}, {}
             for i, name in enumerate(["atkinson", "grotesk", "saira", "arial"]):
-                btns.nth(i).click(); pg.wait_for_timeout(250)
+                btns.nth(i).click(); navegador.quieto(pg)
                 pg.evaluate("document.fonts.ready")
                 heights[name] = pg.evaluate(LAYOUT)
                 loaded[name] = font(pg) == name
@@ -74,8 +74,8 @@ def main():
             r["cada_fuente_se_aplica"] = all(loaded.values())
             r["mismos_renglones"] = max(heights.values()) - min(heights.values()) < 1
             r["alturas"] = heights
-            btns.nth(1).click(); pg.wait_for_timeout(200)
-            pg.reload(); pg.wait_for_timeout(700)
+            btns.nth(1).click(); navegador.quieto(pg)
+            pg.reload(); navegador.quieto(pg)
             r["guarda_la_fuente"] = font(pg) == "grotesk"
             r["globo_no_vuelve"] = not tip_visible(pg)
             ctx.close()
@@ -84,7 +84,7 @@ def main():
             ctx = b.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
             pg.add_init_script(BASE + "if(!localStorage.getItem('qpeeg_state_v1'))localStorage.setItem('qpeeg_state_v1',%s);" % json.dumps(json.dumps(OLD_DATA)))
-            pg.goto(URL); pg.wait_for_timeout(700)
+            pg.goto(URL); navegador.quieto(pg)
             r["usuario_viejo_arial"] = font(pg) == "arial"
             r["usuario_viejo_ve_globo"] = tip_visible(pg)
             ctx.close()

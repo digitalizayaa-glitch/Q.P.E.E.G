@@ -5,6 +5,8 @@ Variables opcionales: CHROME=/ruta/a/chrome  PORT=8802
 """
 import json, os, re, subprocess, sys, time
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8802")
@@ -44,20 +46,20 @@ def main():
             pg.goto(URL); pg.wait_for_timeout(1200)
 
             # Recorrido por las secciones
-            pg.evaluate("enterApp(false)"); pg.wait_for_timeout(500)
+            pg.evaluate("enterApp(false)"); navegador.quieto(pg)
             for sec in ["week", "exercises", "history"]:
-                pg.evaluate(f"showSection('{sec}')"); pg.wait_for_timeout(500)
-            pg.evaluate("startWorkoutDay('r1','d1')"); pg.wait_for_timeout(800)
+                pg.evaluate(f"showSection('{sec}')"); navegador.quieto(pg)
+            pg.evaluate("startWorkoutDay('r1','d1')"); navegador.quieto(pg)
             r["tarjetas_entreno"] = pg.evaluate("document.querySelectorAll('.workout-track > *').length") >= 3
             r["figuras_svg"] = pg.evaluate("document.querySelectorAll('.workout-track svg').length") >= 3
 
             # Abrir y cerrar una ventana emergente (animación de arriba hacia abajo y recogida)
-            pg.evaluate("openSettings()"); pg.wait_for_timeout(500)
+            pg.evaluate("openSettings()"); navegador.quieto(pg)
             r["ajustes_abre"] = pg.evaluate("!!document.querySelector('.picker-overlay')")
-            pg.keyboard.press("Escape"); pg.wait_for_timeout(600)
+            pg.keyboard.press("Escape"); navegador.quieto(pg)
 
             # Guardar un dato y comprobar que sobrevive a recargar
-            pg.evaluate("state.achievements.push({ t: 'Prueba e2e', done: false }); saveState()"); pg.wait_for_timeout(300)
+            pg.evaluate("state.achievements.push({ t: 'Prueba e2e', done: false }); saveState()"); navegador.quieto(pg)
             pg.reload(); pg.wait_for_timeout(1000)
             r["persiste"] = pg.evaluate("state.achievements.some(a => a.t === 'Prueba e2e')")
 

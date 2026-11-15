@@ -6,6 +6,8 @@ Variables opcionales: CHROME=/ruta/a/chrome  PORT=8803  SHOTS=carpeta (capturas)
 """
 import json, os, re, subprocess, sys, time
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8803")
@@ -72,8 +74,8 @@ def phone(browser, data, errors):
     pg.on("pageerror", lambda e: errors.append(str(e)))
     if data:
         pg.add_init_script("if (!localStorage.getItem('qpeeg_state_v1')) localStorage.setItem('qpeeg_state_v1', %s)" % json.dumps(json.dumps(data)))
-    pg.goto(URL); pg.wait_for_timeout(900)
-    pg.evaluate("enterApp(false)"); pg.wait_for_timeout(300)
+    pg.goto(URL); navegador.quieto(pg)
+    pg.evaluate("enterApp(false)"); navegador.quieto(pg)
     return ctx, pg
 
 
@@ -82,7 +84,7 @@ def dialog_text(pg):
 
 
 def click(pg, text):
-    pg.locator("button", has_text=text).last.click(); pg.wait_for_timeout(450)
+    pg.locator("button", has_text=text).last.click(); navegador.quieto(pg)
 
 
 def main():
@@ -100,48 +102,48 @@ def main():
 
             # Teléfono A: tiene datos y crea la cuenta
             ctxA, A = phone(b, {"routines": [routine("r1", "Push")], "logs": {}, "food": {"log": {}}, "achievements": []}, errors)
-            A.evaluate("openSettings()"); A.wait_for_timeout(400)
+            A.evaluate("openSettings()"); navegador.quieto(A)
             r["seccion_visible"] = A.locator(".settings-label", has_text="Cuenta").count() == 1
             if SHOTS: A.screenshot(path=f"{SHOTS}/cuenta_1_sin_cuenta.png")
             click(A, "Crear mi código")
             code = re.search(r"[2-9A-Z]{4}(?:-[2-9A-Z]{4}){4}", dialog_text(A)).group(0)
             if SHOTS: A.screenshot(path=f"{SHOTS}/cuenta_2_codigo.png")
-            click(A, "Listo"); A.wait_for_timeout(800)
+            click(A, "Listo"); navegador.quieto(A)
             r["a_subio"] = len(vaults) == 1
             r["cifrado"] = bool(vaults) and "Push" not in list(vaults.values())[0]["blob"]
             if SHOTS: A.screenshot(path=f"{SHOTS}/cuenta_3_con_cuenta.png")
 
             # Teléfono B: nuevo, entra con el código de cuenta
             ctxB, B = phone(b, None, errors)
-            B.evaluate("openSettings()"); B.wait_for_timeout(400)
+            B.evaluate("openSettings()"); navegador.quieto(B)
             click(B, "Entrar con un código")
-            B.fill(".dialog-input", code.lower().replace("-", " ")); click(B, "Seguir"); B.wait_for_timeout(1200)
+            B.fill(".dialog-input", code.lower().replace("-", " ")); click(B, "Seguir"); navegador.quieto(B, 0, 8000)
             r["b_vinculado"] = "ya usa esa cuenta" in dialog_text(B)
             click(B, "Entendido")
             r["b_recibe"] = B.evaluate("state.routines.map(x => x.name).join()") == "Push"
 
             # A cambia algo → B lo recibe
-            A.keyboard.press("Escape"); A.wait_for_timeout(300)
-            A.evaluate("state.achievements.push({ t: 'Correr 10 km', done: false }); saveState(); syncNow()"); A.wait_for_timeout(800)
-            B.keyboard.press("Escape"); B.wait_for_timeout(300)
-            B.evaluate("syncNow()"); B.wait_for_timeout(800)
+            A.keyboard.press("Escape"); navegador.quieto(A)
+            A.evaluate("state.achievements.push({ t: 'Correr 10 km', done: false }); saveState(); syncNow()"); navegador.quieto(A)
+            B.keyboard.press("Escape"); navegador.quieto(B)
+            B.evaluate("syncNow()"); navegador.quieto(B)
             r["b_recibe_cambio"] = B.evaluate("state.achievements.some(a => a.t === 'Correr 10 km')")
             r["b_pantalla_refrescada"] = "Correr 10 km" in B.locator("#achievementsList").inner_text()
 
             # Teléfono C con sus propios datos: entra con código temporal y une
-            A.evaluate("openSettings()"); A.wait_for_timeout(400)
+            A.evaluate("openSettings()"); navegador.quieto(A)
             click(A, "Usar en otro teléfono")
             pair = re.search(r"\b[2-9A-Z]{4}-[2-9A-Z]{4}\b", dialog_text(A)).group(0)
-            click(A, "Listo"); A.keyboard.press("Escape"); A.wait_for_timeout(300)
+            click(A, "Listo"); A.keyboard.press("Escape"); navegador.quieto(A)
             ctxC, C = phone(b, {"routines": [routine("r9", "Pierna")], "logs": {}, "food": {"log": {}}, "achievements": []}, errors)
-            C.evaluate("openSettings()"); C.wait_for_timeout(400)
-            click(C, "Entrar con un código"); C.fill(".dialog-input", pair); click(C, "Seguir"); C.wait_for_timeout(900)
+            C.evaluate("openSettings()"); navegador.quieto(C)
+            click(C, "Entrar con un código"); C.fill(".dialog-input", pair); click(C, "Seguir"); navegador.quieto(C)
             r["c_avisa_datos_sin_cuenta"] = "datos sin cuenta" in C.locator(".dialog-overlay .dialog-title").first.inner_text()
             r["sin_unir"] = C.locator("button", has_text="Unir").count() == 0
             if SHOTS: C.screenshot(path=f"{SHOTS}/cuenta_4_reemplazar.png")
-            click(C, "Entrar y reemplazar"); C.wait_for_timeout(1200); click(C, "Entendido")
+            click(C, "Entrar y reemplazar"); navegador.quieto(C, 0, 8000); click(C, "Entendido")
             r["c_reemplaza"] = C.evaluate("state.routines.map(x => x.name)") == ["Push"]
-            A.evaluate("syncNow()"); A.wait_for_timeout(800)
+            A.evaluate("syncNow()"); navegador.quieto(A)
             r["a_no_recibe_mezcla"] = A.evaluate("state.routines.map(x => x.name)") == ["Push"]
             r["temporal_un_uso"] = len(pairs) == 0
 
@@ -149,77 +151,81 @@ def main():
             ctxB.set_offline(True)
             B.evaluate("state.routines.push({ id: 'r5', name: 'Brazo', days: [] }); saveState()")
             r["b_offline"] = B.evaluate("syncNow()") == "offline"
-            ctxB.set_offline(False); B.wait_for_timeout(7000)
-            A.evaluate("syncNow()"); A.wait_for_timeout(800)
+            ctxB.set_offline(False)
+            # B sube solo al volver la red (unos segundos); A revisa hasta verlo, máx. ~12 s
+            for _ in range(48):
+                A.evaluate("syncNow()"); navegador.quieto(A)
+                if "Brazo" in A.evaluate("state.routines.map(x => x.name).join()"): break
+                A.wait_for_timeout(200)
             r["sube_al_volver_red"] = "Brazo" in A.evaluate("state.routines.map(x => x.name).join()")
 
             # Mientras se entrena no se cambian los datos; se aplican al salir
-            C.keyboard.press("Escape"); C.wait_for_timeout(300)
+            C.keyboard.press("Escape"); navegador.quieto(C)
             C.evaluate("state.routines[0].days.push({ id: 'd1', name: 'Día', exercises: [{ id: 'e1', name: 'Curl', kg: 10, unit: 'kg', series: [{ min: 8, max: 12 }] }] }); saveState(); syncNow()")
-            C.wait_for_timeout(800)
+            navegador.quieto(C)
             rid = C.evaluate("state.routines[0].id")
-            C.evaluate(f"startWorkoutDay('{rid}', 'd1')"); C.wait_for_timeout(600)
-            A.evaluate("syncNow()"); A.wait_for_timeout(600)
-            A.evaluate("state.achievements.push({ t: 'Durante entreno', done: false }); saveState(); syncNow()"); A.wait_for_timeout(800)
+            C.evaluate(f"startWorkoutDay('{rid}', 'd1')"); navegador.quieto(C)
+            A.evaluate("syncNow()"); navegador.quieto(A)
+            A.evaluate("state.achievements.push({ t: 'Durante entreno', done: false }); saveState(); syncNow()"); navegador.quieto(A)
             r["entrenando_espera"] = C.evaluate("syncNow()") == "busy" and not C.evaluate("state.achievements.some(a => a.t === 'Durante entreno')")
-            C.evaluate("showSection('week')"); C.wait_for_timeout(300)
+            C.evaluate("showSection('week')"); navegador.quieto(C)
             r["aplica_al_salir"] = C.evaluate("syncNow()") == "ok" and C.evaluate("state.achievements.some(a => a.t === 'Durante entreno')")
 
             # Los tres terminan iguales
-            for pg in (A, B, C, A, B): pg.evaluate("syncNow()"); pg.wait_for_timeout(500)
+            for pg in (A, B, C, A, B): pg.evaluate("syncNow()"); navegador.quieto(pg)
             snap = lambda pg: pg.evaluate("JSON.stringify(syncableState())")
             r["todos_iguales"] = snap(A) == snap(B) == snap(C)
 
             # B cambia a otra cuenta (D) y vuelve a la suya: nada se mezcla
             ctxD, D = phone(b, {"routines": [routine("r7", "Cuenta D")], "logs": {}, "food": {"log": {}}, "achievements": []}, errors)
-            D.evaluate("openSettings()"); D.wait_for_timeout(400)
+            D.evaluate("openSettings()"); navegador.quieto(D)
             click(D, "Crear mi código")
             code_d = re.search(r"[2-9A-Z]{4}(?:-[2-9A-Z]{4}){4}", dialog_text(D)).group(0)
-            click(D, "Listo"); D.wait_for_timeout(800)
-            B.evaluate("openSettings()"); B.wait_for_timeout(400)
-            click(B, "Entrar con otro código"); B.fill(".dialog-input", code_d); click(B, "Seguir"); B.wait_for_timeout(1200)
+            click(D, "Listo"); navegador.quieto(D)
+            B.evaluate("openSettings()"); navegador.quieto(B)
+            click(B, "Entrar con otro código"); B.fill(".dialog-input", code_d); click(B, "Seguir"); navegador.quieto(B, 0, 8000)
             r["cambio_muestra_mi_codigo"] = code in dialog_text(B)
             if SHOTS: B.screenshot(path=f"{SHOTS}/cuenta_5_cambiar.png")
-            click(B, "Cambiar de cuenta"); B.wait_for_timeout(1200); click(B, "Entendido")
+            click(B, "Cambiar de cuenta"); navegador.quieto(B, 0, 8000); click(B, "Entendido")
             r["b_en_cuenta_d"] = B.evaluate("state.routines.map(x => x.name)") == ["Cuenta D"]
-            B.evaluate("openSettings()"); B.wait_for_timeout(400)
-            click(B, "Entrar con otro código"); B.fill(".dialog-input", code); click(B, "Seguir"); B.wait_for_timeout(1200)
-            click(B, "Cambiar de cuenta"); B.wait_for_timeout(1200); click(B, "Entendido")
+            B.evaluate("openSettings()"); navegador.quieto(B)
+            click(B, "Entrar con otro código"); B.fill(".dialog-input", code); click(B, "Seguir"); navegador.quieto(B, 0, 8000)
+            click(B, "Cambiar de cuenta"); navegador.quieto(B, 0, 8000); click(B, "Entendido")
             r["b_vuelve_a_la_suya"] = "Push" in B.evaluate("state.routines.map(x => x.name).join()") and "Cuenta D" not in B.evaluate("state.routines.map(x => x.name).join()")
             ctxD.close()
 
             # Versiones anteriores: A borra una rutina y vuelve a una versión de antes
             names_before = A.evaluate("state.routines.map(x => x.name).join()")
-            A.evaluate("state.routines = state.routines.filter(x => x.name !== 'Push'); saveState(); syncNow()"); A.wait_for_timeout(900)
-            A.evaluate("openSettings()"); A.wait_for_timeout(400)
-            click(A, "Versiones anteriores"); A.wait_for_timeout(500)
+            A.evaluate("state.routines = state.routines.filter(x => x.name !== 'Push'); saveState(); syncNow()"); navegador.quieto(A)
+            A.evaluate("openSettings()"); navegador.quieto(A)
+            click(A, "Versiones anteriores"); navegador.quieto(A)
             r["versiones_lista"] = A.locator(".version-btn").count() >= 1
             if SHOTS: A.screenshot(path=f"{SHOTS}/cuenta_6_versiones.png")
-            A.locator(".version-btn").first.click(); A.wait_for_timeout(400)
-            click(A, "Volver a esta versión"); A.wait_for_timeout(1500); click(A, "Entendido")
+            A.locator(".version-btn").first.click(); navegador.quieto(A)
+            click(A, "Volver a esta versión"); navegador.quieto(A, 0, 8000); click(A, "Entendido")
             r["version_restaurada"] = A.evaluate("state.routines.map(x => x.name).join()") == names_before
-            B.evaluate("syncNow()"); B.wait_for_timeout(800)
+            B.evaluate("syncNow()"); navegador.quieto(B)
             r["version_llega_a_b"] = "Push" in B.evaluate("state.routines.map(x => x.name).join()")
 
             # Cambiar el código: A recibe uno nuevo; B (código viejo) deja de sincronizar y entra con el nuevo
-            A.evaluate("openSettings()"); A.wait_for_timeout(400)
-            click(A, "Cambiar mi código"); click(A, "Cambiar código"); A.wait_for_timeout(1500)
+            A.evaluate("openSettings()"); navegador.quieto(A)
+            click(A, "Cambiar mi código"); click(A, "Cambiar código"); navegador.quieto(A, 0, 8000)
             new_code = re.search(r"[2-9A-Z]{4}(?:-[2-9A-Z]{4}){4}", dialog_text(A)).group(0)
             r["codigo_nuevo"] = new_code != code
             click(A, "Listo")
-            B.keyboard.press("Escape"); B.wait_for_timeout(300)
+            B.keyboard.press("Escape"); navegador.quieto(B)
             r["b_codigo_viejo"] = B.evaluate("syncNow()") in ("gone", "idle")
-            B.wait_for_timeout(400); B.evaluate("openSettings()"); B.wait_for_timeout(500)
+            navegador.quieto(B); B.evaluate("openSettings()"); navegador.quieto(B)
             r["b_avisa_cambio"] = "cambió de código" in B.locator(".settings-account").inner_text()
             if SHOTS: B.screenshot(path=f"{SHOTS}/cuenta_7_codigo_viejo.png")
-            click(B, "Entrar con un código"); B.fill(".dialog-input", new_code); click(B, "Seguir"); B.wait_for_timeout(1000)
-            click(B, "Entrar"); B.wait_for_timeout(1200); click(B, "Entendido")
+            click(B, "Entrar con un código"); B.fill(".dialog-input", new_code); click(B, "Seguir"); navegador.quieto(B, 0, 8000)
+            click(B, "Entrar"); navegador.quieto(B, 0, 8000); click(B, "Entendido")
             r["b_con_codigo_nuevo"] = snap(A) == snap(B)
             for c in (ctxA, ctxB, ctxC): c.close()
 
             # Registro de errores: un fallo se envía sin textos del usuario
             ctxE, E = phone(b, None, errors)
-            E.evaluate("""setTimeout(() => { throw new Error('No se pudo guardar "Press banca" 75 kg id 1794349511116') }, 0)"""); E.wait_for_timeout(1500)
+            E.evaluate("""setTimeout(() => { throw new Error('No se pudo guardar "Press banca" 75 kg id 1794349511116') }, 0)"""); navegador.quieto(E, 0, 8000)
             errors[:] = [e for e in errors if "No se pudo guardar" not in e]
             sent = app_errors[-1] if app_errors else {}
             r["error_enviado"] = "No se pudo guardar" in sent.get("p_msg", ""); print("ENVIADO", json.dumps(sent, ensure_ascii=False)[:400])
@@ -231,7 +237,7 @@ def main():
             ctx = b.new_context(service_workers="block")
             ctx.route("**/scripts/core/config.js", lambda r: r.fulfill(content_type="text/javascript", body='const QPEEG_SYNC = { url: "", key: "" };'))
             pg = ctx.new_page()
-            pg.goto(URL); pg.wait_for_timeout(600); pg.evaluate("enterApp(false); openSettings()"); pg.wait_for_timeout(400)
+            pg.goto(URL); navegador.quieto(pg); pg.evaluate("enterApp(false); openSettings()"); navegador.quieto(pg)
             r["oculta_sin_servidor"] = pg.locator(".settings-label", has_text="Cuenta").count() == 0
             ctx.close(); b.close()
     finally:

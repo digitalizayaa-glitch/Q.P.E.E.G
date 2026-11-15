@@ -6,6 +6,8 @@ Variables opcionales: CHROME=/ruta/a/chrome  PORT=8805  SHOTS=carpeta
 import json, os, re, subprocess, sys, time
 from datetime import date, timedelta
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8805")
@@ -45,102 +47,102 @@ def main():
             ctx.add_init_script("localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false}));localStorage.setItem('qpeeg_install_seen','1');" "localStorage.setItem('qpeeg_seen_version','%s');"
                                 "if(!localStorage.getItem('qpeeg_state_v1'))localStorage.setItem('qpeeg_state_v1',%s)" % (VER, json.dumps(json.dumps(STATE))))
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
-            pg.goto(URL); pg.wait_for_timeout(900)
-            pg.evaluate("enterApp(false)"); pg.wait_for_timeout(400)
+            pg.goto(URL); navegador.quieto(pg)
+            pg.evaluate("enterApp(false)"); navegador.quieto(pg)
             if SHOTS: pg.screenshot(path=f"{SHOTS}/semana_tarjetas.png")
-            pg.evaluate("showSection('exercises')"); pg.wait_for_timeout(500)
+            pg.evaluate("showSection('exercises')"); navegador.quieto(pg)
             if SHOTS: pg.screenshot(path=f"{SHOTS}/rutinas_tarjetas.png")
             r["tarjetas_color_boton"] = pg.evaluate("getComputedStyle(document.querySelector('.day-card')).borderColor") == \
                 pg.evaluate("getComputedStyle(document.querySelector('.square-card.add-square')).borderColor")
 
-            pg.evaluate("showSection('food')"); pg.wait_for_timeout(500)
-            pg.locator(".food-add").click(); pg.wait_for_timeout(500)
+            pg.evaluate("showSection('food')"); navegador.quieto(pg)
+            pg.locator(".food-add").click(); navegador.quieto(pg)
             groups = pg.locator(".picker-group").all_inner_texts()
             r["frecuentes_arriba"] = bool(groups) and groups[0].lower() == "frecuentes"
             first = pg.locator(".picker-list > *").nth(1).inner_text()
             r["solo_arroz_frecuente"] = "Arroz blanco" in first and pg.locator(".picker-list > *").nth(2).inner_text().lower().startswith("harinas")
             if SHOTS: pg.screenshot(path=f"{SHOTS}/menu_frecuentes.png")
 
-            pg.locator(".picker-item", has_text="Arroz blanco").first.click(); pg.wait_for_timeout(500)
-            pg.locator(".stepper-overlay button", has_text="Agregar").click(); pg.wait_for_timeout(600)
+            pg.locator(".picker-item", has_text="Arroz blanco").first.click(); navegador.quieto(pg)
+            pg.locator(".stepper-overlay button", has_text="Agregar").click(); navegador.quieto(pg)
             r["menu_sigue_abierto"] = pg.locator(".picker-overlay:not(.stepper-overlay)").count() == 1
             r["arroz_marcado"] = pg.locator(".picker-item.picked", has_text="Arroz blanco").count() == 2   # en Frecuentes y en Harinas
             # Volver a tocar lo agregado: abre en la cantidad puesta y se corrige sin duplicar
-            pg.locator(".picker-item.picked", has_text="Arroz blanco").first.click(); pg.wait_for_timeout(500)
+            pg.locator(".picker-item.picked", has_text="Arroz blanco").first.click(); navegador.quieto(pg)
             r["reabre_en_cantidad"] = pg.locator(".stepper-overlay").inner_text().split("porci")[0].strip().endswith("1") and \
                 pg.locator(".stepper-overlay button", has_text="Guardar").count() == 1
-            pg.locator(".stepper-overlay .stepper-arrow, .stepper-overlay button").filter(has_text="▲").first.click(); pg.wait_for_timeout(200)
-            pg.locator(".stepper-overlay button", has_text="Guardar").click(); pg.wait_for_timeout(500)
+            pg.locator(".stepper-overlay .stepper-arrow, .stepper-overlay button").filter(has_text="▲").first.click(); navegador.quieto(pg)
+            pg.locator(".stepper-overlay button", has_text="Guardar").click(); navegador.quieto(pg)
             r["corrige_sin_duplicar"] = pg.evaluate("foodEntries().filter(e => e.n === 'Arroz blanco').map(e => e.p).join()") == "2"
-            pg.locator(".picker-item.picked", has_text="Arroz blanco").first.click(); pg.wait_for_timeout(400)
+            pg.locator(".picker-item.picked", has_text="Arroz blanco").first.click(); navegador.quieto(pg)
             r["reabre_en_2"] = "Guardar" in pg.locator(".stepper-overlay").inner_text()
-            pg.locator(".stepper-overlay button", has_text="Cancelar").click(); pg.wait_for_timeout(400)
+            pg.locator(".stepper-overlay button", has_text="Cancelar").click(); navegador.quieto(pg)
             # Filtros y lupa
-            pg.locator(".picker-filter", has_text="Frutas").click(); pg.wait_for_timeout(300)
+            pg.locator(".picker-filter", has_text="Frutas").click(); navegador.quieto(pg)
             r["filtro_frutas"] = [g.lower() for g in pg.locator(".picker-group").all_inner_texts()] == ["frutas"]
-            pg.locator(".picker-filter", has_text="Todos").click(); pg.wait_for_timeout(300)
-            pg.focus(".picker-search"); pg.keyboard.type("banano"); pg.keyboard.press("Enter"); pg.wait_for_timeout(200)
+            pg.locator(".picker-filter", has_text="Todos").click(); navegador.quieto(pg)
+            pg.focus(".picker-search"); pg.keyboard.type("banano"); pg.keyboard.press("Enter"); navegador.quieto(pg)
             r["enter_cierra_teclado"] = pg.evaluate("document.activeElement !== document.querySelector('.picker-search')")
-            pg.focus(".picker-search"); pg.locator(".picker-lens").click(); pg.wait_for_timeout(200)
+            pg.focus(".picker-search"); pg.locator(".picker-lens").click(); navegador.quieto(pg)
             r["lupa_cierra_teclado"] = pg.evaluate("document.activeElement !== document.querySelector('.picker-search')")
-            pg.fill(".picker-search", ""); pg.wait_for_timeout(200)
+            pg.fill(".picker-search", ""); navegador.quieto(pg)
             box = pg.locator(".picker-sheet").bounding_box()
             r["cuadro_mas_alto"] = box["y"] < 0.75 * (844 - 560) / 2 + 2 and 844 - (box["y"] + box["height"]) < 0.75 * (844 - 560) / 2 + 2
             if SHOTS: pg.screenshot(path=f"{SHOTS}/menu_filtros.png")
-            pg.fill(".picker-search", "pechuga"); pg.wait_for_timeout(300)
-            pg.locator(".picker-item", has_text="Pechuga").first.click(); pg.wait_for_timeout(500)
-            pg.locator(".stepper-overlay button", has_text="Cancelar").click(); pg.wait_for_timeout(500)
+            pg.fill(".picker-search", "pechuga"); navegador.quieto(pg)
+            pg.locator(".picker-item", has_text="Pechuga").first.click(); navegador.quieto(pg)
+            pg.locator(".stepper-overlay button", has_text="Cancelar").click(); navegador.quieto(pg)
             r["cancelar_no_marca"] = pg.locator(".picker-item.picked").count() == 0   # con el filtro solo se ve la pechuga
-            pg.locator(".picker-item", has_text="Pechuga").first.click(); pg.wait_for_timeout(500)
-            pg.locator(".stepper-overlay button", has_text="Agregar").click(); pg.wait_for_timeout(600)
-            pg.fill(".picker-search", ""); pg.wait_for_timeout(300)
+            pg.locator(".picker-item", has_text="Pechuga").first.click(); navegador.quieto(pg)
+            pg.locator(".stepper-overlay button", has_text="Agregar").click(); navegador.quieto(pg)
+            pg.fill(".picker-search", ""); navegador.quieto(pg)
             r["varias_marcadas"] = pg.locator(".picker-item.picked").count() == 3
             if SHOTS: pg.screenshot(path=f"{SHOTS}/menu_agregadas.png")
             r["guardadas"] = pg.evaluate("foodEntries().map(e => e.n).sort().join()") == "Arroz blanco,Pechuga de pollo"
-            pg.locator(".picker-close").click(); pg.wait_for_timeout(500)
+            pg.locator(".picker-close").click(); navegador.quieto(pg)
             r["resumen_actualizado"] = "/" in pg.locator(".food-macros").inner_text()
             r["cerrado"] = pg.locator(".picker-overlay").count() == 0
 
             # Comida rápida: pizza por slice, sin salir del menú
-            pg.locator(".food-add").click(); pg.wait_for_timeout(500)
-            pg.fill(".picker-search", "pepperoni"); pg.wait_for_timeout(300)
+            pg.locator(".food-add").click(); navegador.quieto(pg)
+            pg.fill(".picker-search", "pepperoni"); navegador.quieto(pg)
             r["catalogo_pizzas"] = pg.locator(".picker-group", has_text="Pizza Hut").count() == 1 and \
                 pg.locator(".picker-group", has_text="Papa John's").count() == 1 and pg.locator(".picker-group", has_text="Rey Pizza").count() == 1
             if SHOTS:
-                pg.fill(".picker-search", "jamón y queso"); pg.wait_for_timeout(300)
+                pg.fill(".picker-search", "jamón y queso"); navegador.quieto(pg)
                 pg.screenshot(path=f"{SHOTS}/menu_jamon_queso.png")
-                pg.fill(".picker-search", "pepperoni"); pg.wait_for_timeout(300)
+                pg.fill(".picker-search", "pepperoni"); navegador.quieto(pg)
             kcal0 = pg.evaluate("foodTotals(foodEntries()).kcal")
-            pg.locator(".picker-item", has_text="Pizza Hut · Pizza pepperoni mediana").first.click(); pg.wait_for_timeout(500)
+            pg.locator(".picker-item", has_text="Pizza Hut · Pizza pepperoni mediana").first.click(); navegador.quieto(pg)
             r["stepper_slices"] = "slice" in pg.locator(".stepper-overlay").inner_text()
             r["stepper_equivalencia"] = "harina" in pg.locator(".stepper-overlay").inner_text()
-            pg.locator(".stepper-overlay button[aria-label*='Subir'], .stepper-overlay .stepper-up").first.click(); pg.wait_for_timeout(200)
+            pg.locator(".stepper-overlay button[aria-label*='Subir'], .stepper-overlay .stepper-up").first.click(); navegador.quieto(pg)
             r["flecha_de_uno"] = "2" in pg.locator(".stepper-value, .stepper-overlay").first.inner_text().split("slices")[0]
             if SHOTS: pg.screenshot(path=f"{SHOTS}/stepper_pizza.png")
-            pg.locator(".stepper-overlay .stepper-down, .stepper-overlay button[aria-label*='Bajar']").first.click(); pg.wait_for_timeout(200)
-            pg.locator(".stepper-overlay button", has_text="Agregar").click(); pg.wait_for_timeout(500)
+            pg.locator(".stepper-overlay .stepper-down, .stepper-overlay button[aria-label*='Bajar']").first.click(); navegador.quieto(pg)
+            pg.locator(".stepper-overlay button", has_text="Agregar").click(); navegador.quieto(pg)
             r["rapida_marcada"] = pg.locator(".picker-item.picked", has_text="Pizza Hut").count() == 1
-            pg.locator(".picker-close").click(); pg.wait_for_timeout(500)
+            pg.locator(".picker-close").click(); navegador.quieto(pg)
             r["rapida_suma"] = round(pg.evaluate("foodTotals(foodEntries()).kcal") - kcal0) == 220
             r["rapida_suma_porciones"] = pg.evaluate("foodTotals(foodEntries()).portions.h") >= 1.5
-            pg.locator(".food-hist-btn").click(); pg.wait_for_timeout(500)
+            pg.locator(".food-hist-btn").click(); navegador.quieto(pg)
             bands = pg.evaluate("[...document.querySelectorAll('.fh-list .picker-group')].map(g => g.textContent)")
             r["historial_reciente_arriba"] = len(bands) >= 1
             r["historial_equivalencia"] = "harina" in pg.locator(".fh-list").inner_text()
             if SHOTS: pg.screenshot(path=f"{SHOTS}/historial_porciones.png")
-            pg.locator(".picker-close").click(); pg.wait_for_timeout(400)
+            pg.locator(".picker-close").click(); navegador.quieto(pg)
 
             # Dar el día
             goal = pg.evaluate("nutritionPlan().kcal")
-            pg.locator(".food-done").click(); pg.wait_for_timeout(500)
+            pg.locator(".food-done").click(); navegador.quieto(pg)
             if SHOTS: pg.screenshot(path=f"{SHOTS}/dar_dia_confirmar.png")
-            pg.locator(".dialog-btn", has_text="Dar el día").click(); pg.wait_for_timeout(500)
+            pg.locator(".dialog-btn", has_text="Dar el día").click(); navegador.quieto(pg)
             r["dia_completo"] = round(pg.evaluate("foodTotals(foodEntries()).kcal")) == goal
             r["boton_activo"] = pg.locator(".food-done.on").count() == 1
             r["barra_llena"] = pg.evaluate("document.querySelector('.food-bar i').style.width") == "100%"
             if SHOTS: pg.screenshot(path=f"{SHOTS}/dar_dia_hecho.png")
-            pg.locator(".food-done").click(); pg.wait_for_timeout(400)
-            pg.locator(".dialog-btn", has_text="Quitar").click(); pg.wait_for_timeout(500)
+            pg.locator(".food-done").click(); navegador.quieto(pg)
+            pg.locator(".dialog-btn", has_text="Quitar").click(); navegador.quieto(pg)
             r["se_puede_quitar"] = not pg.evaluate("foodEntries().some(e => e.g === 'libre')") and pg.locator(".food-done.on").count() == 0
             ctx.close(); b.close()
     finally:

@@ -5,6 +5,8 @@ Variables opcionales: CHROME=/ruta/a/chrome  PORT=8801
 """
 import json, os, re, subprocess, sys, time
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8801")
@@ -47,34 +49,34 @@ def main():
             ctx = b.new_context(service_workers="block"); ctx.add_init_script(SEEN)
             ctx.add_init_script("if (!sessionStorage.getItem('v1_puesto')) { sessionStorage.setItem('v1_puesto', '1'); localStorage.setItem('%s', %s); }" % (KEY, json.dumps(json.dumps(V1_STATE))))
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
-            pg.goto(URL); pg.wait_for_function("document.readyState==='complete'"); pg.wait_for_timeout(600)
+            pg.goto(URL); pg.wait_for_function("document.readyState==='complete'"); navegador.quieto(pg)
             idb = pg.evaluate(READ_IDB)
             for _ in range(60):   # la copia a IndexedDB puede tardar un poco más que la carga (sobre todo en Safari)
                 if idb and "r1" in idb["state"].get("logs", {}): break
-                pg.wait_for_timeout(200); idb = pg.evaluate(READ_IDB)
+                navegador.quieto(pg); idb = pg.evaluate(READ_IDB)
             results["migra_v1"] = bool(idb) and idb["state"]["meta"]["schema"] == 2 and len(idb["state"]["routines"]) == 1
             results["conserva_registro"] = bool(idb) and "r1" in idb["state"].get("logs", {}) and idb["state"]["logs"]["r1"]["2026-11-02"]["exercises"]["e1"]["reps"] == [10, 9, 8]
             results["tema_claro"] = pg.evaluate("document.documentElement.getAttribute('data-theme')") == "light"
 
             # 2) Se borra localStorage → los datos vuelven desde IndexedDB
-            pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_timeout(800)
+            pg.evaluate("localStorage.clear()"); pg.reload(); navegador.quieto(pg)
             results["recupera_de_idb"] = pg.evaluate("state.routines.length === 1 && state.routines[0].name === 'Push'")
 
             # 3) localStorage lleno → se guarda igual en IndexedDB y sin aviso de error
             pg.evaluate("""() => { Storage.prototype.setItem = () => { throw new DOMException('lleno', 'QuotaExceededError'); };
                                    state.achievements.push({ t: 'Logro nuevo', done: false }); return saveState(); }""")
-            pg.wait_for_timeout(300)
+            navegador.quieto(pg)
             results["sin_aviso"] = pg.evaluate("!document.querySelector('.dialog-overlay, .dialog')")
             idb = pg.evaluate(READ_IDB)
             results["guarda_en_idb_lleno"] = bool(idb) and any(a["t"] == "Logro nuevo" for a in idb["state"]["achievements"])
-            pg.reload(); pg.wait_for_timeout(800)
+            pg.reload(); navegador.quieto(pg)
             results["idb_gana_si_mas_nuevo"] = pg.evaluate("state.achievements.some(a => a.t === 'Logro nuevo')")
             ctx.close()
 
             # 4) Instalación nueva: sin datos → estado vacío con id de dispositivo
             ctx = b.new_context(service_workers="block"); ctx.add_init_script(SEEN)
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
-            pg.goto(URL); pg.wait_for_timeout(800)
+            pg.goto(URL); navegador.quieto(pg)
             results["nuevo_vacio"] = pg.evaluate("state.routines.length === 0 && !!state.meta.device && state.meta.schema === 2")
             ctx.close(); b.close()
     finally:

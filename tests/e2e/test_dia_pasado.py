@@ -6,6 +6,8 @@ Variables opcionales: CHROME=/ruta/a/chrome  PORT=8806  SHOTS=carpeta
 import json, os, re, subprocess, sys, time
 from datetime import date, timedelta
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import navegador
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PORT = os.environ.get("PORT", "8806")
@@ -41,31 +43,31 @@ def main():
             ctx.add_init_script("localStorage.setItem('qpeeg_consent',JSON.stringify({v:1,share:false}));localStorage.setItem('qpeeg_install_seen','1');" "localStorage.setItem('qpeeg_seen_version','%s');"
                                 "if(!localStorage.getItem('qpeeg_state_v1'))localStorage.setItem('qpeeg_state_v1',%s)" % (VER, json.dumps(json.dumps(STATE))))
             pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
-            pg.goto(URL); pg.wait_for_timeout(900)
-            pg.evaluate("enterApp(false)"); pg.wait_for_timeout(300)
+            pg.goto(URL); navegador.quieto(pg)
+            pg.evaluate("enterApp(false)"); navegador.quieto(pg)
             title = lambda: pg.locator("#weekDate").inner_text()
             fits = lambda: pg.evaluate("(() => { const e = document.getElementById('weekDate'); return e.scrollWidth <= e.clientWidth + 1; })()")
             today_btn = lambda: pg.locator("#todayBtn").is_visible()
             r["hoy_sin_boton"] = not today_btn()
 
             # Desde el calendario de calorías
-            pg.evaluate("showSection('history'); historyMode = 'food'; renderHistory()"); pg.wait_for_timeout(400)
-            pg.evaluate(f"historyOffset = ({past.year} * 12 + {past.month - 1}) - (new Date().getFullYear() * 12 + new Date().getMonth()); renderHistory()"); pg.wait_for_timeout(300)
-            pg.locator(f".history-grid [data-key='{PK}']").click(); pg.wait_for_timeout(600)
+            pg.evaluate("showSection('history'); historyMode = 'food'; renderHistory()"); navegador.quieto(pg)
+            pg.evaluate(f"historyOffset = ({past.year} * 12 + {past.month - 1}) - (new Date().getFullYear() * 12 + new Date().getMonth()); renderHistory()"); navegador.quieto(pg)
+            pg.locator(f".history-grid [data-key='{PK}']").click(); navegador.quieto(pg)
             r["abre_comida_del_dia"] = pg.evaluate("document.querySelector('.section.active').id") == "food" and pg.evaluate("foodKey()") == PK
             r["titulo_cabe"] = fits() and "←" not in title()
             r["boton_hoy"] = today_btn()
             if SHOTS: pg.screenshot(path=f"{SHOTS}/dia_pasado_comida.png")
 
             # Deslizar a otras pestañas mantiene el día
-            pg.evaluate("shiftWeekTab(1)"); pg.wait_for_timeout(300)        # Historial
-            pg.evaluate("shiftWeekTab(1)"); pg.wait_for_timeout(300)        # Semana
+            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)        # Historial
+            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)        # Semana
             r["semana_mismo_dia"] = pg.evaluate("getWorkoutDateKey()") == PK
             r["semana_titulo_dia"] = str(past.day) in title() and fits()
             if SHOTS: pg.screenshot(path=f"{SHOTS}/dia_pasado_semana.png")
-            pg.evaluate("shiftWeekTab(1)"); pg.wait_for_timeout(300)        # Rutinas
+            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)        # Rutinas
             r["rutinas_sin_boton"] = not today_btn()
-            pg.evaluate("shiftWeekTab(1)"); pg.wait_for_timeout(300)        # Comida
+            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)        # Comida
             r["comida_sigue"] = pg.evaluate("foodKey()") == PK
 
             # "Hoy" vuelve a hoy en todas
@@ -73,13 +75,13 @@ def main():
             r_diag = {"antes_de_hoy": diag()}
             pg.locator("#todayBtn").click()
             # polling por intervalo (no por cuadro): si el motor pausa los cuadros, igual se revisa
-            try: pg.wait_for_function("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()", timeout=4000, polling=100); pg.wait_for_timeout(300)
+            try: pg.wait_for_function("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()", timeout=4000, polling=100); navegador.quieto(pg)
             except Exception: pass
             r["hoy_vuelve"] = pg.evaluate("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()") and not today_btn()
             if not r["hoy_vuelve"]: r_diag["despues_de_hoy"] = diag(); print("DIAGNÓSTICO", json.dumps(r_diag, ensure_ascii=False))
 
             # Desde el calendario de entreno lleva al día y también a su comida
-            pg.evaluate(f"setViewDate(null); showSection('history'); historyMode = 'workout'; openHistoryDay('{PK}')"); pg.wait_for_timeout(600)
+            pg.evaluate(f"setViewDate(null); showSection('history'); historyMode = 'workout'; openHistoryDay('{PK}')"); navegador.quieto(pg)
             pg.evaluate("showSection('food')")
             try: pg.wait_for_function(f"foodKey() === '{PK}'", timeout=4000, polling=100)
             except Exception: pass
