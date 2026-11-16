@@ -28,7 +28,7 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
     sub.className = "stepper-sub";
     /* la unidad que cambia (kg/lb, 1 rebanada/2 rebanadas) se muestra en el subtítulo; la fija ya la dice el subtítulo */
     const unitText = () => (typeof unit === "function" ? unit() : "");
-    const paintSub = () => { const u = unitText(); sub.textContent = u ? `${subtitle} · ${u}` : subtitle; };
+    const paintSub = () => { const u = unitText(); sub.textContent = [subtitle, u].filter(Boolean).join(" · "); };
     paintSub();
 
     const up = document.createElement("button");

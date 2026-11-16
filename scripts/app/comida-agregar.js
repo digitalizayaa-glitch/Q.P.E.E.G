@@ -202,8 +202,8 @@ async function giveTheDay() {
     let kcal = Math.max(DIRTY_STEP, Math.round(Math.max(goal - now, 600) / DIRTY_STEP) * DIRTY_STEP);
     openStepper({
         title: "Volumen sucio",
-        subtitle: "Calorías a sumar",
-        unit: () => `el día queda en ${fmtNum(now + kcal, 0)} kcal`,
+        subtitle: "",
+        unit: () => `Calorías totales: ${fmtNum(now + kcal, 0)} kcal`,   /* cómo queda el día */
         read: () => String(kcal),
         step: dir => { kcal = Math.min(10000, Math.max(DIRTY_STEP, kcal + dir * DIRTY_STEP)); },
         editMode: "numeric",
