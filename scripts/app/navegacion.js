@@ -175,12 +175,12 @@ async function showDoneDay(key) {
         });
         navFading = false;
     }
+    /* el día recién completado: el pulso de "hoy" (mismo ritmo, 3,4 s), con el doble de intensidad, una vez */
     const cell = document.querySelector(`.history-cell[data-key="${key}"]`);
-    if (cell) cell.animate([
-        { boxShadow: "0 0 0 2px rgba(var(--ui-rgb), .5), 0 0 0 0 rgba(var(--ui-rgb), 0)", transform: "scale(1)" },
-        { boxShadow: "0 0 0 3px var(--ui), 0 0 26px 6px rgba(var(--ui-rgb), .85)", transform: "scale(1.12)" },
-        { boxShadow: "0 0 0 2px rgba(var(--ui-rgb), .5), 0 0 0 0 rgba(var(--ui-rgb), 0)", transform: "scale(1)" }
-    ], { duration: 500, iterations: 4, easing: "ease-in-out", delay: 200 * NAV_SPEED });
+    if (cell) {
+        cell.classList.add("just-done");
+        cell.addEventListener("animationend", () => cell.classList.remove("just-done"), { once: true });
+    }
 }
 
 function goHome() {

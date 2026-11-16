@@ -654,7 +654,7 @@
 
 /* Semana: los días pulsan suave (como "Añadir deporte"); el que se está entrenando, más fuerte (85 % del de "hoy"
    del calendario); casi terminado (≥ 76 %), el suave. La sección deja 16 px alrededor para que el brillo no se corte. */
-#week.section.active { padding: 16px; margin: -16px; width: calc(100% + 32px); max-width: none; box-sizing: border-box; }
+#week.section.active, #history.section.active { padding: 16px; margin: -16px; width: calc(100% + 32px); max-width: none; box-sizing: border-box; }
 @keyframes training-pulse {
     0%, 100% { box-shadow: 0 0 0 2px rgba(var(--ui-rgb), .47), 0 0 0 0 rgba(var(--ui-rgb), 0); }
     50%      { box-shadow: 0 0 0 2px var(--ui), 0 0 19px 2px rgba(var(--ui-rgb), .56); }
@@ -665,3 +665,11 @@
     .split-card { animation: none; }
     .split-card.training { box-shadow: 0 0 0 2px var(--ui); }
 }
+
+/* Calendario: el día recién completado con el ✓ pulsa una vez como "hoy" (3,4 s), con el doble de intensidad */
+@keyframes done-day-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--ui-rgb), 0), 0 0 0 0 rgba(var(--ui-rgb), 0); }
+    50%      { box-shadow: 0 0 0 4px var(--ui), 0 0 44px 4px rgba(var(--ui-rgb), 1); }
+}
+.history-cell.just-done { position: relative; z-index: 2; animation: done-day-pulse 3.4s ease-in-out 1; }
+@media (prefers-reduced-motion: reduce) { .history-cell.just-done { animation: none; box-shadow: 0 0 0 4px var(--ui); } }
