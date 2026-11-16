@@ -217,6 +217,11 @@ function sanitizeState(src) {
             if (min > 0) sp.min = Math.min(min, 1440);
             if (km > 0) sp.km = Math.min(km, 500);
             if (up > 0) sp.up = Math.min(up, 9000);
+            /* boxeo: rounds y minutos por round (y su tiempo total en min) */
+            const rounds = Math.round(num(x.rounds)), rmin = num(x.rmin);
+            if (rounds > 0) sp.rounds = Math.min(rounds, 50);
+            if (rmin > 0) sp.rmin = Math.min(rmin, 15);
+            if (sp.rounds && sp.rmin && !sp.min) sp.min = Math.min(sp.rounds * sp.rmin, 1440);
             if (sp.km) { sp.u = "km"; sp.v = sp.km; } else if (sp.min) { sp.u = "min"; sp.v = sp.min; }
             /* cuerpo del día (deportes.js): sexo, edad, altura y peso */
             const bp = x.bp;

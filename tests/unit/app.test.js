@@ -333,6 +333,19 @@ test("deportes: bici de montaña pesa más que la de ruta con los mismos datos",
     app("state.nutrition = null");
 });
 
+test("deportes: boxeo por rounds y minutos por round", () => {
+    app("state.nutrition = { profile: { sex: 'm', age: 17, height: 175, weight: 75, activity: 1.55, bf: null }, goal: 'maintain', diet: 'mod' }");
+    assert.deepEqual(ev("sportFields('boxing').map(f => f.f)"), ["rounds", "rmin"]);
+    const l8 = call("sportLoad", { k: "boxing", rounds: 8, rmin: 3 }), l12 = call("sportLoad", { k: "boxing", rounds: 12, rmin: 3 });
+    assert.ok(l8 > 60 && l12 > l8, `${l8} ${l12}`);
+    assert.equal(Math.round(ev("sportPaceDetail({ k: 'boxing', rounds: 8, rmin: 3 }).minutes")), 24);
+    assert.equal(call("sportLoad", { k: "boxing", rounds: 8 }), 0, "sin minutos por round no hay tiempo");
+    assert.equal(call("sportSummary", { k: "boxing", rounds: 8, rmin: 3, min: 24 }), "8 rounds × 3 min");
+    const st = call("stateFrom", { sports: { "2026-11-16": [{ id: "b", k: "boxing", n: "Boxeo", rounds: 8, rmin: 3 }] } });
+    assert.deepEqual([st.sports["2026-11-16"][0].rounds, st.sports["2026-11-16"][0].rmin, st.sports["2026-11-16"][0].min], [8, 3, 24]);
+    app("state.nutrition = null");
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

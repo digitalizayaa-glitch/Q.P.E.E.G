@@ -4,7 +4,9 @@
 
 /* "1 h 30 min · 40 km · +450 m" */
 function sportSummary(sp) {
-    return SPORT_FIELDS.filter(({ f }) => sp[f] > 0).map(({ f, fmt }) => fmt(sp[f])).join(" · ");
+    /* boxeo: "8 rounds × 3 min" (su tiempo total también se guarda, pero no se repite) */
+    if (sp.rounds > 0) return `${fmtNum(sp.rounds, 0)} ${sp.rounds === 1 ? "round" : "rounds"}${sp.rmin > 0 ? ` × ${fmtNum(sp.rmin, 1)} min` : ""}`;
+    return SPORT_FIELDS.filter(({ f }) => sp[f] > 0 && f !== "rmin").map(({ f, fmt }) => fmt(sp[f])).join(" · ");
 }
 
 /* ---------- Añadir y editar deporte ---------- */
@@ -13,7 +15,7 @@ function addSport() {
         title: "Añadir deporte",
         groups: [
             { title: "Con distancia", items: SPORTS.filter(s => !s.hidden && s.ref.km).map(s => ({ label: s.name, sub: s.ref.up ? "Tiempo, km y desnivel" : "Tiempo y km", value: s })) },
-            { title: "Por tiempo", items: SPORTS.filter(s => !s.hidden && !s.ref.km).map(s => ({ label: s.name, sub: "Tiempo", value: s })) }
+            { title: "Por tiempo", items: SPORTS.filter(s => !s.hidden && !s.ref.km).map(s => ({ label: s.name, sub: s.ref.rounds ? "Rounds y minutos por round" : "Tiempo", value: s })) }
         ],
         createLabel: "Otro deporte",
         onPick: sport => askSportData(sport),
@@ -37,7 +39,10 @@ function askSportData(sport, editing) {
     const vals = {};
     fields.forEach(({ f }) => { vals[f] = editing ? editing.entry[f] || 0 : 0; });
     const ref = sportReference(sport.k);
-    if (!editing) vals[ref.km ? "km" : "min"] = ref.km ? Math.round(ref.km) : Math.round(ref.min / 5) * 5;   /* empieza con un valor normal */
+    if (!editing) {   /* empieza con un valor normal */
+        if (ref.rounds) { vals.rounds = ref.rounds; vals.rmin = ref.rmin; }
+        else vals[ref.km ? "km" : "min"] = ref.km ? Math.round(ref.km) : Math.round(ref.min / 5) * 5;
+    }
 
     const { sheet, close } = openSheet("sport-sheet", sport.name);
     const body = document.createElement("div");
@@ -71,6 +76,7 @@ function askSportData(sport, editing) {
         if (any) {
             const d = sportPaceDetail(sp);
             const bits = [`intensidad ${d.zone}`];
+            if (vals.rounds > 0 && vals.rmin > 0) bits.push(`${fmtDuration(vals.rounds * vals.rmin)} en total`);
             if (vals.km > 0 && !(vals.min > 0)) bits.push(`sin tiempo: ${fmtDuration(d.expected)}`);
             if (vals.km > 0 && vals.min > 0) bits.push(`${fmtNum(d.speed, 1)} km/h`);
             bits.push(`≈ ${fmtNum(Math.round(d.kcal / 10) * 10, 0)} kcal`);
@@ -110,7 +116,8 @@ function askSportData(sport, editing) {
             if (field.f === "min" && (vals.km > 0)) {
                 hint.textContent = `Esperado ${fmtDuration(sportPaceDetail({ k: sk, km: vals.km, up: vals.up, bp: who }).expected)}`;
             } else {
-                const r = field.f === "km" ? Math.round(ref.km * 2) / 2 : field.f === "min" ? Math.round(ref.min / 5) * 5 : Math.round(ref.up / 5) * 5;
+                const r = field.f === "km" ? Math.round(ref.km * 2) / 2 : field.f === "min" ? Math.round(ref.min / 5) * 5
+                    : field.f === "up" ? Math.round(ref.up / 5) * 5 : ref[field.f];
                 hint.textContent = `Típico ${field.fmt(r)}`;
             }
             box.setAttribute("aria-label", `${field.label}: ${vals[field.f] > 0 ? field.fmt(vals[field.f]) : "sin dato"}`);
@@ -154,6 +161,8 @@ function askSportData(sport, editing) {
     saveBtn.onclick = () => {
         const entry = editing ? { ...editing.entry } : { id: newId("sp"), k: sport.k, n: sport.name };
         fields.forEach(({ f }) => { if (vals[f] > 0) entry[f] = vals[f]; else delete entry[f]; });
+        /* boxeo: también el tiempo total (rounds × min), para el historial y para teléfonos sin actualizar */
+        if (vals.rounds !== undefined) { const t = sportMinutes(entry); if (t > 0) entry.min = t; else delete entry.min; }
         if (who) entry.bp = { ...who }; else delete entry.bp;     /* el cuerpo de ese día: bajar de peso no cambia el historial */
         if (!fields.some(({ f }) => entry[f] > 0)) return;
         const key = editing ? editing.key : getWorkoutDateKey();

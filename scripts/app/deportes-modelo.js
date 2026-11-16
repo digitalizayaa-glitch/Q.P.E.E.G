@@ -41,6 +41,8 @@ const SPORTS = [
     { k: "basket", name: "Básquetbol", ref: { min: 60, km: 4 } },
     { k: "tennis", name: "Tenis",      ref: { min: 60, km: 3 } },
     { k: "volley", name: "Voleibol",   ref: { min: 60 } },
+    /* Boxeo: por rounds y su duración (el tiempo = rounds × minutos por round; los descansos no cuentan) */
+    { k: "boxing", name: "Boxeo",      ref: { rounds: 8, rmin: 3 } },
     { k: "custom", name: "Otro",       ref: { min: 60, km: 5,   up: 100 }, hidden: true }
 ];
 const SPORT_BY_KEY = Object.fromEntries(SPORTS.map(s => [s.k, s]));
@@ -49,8 +51,12 @@ const sportDef = k => SPORT_BY_KEY[k] || SPORT_BY_KEY.custom;
 const SPORT_FIELDS = [
     { f: "min", label: "Tiempo",    unit: "min", step: 5,   max: 1440, fmt: v => fmtDuration(v), mode: "numeric" },
     { f: "km",  label: "Distancia", unit: "km",  step: 0.5, max: 500,  fmt: v => `${fmtNum(v, 1)} km`, mode: "decimal" },
-    { f: "up",  label: "Desnivel",  unit: "m",   step: 5,   max: 9000, fmt: v => `+${fmtNum(v, 0)} m`, mode: "numeric" }
+    { f: "up",  label: "Desnivel",  unit: "m",   step: 5,   max: 9000, fmt: v => `+${fmtNum(v, 0)} m`, mode: "numeric" },
+    { f: "rounds", label: "Rounds", unit: "rounds", step: 1, max: 50, fmt: v => `${fmtNum(v, 0)} ${v === 1 ? "round" : "rounds"}`, mode: "numeric" },
+    { f: "rmin", label: "Por round", unit: "min", step: 0.5, max: 15, fmt: v => `${fmtNum(v, 1)} min`, mode: "decimal" }
 ];
+/* Minutos de un registro: los suyos, o rounds × minutos por round (boxeo) */
+const sportMinutes = sp => (sp.rounds > 0 && sp.rmin > 0 ? sp.rounds * sp.rmin : sp.min > 0 ? sp.min : 0);
 const sportFields = k => SPORT_FIELDS.filter(({ f }) => sportDef(k).ref[f]);
 
 function fmtDuration(min) {
@@ -74,6 +80,8 @@ const SPORT_PACE = {
     basket: { v: 4,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 6.5 },
     tennis: { v: 3,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 6.8 },
     volley: { v: 1,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 4 },
+    /* Boxeo: Compendio — saco 5,5, sparring 7,8, en el ring 12,8; un entreno de rounds ≈ 9 */
+    boxing: { v: 1,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 9 },
     custom: { v: 5,       up: 0.8, o2: 1.8, sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 5 }
 };
 
@@ -143,7 +151,8 @@ const sportZone = x => x < 0.4 ? "suave" : x < 0.6 ? "moderada" : x < 0.85 ? "in
 function sportPaceDetail(sp) {
     const k = sp.k, body = sportBody(sp), base = sportDef(k).ref, c = SPORT_PACE[k];
     /* solo los datos que aplican al deporte */
-    const km = sp.km > 0 && base.km ? sp.km : 0, up = sp.up > 0 && base.up ? sp.up : 0, min = sp.min > 0 ? sp.min : 0;
+    const km = sp.km > 0 && base.km ? sp.km : 0, up = sp.up > 0 && base.up ? sp.up : 0;
+    const min = base.rounds ? (sp.rounds > 0 && sp.rmin > 0 ? sp.rounds * sp.rmin : 0) : (sp.min > 0 ? sp.min : 0);
     const vExp = sportSpeed(k, body);
     const expected = km > 0 || up > 0 ? sportExpectedMin(k, km, up, body) : min;
     const minutes = Math.max(1, min > 0 ? min : expected);
@@ -176,6 +185,7 @@ function sportReference(k) {
     const out = {};
     if (base.km) out.km = base.km * f;
     if (base.up) out.up = base.up * f;
+    if (base.rounds) { out.rounds = base.rounds; out.rmin = base.rmin; out.min = base.rounds * base.rmin; return out; }
     out.min = base.km ? sportExpectedMin(k, out.km, out.up, body) : base.min * SPORT_REF_FACTOR;
     return out;
 }
@@ -183,5 +193,6 @@ function sportReference(k) {
 /* Carga (100 = una sesión moderada de 40 min) */
 function sportLoad(sp) {
     const k = sportDef(sp.k).k;
+    if (sportDef(k).ref.rounds && !(sp.rounds > 0 && sp.rmin > 0)) return 0;   /* boxeo: hacen falta los dos */
     return sportFields(k).some(({ f }) => sp[f] > 0) ? sportPaceDetail({ ...sp, k }).load : 0;
 }
