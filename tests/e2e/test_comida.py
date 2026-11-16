@@ -132,11 +132,13 @@ def main():
             if SHOTS: pg.screenshot(path=f"{SHOTS}/historial_porciones.png")
             pg.locator(".picker-close").click(); navegador.quieto(pg)
 
-            # Dar el día
+            # Volumen sucio: completar la meta
             goal = pg.evaluate("nutritionPlan().kcal")
+            now = round(pg.evaluate("foodTotals(foodEntries()).kcal"))
             pg.locator(".food-done").click(); navegador.quieto(pg)
-            if SHOTS: pg.screenshot(path=f"{SHOTS}/dar_dia_confirmar.png")
-            pg.locator(".dialog-btn", has_text="Dar el día").click(); navegador.quieto(pg)
+            if SHOTS: pg.screenshot(path=f"{SHOTS}/volumen_sucio_opciones.png")
+            r["volumen_sucio_opciones"] = all(pg.locator(".picker-item", has_text=t).count() == 1 for t in ["Bajo · +750", "Medio · +1500", "Grande · +2000", "Completar la meta", "Elegir el total"])
+            pg.locator(".picker-item", has_text="Completar la meta").click(); navegador.quieto(pg)
             r["dia_completo"] = round(pg.evaluate("foodTotals(foodEntries()).kcal")) == goal
             r["boton_activo"] = pg.locator(".food-done.on").count() == 1
             r["barra_llena"] = pg.evaluate("document.querySelector('.food-bar i').style.width") == "100%"
@@ -144,6 +146,23 @@ def main():
             pg.locator(".food-done").click(); navegador.quieto(pg)
             pg.locator(".dialog-btn", has_text="Quitar").click(); navegador.quieto(pg)
             r["se_puede_quitar"] = not pg.evaluate("foodEntries().some(e => e.g === 'libre')") and pg.locator(".food-done.on").count() == 0
+
+            # Volumen sucio medio: +1500 kcal
+            pg.locator(".food-done").click(); navegador.quieto(pg)
+            pg.locator(".picker-item", has_text="Medio").click(); navegador.quieto(pg)
+            r["volumen_medio_1500"] = round(pg.evaluate("foodTotals(foodEntries()).kcal")) == now + 1500
+            pg.locator(".food-done").click(); navegador.quieto(pg)
+            pg.locator(".dialog-btn", has_text="Quitar").click(); navegador.quieto(pg)
+
+            # Elegir el total del día: escribir 3000 → el día queda en 3000
+            pg.locator(".food-done").click(); navegador.quieto(pg)
+            pg.locator(".picker-item", has_text="Elegir el total").click(); navegador.quieto(pg)
+            box = pg.locator(".stepper-sheet .stepper-value")
+            box.click(); navegador.quieto(pg)
+            if pg.locator(".stepper-input").count() == 0: box.click(); navegador.quieto(pg)
+            pg.locator(".stepper-input").fill("3000"); pg.keyboard.press("Enter"); navegador.quieto(pg)
+            pg.locator(".stepper-sheet .dialog-btn.accept").click(); navegador.quieto(pg)
+            r["total_elegido"] = round(pg.evaluate("foodTotals(foodEntries()).kcal")) == 3000
             ctx.close(); b.close()
     finally:
         srv.terminate()

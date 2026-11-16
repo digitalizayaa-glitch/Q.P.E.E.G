@@ -176,16 +176,31 @@ function askFastFood(key, done, existing) {
     });
 }
 
-/* ---------- dar el día ----------
-   Para días en que se come fuera de lo común y no se puede contar: completa las calorías
-   que faltan para la meta con una entrada "Volumen sucio" (sin macros: no se conocen).
+/* ---------- dar el día (volumen sucio) ----------
+   Para días en que se come fuera de lo común y no se puede contar: suma calorías como una entrada
+   "Volumen sucio" (sin macros: no se conocen). Opciones: bajo (+750), medio (+1500), grande (+2000),
+   completar la meta, o elegir en cuánto quedará el total del día.
    Si ya se dio el día, el mismo botón permite quitarlo. */
+const DIRTY_SIZES = [
+    { label: "Bajo", kcal: 750 },
+    { label: "Medio", kcal: 1500 },
+    { label: "Grande", kcal: 2000 }
+];
+
+function addDirtyVolume(kcal, note) {
+    addFoodEntry({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        n: "Volumen sucio", g: FREE_GROUP, p: 1, k: Math.round(kcal), t: note
+    });
+    renderFood();
+}
+
 async function giveTheDay() {
     const entries = foodEntries();
     const given = entries.find(e => e.g === FREE_GROUP);
     if (given) {
         const ok = await askConfirm({
-            title: "Quitar el día dado",
+            title: "Quitar el volumen sucio",
             message: `Se quitarán las ${fmtNum(entryKcal(given), 0)} kcal de volumen sucio de este día.`,
             confirmLabel: "Quitar"
         });
@@ -195,21 +210,30 @@ async function giveTheDay() {
         return;
     }
     const goal = nutritionPlan().kcal;
-    const missing = Math.round(goal - foodTotals(entries).kcal);
-    if (missing <= 0) {
-        await showMessage({ title: "Meta alcanzada", message: "Ya llegaste a tu meta de calorías de este día." });
-        return;
-    }
-    const ok = await askConfirm({
-        title: "Dar el día",
-        message: `Se sumarán ${fmtNum(missing, 0)} kcal como volumen sucio para completar tu meta de ${fmtNum(goal, 0)} kcal.\n\nÚsalo los días en que comes fuera de lo común y no puedes contar.`,
-        confirmLabel: "Dar el día"
+    const now = Math.round(foodTotals(entries).kcal);
+    const missing = Math.round(goal - now);
+    const after = k => `el día queda en ${fmtNum(now + k, 0)} kcal`;
+    const items = DIRTY_SIZES.map(d => ({ label: `${d.label} · +${fmtNum(d.kcal, 0)} kcal`, sub: after(d.kcal), value: { kcal: d.kcal, note: `Volumen sucio ${d.label.toLowerCase()}` } }));
+    if (missing > 0) items.push({ label: `Completar la meta · +${fmtNum(missing, 0)} kcal`, sub: `el día queda en tu meta de ${fmtNum(goal, 0)} kcal`, value: { kcal: missing, note: "Calorías que faltaban" } });
+    items.push({ label: "Elegir el total del día…", sub: "tú dices en cuántas calorías queda", value: "custom" });
+    openPicker({
+        title: "Volumen sucio",
+        groups: [{ items }],
+        onPick: choice => {
+            if (choice !== "custom") { addDirtyVolume(choice.kcal, choice.note); return; }
+            /* elegir en cuánto queda el total: se suma la diferencia con lo que ya llevas */
+            let total = Math.max(now + 50, Math.ceil(Math.max(goal, now) / 50) * 50);
+            openStepper({
+                title: "Volumen sucio",
+                subtitle: `Total del día en kcal (ya llevas ${fmtNum(now, 0)})`,
+                read: () => String(total),
+                step: dir => { total = Math.max(now + 50, total + dir * 50); },
+                editMode: "numeric",
+                onEdit: text => { const n = parseAmount(text, { integer: true, max: 20000 }); if (n === null || n <= now) return "x"; total = n; return ""; },
+                doneLabel: "Agregar",
+                cancelLabel: "Cancelar",
+                onClose: ok => { if (ok) addDirtyVolume(total - now, `Total del día: ${fmtNum(total, 0)} kcal`); }
+            });
+        }
     });
-    if (!ok) return;
-    addFoodEntry({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        n: "Volumen sucio", g: FREE_GROUP, p: 1, k: missing,
-        t: "Calorías que faltaban"
-    });
-    renderFood();
 }
