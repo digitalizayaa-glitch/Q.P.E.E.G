@@ -133,7 +133,7 @@ function updateDayDoneButton(sectionId) {
         hint.id = "dayDoneHint";
         hint.className = "day-done-hint";
         hint.setAttribute("aria-hidden", "true");
-        hint.textContent = "Marca aquí al terminar el día";
+        hint.textContent = "Completar";
         btn.parentElement.appendChild(hint);
     }
     hint.classList.toggle("on", !!entry && !on);

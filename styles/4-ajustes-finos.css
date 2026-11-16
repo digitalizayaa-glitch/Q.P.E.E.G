@@ -629,23 +629,22 @@
     font-size: 9px; font-weight: 700; line-height: 1; color: var(--ui);
 }
 
-/* ✓ del entreno: aviso que aparece cada 5 s mientras el día no está terminado */
+/* ✓ del entreno: globo "Completar" (como el de la tuerca) a la izquierda del botón, cada 5 s mientras el día no está terminado */
 .day-done-hint {
-    position: absolute; right: 0; top: calc(50% + max(15px, calc(var(--hdr) * 0.2)) + 10px); z-index: 30;
-    padding: 6px 10px; border-radius: 10px; white-space: nowrap; pointer-events: none;
-    font-size: 12px; font-weight: bold; color: var(--text);
-    background: var(--bg); border: 1px solid var(--ui); box-shadow: 0 0 11px rgba(var(--ui-rgb), .4);
-    opacity: 0; visibility: hidden;
+    position: absolute; top: 50%; right: calc(max(30px, calc(var(--hdr) * 0.4)) + 10px); z-index: 30;
+    padding: 6px 11px; border-radius: 8px; font-size: 13px; font-weight: bold; white-space: nowrap; pointer-events: none;
+    background: var(--text); color: var(--bg);
+    opacity: 0; visibility: hidden; transform: translateY(-50%);
 }
-.day-done-hint::before {
-    content: ""; position: absolute; right: max(10px, calc(var(--hdr) * 0.2) - 5px); top: -6px; width: 10px; height: 10px;
-    background: var(--bg); border-left: 1px solid var(--ui); border-top: 1px solid var(--ui); transform: rotate(45deg);
+.day-done-hint::after {
+    content: ""; position: absolute; left: 100%; top: 50%; margin-top: -6px;
+    border: 6px solid transparent; border-left-color: var(--text);
 }
 .day-done-hint.on { visibility: visible; animation: done-hint 5s ease-in-out 1.5s infinite; }
 @keyframes done-hint {
-    0%, 100% { opacity: 0; transform: translateY(-4px); }
-    8%, 44% { opacity: 1; transform: none; }
-    54% { opacity: 0; transform: none; }
+    0%, 100% { opacity: 0; transform: translate(-6px, -50%); }
+    8%, 44% { opacity: 1; transform: translate(0, -50%); }
+    54% { opacity: 0; transform: translate(0, -50%); }
 }
 /* calendario: días con el ✓ marcado */
 .history-cell.done::before {
