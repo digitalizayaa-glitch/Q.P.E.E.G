@@ -32,6 +32,19 @@ function fitHeaderDate() {
     }
 }
 
+/* El título grande se achica si no cabe (nombres de días largos) */
+function fitTabLabel() {
+    const el = document.querySelector(".week-tab-label");
+    if (!el) return;
+    el.style.fontSize = "";
+    const base = parseFloat(getComputedStyle(el).fontSize) || 30;
+    let size = base;
+    while (el.scrollWidth > el.clientWidth + 1 && size > 14) {
+        size -= 1;
+        el.style.fontSize = size + "px";
+    }
+}
+
 function showSection(sectionId) {
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById(sectionId).classList.add("active");
@@ -71,9 +84,19 @@ function showSection(sectionId) {
     const tab = TAB_ORDER.find(t => t.id === sectionId);
     label.textContent = tab ? tab.label : (sectionId === "workout" ? "ENTRENO" : label.textContent);
 
-    /* Entreno pertenece a Semana: ilumina el punto de Semana */
+    /* Entreno de un día anterior: arriba el nombre del día de la rutina y abajo la fecha de ese día */
+    if (sectionId === "workout" && viewDate()) {
+        const day = findDay(findRoutine(activeWorkout.routineId), activeWorkout.dayId);
+        if (day) {
+            label.textContent = day.name.toUpperCase();
+            setHeaderDateText(getDateText(parseKey(viewDate())), () => navFade(() => showSection("week")));
+        }
+    }
+    requestAnimationFrame(fitTabLabel);
+
+    /* Entreno pertenece a Semana: ilumina el punto de Semana. Editando un día anterior no hay puntos (no se cambia de pestaña) */
     const dotId = sectionId === "workout" ? "week" : sectionId;
-    renderDots(document.getElementById("tabDots"), TAB_ORDER.length, TAB_ORDER.findIndex(t => t.id === dotId));
+    renderDots(document.getElementById("tabDots"), viewDate() ? 0 : TAB_ORDER.length, TAB_ORDER.findIndex(t => t.id === dotId));
 }
 
 /* Puntos indicadores (index = -1: ninguno activo) */
