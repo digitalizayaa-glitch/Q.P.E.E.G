@@ -65,9 +65,15 @@ function renderWeekSection() {
     const twoCols = routine.days.length > 4;
     if (twoCols) picker.classList.add("two-cols");
 
+    /* El día que se está entrenando (ya con alguna serie marcada) pulsa el doble; al 76 % baja al pulso normal */
+    const entry = state.logs[routine.id]?.[getWorkoutDateKey()];
+    const prog = entry ? dayProgress(routine, getWorkoutDateKey()) : null;
+    const started = prog && prog.marked + prog.extra > 0 ? entry.dayId : null;
+
     routine.days.forEach((day, i) => {
         const btn = document.createElement("button");
         btn.className = "split-card";
+        if (day.id === started) btn.classList.add(prog.done >= 0.76 ? "training-almost" : "training");
         if (twoCols && routine.days.length % 2 === 1 && i === routine.days.length - 1) btn.classList.add("odd-last");
         btn.textContent = day.name;
         btn.onclick = () => navFade(() => startWorkoutDay(routine.id, day.id));

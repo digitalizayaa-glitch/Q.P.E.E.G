@@ -346,7 +346,7 @@ test("deportes: boxeo por rounds y minutos por round", () => {
     app("state.nutrition = null");
 });
 
-test("entreno: rojo solo con ≥25 % de series en rojo o más de 2 sin marcar; tocar otro día no cambia el entrenado", () => {
+test("entreno: rojo solo con ≥25 % de series en rojo o sin hacer (las extra cuentan); tocar otro día no cambia el entrenado", () => {
     const ser = n => Array.from({ length: n }, () => ({ min: 6, max: 8 }));
     app(`state.routines = [{ id: "r1", name: "R", days: [
         { id: "push", name: "Push", exercises: [{ id: "a", name: "Press banca", kg: 50, unit: "lb", series: ${JSON.stringify(ser(3))} },
@@ -363,7 +363,14 @@ test("entreno: rojo solo con ≥25 % de series en rojo o más de 2 sin marcar; t
     put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 0] } });
     assert.equal(st(), "green", "1 serie sin marcar");
     put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [0, 0, 0] } });
-    assert.equal(st(), "red", "3 series sin marcar");
+    assert.equal(st(), "red", "3 de 12 sin marcar = 25 %");
+    put({ a: { kg: 50, reps: [7, 7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [0, 0, 0] } });
+    assert.equal(st(), "gold", "1 serie extra cubre una: quedan 2 de 12 sin hacer");
+    put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [0, 0, 0] } });
+    app(`state.logs.__extra = { "${k}": { dayId: "xd-${k}", exercises: { x1: { kg: 20, reps: [10, 10], extra: 0 } } } }`);
+    assert.equal(st(), "gold", "un ejercicio extra con 2 series reemplaza");
+    assert.equal(ev(`dayProgress(state.routines[0], "${k}").done`), 11 / 12);
+    app("delete state.logs.__extra");
     put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 7] } });
     /* tocar el peso muerto rumano (otro día) no cambia el día entrenado */
     app(`ensureExerciseLog("r1", "${k}", "leg", state.routines[0].days[1].exercises[0]).kg = 70`);

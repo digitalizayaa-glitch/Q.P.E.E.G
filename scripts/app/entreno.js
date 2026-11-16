@@ -27,6 +27,17 @@ function renderWorkoutForDay(routineId, dayId) {
     if (routineId === EXTRA_ROUTINE_ID && day.exercises.length < MAX_EXERCISES_PER_DAY) {
         track.appendChild(addSquare("Añadir ejercicio", () => addRoutineExercise(routineId, dayId, id => { refreshWorkout(); scrollWorkoutTo(id); }), "add-wide workout-add"));
     }
+    /* rutina normal: al final, los ejercicios extra de hoy (reemplazan a los que no se hicieron) y el botón para añadir más */
+    const extraDay = routineId !== EXTRA_ROUTINE_ID ? extraDayFor(getWorkoutDateKey()) : null;
+    if (routineId !== EXTRA_ROUTINE_ID) {
+        (extraDay ? extraDay.exercises : []).forEach(ex => track.appendChild(buildExerciseCard(EXTRA_ROUTINE_ID, extraDay.id, ex.id)));
+        if (!extraDay || extraDay.exercises.length < MAX_EXERCISES_PER_DAY) {
+            track.appendChild(addSquare("Añadir ejercicio extra", () => {
+                const xd = ensureExtraDay(getWorkoutDateKey());
+                addRoutineExercise(EXTRA_ROUTINE_ID, xd.id, id => { refreshWorkout(); scrollWorkoutTo(id); }, day.name);
+            }, "add-wide workout-add"));
+        }
+    }
     container.appendChild(track);
 
     /* alto de cada tarjeta: caben 2 y media */
@@ -34,6 +45,7 @@ function renderWorkoutForDay(routineId, dayId) {
     track.style.setProperty("--card-h", `${Math.max(150, (container.clientHeight - 2 * gap) / 2.5)}px`);
 
     day.exercises.forEach(exercise => updateSemaphore(routineId, dayId, exercise.id));
+    if (extraDay) extraDay.exercises.forEach(exercise => updateSemaphore(EXTRA_ROUTINE_ID, extraDay.id, exercise.id));
 
     workoutPage = Math.min(workoutPage, workoutStops().length - 1);
     setWorkoutOffset(workoutStops()[workoutPage] || 0, false);

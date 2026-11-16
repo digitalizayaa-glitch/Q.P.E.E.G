@@ -651,3 +651,11 @@
 .history-cell.done::before {
     content: "✓"; position: absolute; top: 2px; right: 5px; font-size: 12px; font-weight: bold; line-height: 1; color: inherit; opacity: .85;
 }
+
+/* Semana: el día que se está entrenando pulsa el doble que los botones; casi terminado (≥ 76 %), el pulso normal */
+.split-card.training { animation: today-pulse 3.4s ease-in-out infinite; }
+.split-card.training-almost { animation: ui-pulse 3.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+    .split-card.training { animation: none; box-shadow: 0 0 0 2px var(--ui); }
+    .split-card.training-almost { animation: none; }
+}

@@ -59,13 +59,13 @@ function renderDaySheet(newKey) {
 }
 
 /* onCreated(id): qué hacer después de crear (por defecto, redibujar la ventana del día) */
-function addRoutineExercise(routineId, dayId, onCreated) {
+function addRoutineExercise(routineId, dayId, onCreated, priorityName) {
     const day = findDay(findRoutine(routineId), dayId);
     if (day.exercises.length >= MAX_EXERCISES_PER_DAY) return;
 
     /* Grupos musculares del día primero (Push: pecho, hombro, tríceps...), sin repetir los ya añadidos */
     const used = day.exercises.map(e => normalizeText(e.name));
-    const priority = priorityGroups(day.name);
+    const priority = priorityGroups(priorityName || day.name);   /* ejercicio extra: los grupos del día que se entrena */
     const groups = Object.entries(EXERCISE_CATALOG)
         .sort(([a], [b]) => priorityIndex(priority, a) - priorityIndex(priority, b))
         .map(([title, names]) => ({

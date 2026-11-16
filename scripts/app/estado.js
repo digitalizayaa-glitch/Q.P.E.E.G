@@ -512,29 +512,42 @@ function exerciseStatus(ranges, reps) {
     return "green";
 }
 
-function dayStatus(routine, key) {
+/* Avance de un día, serie por serie: total de la rutina, en rojo, sin marcar, y las series extra hechas
+   (las extra de cada ejercicio y las de los ejercicios extra de esa fecha) que reemplazan a las no hechas */
+function dayProgress(routine, key) {
     const entry = state.logs[routine.id]?.[key];
-    if (!entry) return "empty";
+    if (!entry) return null;
 
     /* Hoy: la rutina actual. Días pasados: las metas guardadas ese día (aunque luego se borrara el día o el ejercicio) */
     const day = findDay(routine, entry.dayId);
     const plan = key !== dateKey() && entry.plan ? entry.plan : (day ? planOf(day) : null);
-    if (!plan || plan.length === 0) return "empty";
+    if (!plan || plan.length === 0) return null;
 
-    /* Serie por serie: rojo solo si al menos el 25 % de las series quedó en rojo
-       o si faltan más de 2 series sin marcar; si no, dorado si algo se superó (o hubo extra), si no verde */
-    let total = 0, red = 0, unmarked = 0, gold = false, any = false;
+    let total = 0, red = 0, unmarked = 0, extra = 0, gold = false;
     plan.forEach(p => {
         const reps = entry.exercises[p.id]?.reps || [];
         p.t.forEach((range, i) => {
             total++;
             const st = reps[i] > 0 ? serieStatus(range, reps[i]) : "";
             if (!st) unmarked++;
-            else { any = true; if (st === "red") red++; if (st === "gold") gold = true; }
+            else { if (st === "red") red++; if (st === "gold") gold = true; }
         });
-        if (reps.slice(p.t.length).some(r => r > 0)) { any = true; gold = true; }   /* series extra */
+        extra += reps.slice(p.t.length).filter(r => r > 0).length;   /* series extra del ejercicio */
     });
-    if (!any) return "empty";
-    if (red >= total * 0.25 || unmarked > 2) return "red";
-    return gold ? "gold" : "green";
+    /* ejercicios extra de esa fecha (para reemplazar los que no se hicieron) */
+    if (routine.id !== EXTRA_ROUTINE_ID) {
+        const xe = state.logs[EXTRA_ROUTINE_ID]?.[key];
+        if (xe) for (const id in xe.exercises) extra += (xe.exercises[id].reps || []).filter(r => r > 0).length;
+    }
+    if (extra) gold = true;
+    const missing = Math.max(0, unmarked - extra);   /* lo no hecho que las extra no cubren */
+    return { total, red, unmarked, extra, missing, gold, marked: total - unmarked, done: Math.min(1, (total - missing) / total) };
+}
+
+function dayStatus(routine, key) {
+    const d = dayProgress(routine, key);
+    if (!d || d.marked + d.extra === 0) return "empty";
+    /* rojo solo si al menos el 25 % de las series quedó en rojo o sin hacer (las extra cuentan como hechas) */
+    if (d.red >= d.total * 0.25 || d.missing >= d.total * 0.25) return "red";
+    return d.gold ? "gold" : "green";
 }
