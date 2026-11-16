@@ -458,9 +458,9 @@
 .picker-item.picked { background: rgba(var(--ui-rgb), 0.2); border-color: var(--ui); }
 .picker-item.picked span::after { content: " ✓"; color: var(--ui); font-weight: bold; }
 
-/* Barra de calorías con el botón "dar el día" (volumen sucio) a la par */
-.food-bar-row { display: flex; align-items: center; gap: 8px; margin: calc(8px * var(--k)) 0; }
-.food-bar-row .food-bar { flex: 1; margin: 0; }
+/* Botón "dar el día" (volumen sucio) a la par del total de calorías, centrado con él;
+   la barra de calorías ocupa todo el ancho debajo */
+.food-kcal .food-done { align-self: center; margin-left: 4px; }
 .food-done {
     flex-shrink: 0; width: 30px; height: 30px; padding: 0; border-radius: 9px; cursor: pointer;
     display: grid; place-items: center; color: var(--text);
