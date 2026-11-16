@@ -133,6 +133,9 @@ const FOOD_CATALOG = {
         ["Atún Sabemas aceite", "1 lata = 5 porciones", "latas", 5],
         ["Atún Sabemas / Member agua", "1 lata = 4 porciones", "latas", 4],
         ["Atún Pronto aceite", "1 lata = 4 porciones", "latas", 4],
+        /* Suli (Walmart, Palí, Más x Menos, Maxi Palí): lata de 140 g, ≈ 100 g escurrido (≈ 25 g de proteína) */
+        ["Atún Suli en agua", "1 lata = 3,5 porciones", "latas", 3.5],
+        ["Atún Suli en aceite", "1 lata = 4,5 porciones", "latas", 4.5],
         ["Sardimar Funcional", "1 lata = 3 porciones", "latas", 3],
         ["Sardina salsa-tomate", "1 lata = 3 porciones", "latas", 3],
         ["Sardina light / Tesoro / Calvo", "1 lata = 2,5 porciones", "latas", 2.5],
