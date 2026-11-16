@@ -14,7 +14,7 @@ const CHANGELOG = [
             "Deportes con una carga nueva y más realista: 100 = 40 minutos de ejercicio moderado. Sale de la distancia, el tiempo y la subida, y de tu cuerpo (altura, peso, sexo y edad). Al registrar ves si fue suave, moderada o intensa y las calorías aproximadas.",
             "Fútbol, básquetbol y tenis cuentan por la distancia que recorres en el partido; voleibol, por tiempo.",
             "Los números deslizables: en el entreno, el editor de rutinas y las ventanas largas, tócalos para activarlos (el pulso ahora es más suave) y dejan de latir al soltar. Todo el cuadro responde, letras incluidas. En el resto de la app se deslizan directo.",
-            "Galletas por paquete (una Chiky = las 6 del paquete), snacks por bolsa pequeña, mediana o grande y Milka por tableta. Las bebidas ahora suman su agua al contador de agua.",
+            "Galletas por paquete (una Chiky = las 6 del paquete), snacks por bolsa con los tamaños que se venden en Costa Rica (por ejemplo Pringles de 40, 67, 124 y 149 g) y Milka por tableta. Las bebidas ahora suman su agua al contador de agua.",
             "Comidas nuevas: picadillo de papa con carne molida o mechada, carne mechada, ensalada fría de caracolitos con atún, patacones caseros y de paquete, y ponches.",
             "Plan base de proteínas y grasas: 40 % bajas en grasa, 30 % medias en grasa y 30 % grasas.",
             "La app va más fluida con meses de datos: deslizar ya no da tirones y se arreglaron una fuga de memoria y navegaciones que podían quedarse trabadas."
