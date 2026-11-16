@@ -90,7 +90,7 @@ function renderWeekSection() {
 
     const caption = document.createElement("p");
     caption.className = "split-caption";
-    caption.textContent = viewDate() ? "Elige el día que entrenaste" : "Elige el día de hoy";
+    caption.textContent = viewDate() ? "Elige el día que entrenaste" : "Añadir otra actividad";
     container.append(caption, weekActions());
 }
 

@@ -205,6 +205,7 @@ async function giveTheDay() {
         subtitle: "",
         unit: () => `Calorías totales: ${fmtNum(now + kcal, 0)} kcal`,   /* cómo queda el día */
         read: () => String(kcal),
+        suffix: " kcal",
         step: dir => { kcal = Math.min(10000, Math.max(DIRTY_STEP, kcal + dir * DIRTY_STEP)); },
         editMode: "numeric",
         onEdit: text => { const n = parseAmount(text, { integer: true, max: 10000 }); if (n === null || n <= 0) return "x"; kcal = n; return ""; },

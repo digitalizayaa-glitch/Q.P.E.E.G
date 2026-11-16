@@ -66,7 +66,7 @@ function bindHold(btn, fn) {
 
 /* Tocar un número lo convierte en un campo de texto: se abre el teclado, Enter aplica y Escape cancela.
    onEdit(texto) devuelve "" si sirve o un texto de error (el campo se marca en rojo). */
-function editInBox(box, { read, onEdit, editMode }) {
+function editInBox(box, { read, onEdit, editMode, show }) {
     if (box.classList.contains("editing")) return;
 
     const input = document.createElement("input");
@@ -96,7 +96,7 @@ function editInBox(box, { read, onEdit, editMode }) {
         }
         finished = true;
         box.classList.remove("editing");
-        box.textContent = read();
+        box.textContent = (show || read)();
     };
 
     input.addEventListener("keydown", e => {

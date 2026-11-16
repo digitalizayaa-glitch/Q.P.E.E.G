@@ -664,3 +664,9 @@
 }
 .history-cell.just-done { position: relative; z-index: 2; animation: done-day-pulse 3.4s ease-in-out 1; }
 @media (prefers-reduced-motion: reduce) { .history-cell.just-done { animation: none; box-shadow: 0 0 0 4px var(--ui); } }
+
+/* Semana: "Añadir otra actividad" y "Series" como títulos iguales, en gris */
+#weekRoutineContent .split-caption, #week .series-title {
+    font-size: 16px; font-weight: bold; letter-spacing: .3px; color: var(--muted);
+}
+.stepper-value.with-suffix { font-size: 44px; white-space: nowrap; }

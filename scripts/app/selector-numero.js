@@ -10,7 +10,8 @@
 
 let stepperOverlay = null;
 
-function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extra, onClose, doneLabel, cancelLabel, second, firstLabel }) {
+function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extra, onClose, doneLabel, cancelLabel, second, firstLabel, suffix = "" }) {
+    const show = () => read() + suffix;   /* el número con su símbolo (p. ej. " kcal"); al escribir, solo el número */
     if (stepperOverlay) return;
 
     const overlay = document.createElement("div");
@@ -45,7 +46,8 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
 
     const box = document.createElement("div");
     box.className = "stepper-value";
-    box.textContent = read();
+    box.textContent = show();
+    if (suffix) box.classList.add("with-suffix");   /* con símbolo: la cifra un poco más chica para que quepa (10000 kcal) */
 
     const actions = document.createElement("div");
     actions.className = "dialog-actions";
@@ -119,7 +121,7 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
         const before = read();
         step(dir);
         const after = read();
-        if (after !== before) animateValue(box, dir, after);
+        if (after !== before) animateValue(box, dir, after + suffix);
     };
 
     /* unidad que cambia con la cantidad (1 rebanada / 2 rebanadas): se repinta cada vez que cambia el número */
@@ -128,7 +130,7 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
     bindHold(up, () => apply(1));
     bindHold(down, () => apply(-1));
 
-    const startEdit = () => { if (onEdit && ready()) editInBox(box, { read, onEdit, editMode }); };
+    const startEdit = () => { if (onEdit && ready()) editInBox(box, { read, onEdit, editMode, show }); };
 
     attachValueSwipe(box, apply, startEdit, 34);
 
