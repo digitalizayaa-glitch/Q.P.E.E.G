@@ -146,14 +146,14 @@ def main():
             pg.keyboard.press("Escape"); navegador.quieto(pg)
             if pg.locator(".picker-overlay").count(): pg.locator(".picker-close").first.click(); navegador.quieto(pg)
 
-            # Un ejercicio en verde y los demás sin marcar: rojo; con ✓: verde
+            # Un ejercicio en verde y los demás sin marcar (más de 2 series): rojo, con ✓ o sin él; el ✓ se guarda
             pg.evaluate("state.logs.r1[getWorkoutDateKey()].exercises.e0 = { kg: 40, reps: [10, 10, 10], extra: 0 }; saveState()")
             r["sin_check_rojo"] = status(pg) == "red"
             pg.click("#dayDoneBtn"); navegador.quieto(pg)
-            r["con_check_verde"] = status(pg) == "green" and pg.evaluate("document.getElementById('dayDoneBtn').classList.contains('on')")
+            r["con_check_verde"] = status(pg) == "red" and pg.evaluate("document.getElementById('dayDoneBtn').classList.contains('on')")
             shot(pg, "volver_2_check")
             pg.reload(); navegador.quieto(pg)
-            r["check_se_guarda"] = pg.evaluate("state.logs.r1[getWorkoutDateKey()].done === true") and status(pg) == "green"
+            r["check_se_guarda"] = pg.evaluate("state.logs.r1[getWorkoutDateKey()].done === true") and pg.evaluate("workoutDayDone(getWorkoutDateKey())")
             pg.evaluate("enterApp(false)"); navegador.quieto(pg)
             pg.locator(".split-card", has_text="Push").click(); navegador.quieto(pg)
             r["check_encendido_al_volver"] = pg.evaluate("document.getElementById('dayDoneBtn').classList.contains('on')")

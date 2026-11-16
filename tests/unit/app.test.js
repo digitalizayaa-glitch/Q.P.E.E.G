@@ -346,6 +346,36 @@ test("deportes: boxeo por rounds y minutos por round", () => {
     app("state.nutrition = null");
 });
 
+test("entreno: rojo solo con ≥25 % de series en rojo o más de 2 sin marcar; tocar otro día no cambia el entrenado", () => {
+    const ser = n => Array.from({ length: n }, () => ({ min: 6, max: 8 }));
+    app(`state.routines = [{ id: "r1", name: "R", days: [
+        { id: "push", name: "Push", exercises: [{ id: "a", name: "Press banca", kg: 50, unit: "lb", series: ${JSON.stringify(ser(3))} },
+            { id: "b", name: "Peck deck", kg: 45, unit: "lb", series: ${JSON.stringify(ser(3))} },
+            { id: "c", name: "Press militar", kg: 40, unit: "lb", series: ${JSON.stringify(ser(3))} },
+            { id: "d", name: "Fondos", kg: 0, unit: "kg", series: ${JSON.stringify(ser(3))} }] },
+        { id: "leg", name: "Pierna", exercises: [{ id: "rdl", name: "Peso muerto rumano", kg: 60, unit: "lb", series: ${JSON.stringify(ser(3))} }] }] }]`);
+    const k = "2026-11-10", st = () => call("dayStatus", ev("state.routines[0]"), k);
+    const put = reps => app(`state.logs = { r1: { "${k}": { dayId: "push", plan: planOf(state.routines[0].days[0]), exercises: ${JSON.stringify(reps)} } } }`);
+    put({ a: { kg: 50, reps: [4, 7, 6] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 7] } });
+    assert.equal(st(), "green", "1 de 12 series en rojo no pinta el día");
+    put({ a: { kg: 50, reps: [4, 4, 4] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 7] } });
+    assert.equal(st(), "red", "3 de 12 = 25 %");
+    put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 0] } });
+    assert.equal(st(), "green", "1 serie sin marcar");
+    put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [0, 0, 0] } });
+    assert.equal(st(), "red", "3 series sin marcar");
+    put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 7] } });
+    /* tocar el peso muerto rumano (otro día) no cambia el día entrenado */
+    app(`ensureExerciseLog("r1", "${k}", "leg", state.routines[0].days[1].exercises[0]).kg = 70`);
+    assert.equal(ev(`state.logs.r1["${k}"].dayId`), "push");
+    assert.equal(st(), "green");
+    /* un registro guardado con el día equivocado se repara al cargar */
+    app(`state.logs.r1["${k}"].dayId = "leg"`);
+    const fixed = call("stateFrom", ev("state"));
+    assert.equal(fixed.logs.r1[k].dayId, "push");
+    app("state.logs = {}; state.routines = []");
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

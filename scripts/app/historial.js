@@ -106,6 +106,7 @@ function renderHistory(animate) {
         if (status === "sport") cell.classList.add("sport");
         if (historyMode !== "sport" && state.sports[key]) cell.classList.add("has-sport");   /* punto: ese día hubo deporte */
         if (key === todayKey) cell.classList.add("today");
+        if (historyMode === "workout" && workoutDayDone(key)) cell.classList.add("done");   /* ✓: día dado por terminado */
 
         if (key > todayKey) {
             cell.classList.add("future");
@@ -504,6 +505,11 @@ function workoutDayStatus(key) {
         if ((rank[st] || 0) > (rank[best] || 0)) best = st;
     });
     return best;
+}
+
+/* ¿Se marcó el ✓ de ese día (rutina activa o entreno extraordinario)? */
+function workoutDayDone(key) {
+    return [state.activeRoutineId, EXTRA_ROUTINE_ID].some(rid => rid && state.logs[rid]?.[key]?.done);
 }
 
 function openHistoryDay(key) {

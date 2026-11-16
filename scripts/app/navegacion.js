@@ -126,6 +126,17 @@ function updateDayDoneButton(sectionId) {
     btn.classList.toggle("on", on);
     btn.setAttribute("aria-pressed", on ? "true" : "false");
     btn.setAttribute("aria-label", on ? "Quitar día terminado" : "Dar el día por terminado");
+    /* aviso cada 5 s junto al ✓ mientras el día no esté terminado */
+    let hint = document.getElementById("dayDoneHint");
+    if (!hint) {
+        hint = document.createElement("div");
+        hint.id = "dayDoneHint";
+        hint.className = "day-done-hint";
+        hint.setAttribute("aria-hidden", "true");
+        hint.textContent = "Marca aquí al terminar el día";
+        btn.parentElement.appendChild(hint);
+    }
+    hint.classList.toggle("on", !!entry && !on);
 }
 
 function toggleDayDone() {

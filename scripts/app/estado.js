@@ -279,6 +279,7 @@ function freezeOldPlans(s) {
             if (day) entry.plan = planOf(day);
         }
     }
+    fixEntryDays(s);
     return s;
 }
 
@@ -448,12 +449,40 @@ function readExerciseLog(routineId, key, ex) {
     };
 }
 
-/* Asocia el registro a un día; si es nuevo o cambia de día, copia las metas actuales de ese día */
+/* Series marcadas (reps > 0) de un día de la rutina dentro de un registro */
+function markedSeriesOf(entry, day) {
+    if (!day) return 0;
+    return day.exercises.reduce((n, ex) => n + (entry.exercises[ex.id]?.reps || []).filter(r => r > 0).length, 0);
+}
+
+/* Asocia el registro a un día; si es nuevo o cambia de día, copia las metas actuales de ese día.
+   Un registro es de un solo día por fecha: tocar otro día de la rutina (ver la pierna estando en push)
+   no cambia el día entrenado mientras el actual tenga más series marcadas. */
 function setEntryDay(routineId, entry, dayId) {
     if (entry.dayId === dayId && entry.plan) return;
+    const routine = findRoutine(routineId);
+    if (entry.dayId && entry.dayId !== dayId && routine) {
+        const cur = markedSeriesOf(entry, findDay(routine, entry.dayId));
+        if (cur > 0 && markedSeriesOf(entry, findDay(routine, dayId)) + 1 <= cur) return;
+    }
     entry.dayId = dayId;
-    const day = findDay(findRoutine(routineId), dayId);
+    const day = findDay(routine, dayId);
     if (day) entry.plan = planOf(day);
+}
+
+/* Registros guardados con el día equivocado (se tocó otro día de la rutina): pasan al día con más series marcadas */
+function fixEntryDays(s) {
+    for (const rid in s.logs) {
+        const routine = s.routines.find(r => r.id === rid);
+        if (!routine) continue;
+        for (const key in s.logs[rid]) {
+            const entry = s.logs[rid][key];
+            const cur = markedSeriesOf(entry, routine.days.find(d => d.id === entry.dayId));
+            let best = null, most = cur;
+            routine.days.forEach(d => { const n = markedSeriesOf(entry, d); if (n > most) { most = n; best = d; } });
+            if (best) { entry.dayId = best.id; entry.plan = planOf(best); }
+        }
+    }
 }
 
 /* Crea el registro si no existe (para escribir) */
@@ -492,16 +521,20 @@ function dayStatus(routine, key) {
     const plan = key !== dateKey() && entry.plan ? entry.plan : (day ? planOf(day) : null);
     if (!plan || plan.length === 0) return "empty";
 
-    let statuses = plan.map(p => exerciseStatus(p.t, entry.exercises[p.id]?.reps || []));
-
-    /* Día dado por terminado (✓ del entreno): los ejercicios sin marcar no cuentan */
-    if (entry.done) {
-        statuses = statuses.filter(s => s !== "pending");
-        if (statuses.length === 0) return "green";
-    }
-    if (statuses.every(s => s === "pending")) return "empty";
-    if (statuses.some(s => s === "pending")) return "red"; // se empezó pero no se completó
-    if (statuses.includes("red")) return "red";
-    if (statuses.includes("gold")) return "gold";
-    return "green";
+    /* Serie por serie: rojo solo si al menos el 25 % de las series quedó en rojo
+       o si faltan más de 2 series sin marcar; si no, dorado si algo se superó (o hubo extra), si no verde */
+    let total = 0, red = 0, unmarked = 0, gold = false, any = false;
+    plan.forEach(p => {
+        const reps = entry.exercises[p.id]?.reps || [];
+        p.t.forEach((range, i) => {
+            total++;
+            const st = reps[i] > 0 ? serieStatus(range, reps[i]) : "";
+            if (!st) unmarked++;
+            else { any = true; if (st === "red") red++; if (st === "gold") gold = true; }
+        });
+        if (reps.slice(p.t.length).some(r => r > 0)) { any = true; gold = true; }   /* series extra */
+    });
+    if (!any) return "empty";
+    if (red >= total * 0.25 || unmarked > 2) return "red";
+    return gold ? "gold" : "green";
 }
