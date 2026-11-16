@@ -323,6 +323,16 @@ test("pan cuadrado: se cuenta por rebanada (1 rebanada = 1 harina)", () => {
     assert.deepEqual(ev("FOOD_CALIBRATION['Pan cuadrado blanco Bimbo'].pt"), { h: 1 });
 });
 
+test("deportes: bici de montaña pesa más que la de ruta con los mismos datos", () => {
+    app("state.nutrition = { profile: { sex: 'm', age: 17, height: 175, weight: 75, activity: 1.55, bf: null }, goal: 'maintain', diet: 'mod' }");
+    const sp = { km: 9, min: 59, up: 200 };
+    const ruta = call("sportLoad", { k: "bike", ...sp }), mtb = call("sportLoad", { k: "mtb", ...sp });
+    assert.ok(mtb > ruta * 1.3, `${mtb} vs ${ruta}`);
+    assert.equal(ev("sportPaceDetail({ k: 'mtb', km: 9, min: 59, up: 200 }).zone"), "moderada");
+    assert.ok(ev("SPORT_BY_KEY.mtb.name") === "Bici de montaña");
+    app("state.nutrition = null");
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

@@ -34,6 +34,7 @@ const SPORT_REF_FACTOR = 0.75;
 const SPORTS = [
     { k: "run",    name: "Correr",     ref: { min: 45, km: 7,   up: 60 } },
     { k: "bike",   name: "Ciclismo",   ref: { min: 90, km: 35,  up: 400 } },
+    { k: "mtb",    name: "Bici de montaña", ref: { min: 90, km: 20, up: 500 } },
     { k: "walk",   name: "Caminar",    ref: { min: 60, km: 5,   up: 80 } },
     { k: "swim",   name: "Nadar",      ref: { min: 45, km: 1.5 } },
     { k: "soccer", name: "Fútbol",     ref: { min: 90, km: 8 } },
@@ -65,6 +66,8 @@ function fmtDuration(min) {
 const SPORT_PACE = {
     run:    { v: 10,      up: 0.8, o2: 0.9, sex: 0.88, age: 0.007, bmi: 0.025, h: 0.3 },
     walk:   { v: 5,       up: 0.8, o2: 1.8, sex: 0.96, age: 0.004, bmi: 0.010, h: 0.5 },
+    /* MTB: más lenta en plano (terreno, llantas) y la subida pesa más en el tiempo que en ruta */
+    mtb:    { v: 13,      up: 1.5, o2: 1.8, sex: 0.88, age: 0.006, bmi: 0.012, h: 0 },
     bike:   { v: 20,      up: 2,   o2: 1.8, sex: 0.88, age: 0.006, bmi: 0.012, h: 0 },
     swim:   { v: 2,       up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.008, h: 0.3 },
     soccer: { v: 8 / 1.5, up: 0,   o2: 0,   sex: 0.92, age: 0.006, bmi: 0.015, h: 0.2, met: 7 },
@@ -80,7 +83,8 @@ function sportFlatMet(k, v, relV = 1) {
     const mmin = v * 1000 / 60;
     if (k === "run" || (k === "walk" && v > 7)) return Math.max(6, (0.2 * mmin + 3.5) / 3.5);   /* ACSM: 10 km/h ≈ 10,5 */
     if (k === "walk") return Math.max(2, (0.1 * mmin + 3.5) / 3.5);    /* ACSM: 5 km/h ≈ 3,4 */
-    if (k === "bike") return Math.max(3.5, 0.45 * v - 1.3);            /* Compendio: paseo ≈ 3,5–4 · 20 km/h ≈ 7,7 · 25 ≈ 10 */
+    if (k === "bike") return Math.max(3.5, 0.45 * v - 1.3);
+    if (k === "mtb") return Math.max(5, 0.45 * v + 1.8);              /* Compendio: MTB general ≈ 8,5; a 9 km/h por trocha ≈ 6 */            /* Compendio: paseo ≈ 3,5–4 · 20 km/h ≈ 7,7 · 25 ≈ 10 */
     if (k === "swim") return Math.max(4, 4 * v);                       /* 2 km/h (3 min/100 m) ≈ 8 */
     return 1 + (SPORT_PACE[k].met - 1) * Math.min(1.3, Math.max(0.75, Math.sqrt(relV)));
 }
@@ -93,7 +97,7 @@ const SPORT_MODERATE = { min: 40, x: 0.5 };                     /* = 100 */
    Potencia 0,6: el doble de minutos suma ≈ 1,5 veces, no el doble; así una salida de 3 h no se dispara a 1000 */
 const SPORT_PAR = 5, SPORT_POW = 0.6;
 /* Ajuste final por deporte (comparado con cómo se sienten las sesiones reales): bici +5 %, caminar +12 %, el resto +10 % */
-const SPORT_BOOST = { bike: 1.05, walk: 1.12 };
+const SPORT_BOOST = { bike: 1.05, mtb: 1.05, walk: 1.12 };
 const sportBoost = k => SPORT_BOOST[k] || 1.10;
 
 /* Cuerpo del perfil (sin plan: null → persona de referencia) */

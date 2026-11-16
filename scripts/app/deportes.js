@@ -116,7 +116,7 @@ function askSportData(sport, editing) {
             box.setAttribute("aria-label", `${field.label}: ${vals[field.f] > 0 ? field.fmt(vals[field.f]) : "sin dato"}`);
             fit();
         };
-        const step = field.f === "km" && sport.k === "bike" ? 1 : field.step;
+        const step = field.f === "km" && (sport.k === "bike" || sport.k === "mtb") ? 1 : field.step;
         const apply = dir => {
             const before = text();
             vals[field.f] = Math.min(field.max, Math.max(0, Math.round((vals[field.f] + dir * step) * 10) / 10));
