@@ -365,11 +365,15 @@ test("entreno: rojo solo con ≥25 % de series en rojo o sin hacer (las extra cu
     put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [0, 0, 0] } });
     assert.equal(st(), "red", "3 de 12 sin marcar = 25 %");
     put({ a: { kg: 50, reps: [7, 7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [0, 0, 0] } });
-    assert.equal(st(), "gold", "1 serie extra cubre una: quedan 2 de 12 sin hacer");
+    assert.equal(st(), "green", "1 serie extra cubre una: quedan 2 de 12 sin hacer (verde: no se hizo toda la rutina)");
     put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [0, 0, 0] } });
     app(`state.logs.__extra = { "${k}": { dayId: "xd-${k}", exercises: { x1: { kg: 20, reps: [10, 10], extra: 0 } } } }`);
-    assert.equal(st(), "gold", "un ejercicio extra con 2 series reemplaza");
+    assert.equal(st(), "green", "un ejercicio extra con 2 series reemplaza");
     assert.equal(ev(`dayProgress(state.routines[0], "${k}").done`), 11 / 12);
+    put({ a: { kg: 50, reps: [7, 7, 9] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 7] } });
+    assert.equal(st(), "gold", "todo en meta y una serie superada: amarillo");
+    put({ a: { kg: 50, reps: [7, 7, 9] }, b: { kg: 45, reps: [7, 7, 5] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 7] } });
+    assert.equal(st(), "green", "una superada pero otra en rojo: verde");
     app("delete state.logs.__extra");
     put({ a: { kg: 50, reps: [7, 7, 7] }, b: { kg: 45, reps: [7, 7, 7] }, c: { kg: 40, reps: [7, 7, 7] }, d: { kg: 0, reps: [7, 7, 7] } });
     /* tocar el peso muerto rumano (otro día) no cambia el día entrenado */

@@ -549,5 +549,6 @@ function dayStatus(routine, key) {
     if (!d || d.marked + d.extra === 0) return "empty";
     /* rojo solo si al menos el 25 % de las series quedó en rojo o sin hacer (las extra cuentan como hechas) */
     if (d.red >= d.total * 0.25 || d.missing >= d.total * 0.25) return "red";
-    return d.gold ? "gold" : "green";
+    /* amarillo solo si toda la rutina quedó hecha y en meta (ninguna serie sin marcar ni en rojo) y algo se superó */
+    return d.gold && d.unmarked === 0 && d.red === 0 ? "gold" : "green";
 }
