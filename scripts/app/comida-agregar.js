@@ -177,23 +177,10 @@ function askFastFood(key, done, existing) {
 }
 
 /* ---------- dar el día (volumen sucio) ----------
-   Para días en que se come fuera de lo común y no se puede contar: suma calorías como una entrada
-   "Volumen sucio" (sin macros: no se conocen). Opciones: bajo (+750), medio (+1500), grande (+2000),
-   completar la meta, o elegir en cuánto quedará el total del día.
-   Si ya se dio el día, el mismo botón permite quitarlo. */
-const DIRTY_SIZES = [
-    { label: "Bajo", kcal: 750 },
-    { label: "Medio", kcal: 1500 },
-    { label: "Grande", kcal: 2000 }
-];
-
-function addDirtyVolume(kcal, note) {
-    addFoodEntry({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        n: "Volumen sucio", g: FREE_GROUP, p: 1, k: Math.round(kcal), t: note
-    });
-    renderFood();
-}
+   Para días en que se come fuera de lo común y no se puede contar: un solo deslizable con las calorías
+   a sumar (de 200 en 200); el subtítulo dice al momento en cuánto queda el día. Se guarda como una entrada
+   "Volumen sucio" (sin macros: no se conocen). Si ya se dio el día, el mismo botón permite quitarlo. */
+const DIRTY_STEP = 200;
 
 async function giveTheDay() {
     const entries = foodEntries();
@@ -211,29 +198,25 @@ async function giveTheDay() {
     }
     const goal = nutritionPlan().kcal;
     const now = Math.round(foodTotals(entries).kcal);
-    const missing = Math.round(goal - now);
-    const after = k => `el día queda en ${fmtNum(now + k, 0)} kcal`;
-    const items = DIRTY_SIZES.map(d => ({ label: `${d.label} · +${fmtNum(d.kcal, 0)} kcal`, sub: after(d.kcal), value: { kcal: d.kcal, note: `Volumen sucio ${d.label.toLowerCase()}` } }));
-    if (missing > 0) items.push({ label: `Completar la meta · +${fmtNum(missing, 0)} kcal`, sub: `el día queda en tu meta de ${fmtNum(goal, 0)} kcal`, value: { kcal: missing, note: "Calorías que faltaban" } });
-    items.push({ label: "Elegir el total del día…", sub: "tú dices en cuántas calorías queda", value: "custom" });
-    openPicker({
+    /* empieza en lo que falta para la meta (redondeado a 200); si ya llegaste, en 600 */
+    let kcal = Math.max(DIRTY_STEP, Math.round(Math.max(goal - now, 600) / DIRTY_STEP) * DIRTY_STEP);
+    openStepper({
         title: "Volumen sucio",
-        groups: [{ items }],
-        onPick: choice => {
-            if (choice !== "custom") { addDirtyVolume(choice.kcal, choice.note); return; }
-            /* elegir en cuánto queda el total: se suma la diferencia con lo que ya llevas */
-            let total = Math.max(now + 50, Math.ceil(Math.max(goal, now) / 50) * 50);
-            openStepper({
-                title: "Volumen sucio",
-                subtitle: `Total del día en kcal (ya llevas ${fmtNum(now, 0)})`,
-                read: () => String(total),
-                step: dir => { total = Math.max(now + 50, total + dir * 50); },
-                editMode: "numeric",
-                onEdit: text => { const n = parseAmount(text, { integer: true, max: 20000 }); if (n === null || n <= now) return "x"; total = n; return ""; },
-                doneLabel: "Agregar",
-                cancelLabel: "Cancelar",
-                onClose: ok => { if (ok) addDirtyVolume(total - now, `Total del día: ${fmtNum(total, 0)} kcal`); }
+        subtitle: "Calorías a sumar",
+        unit: () => `el día queda en ${fmtNum(now + kcal, 0)} kcal`,
+        read: () => String(kcal),
+        step: dir => { kcal = Math.min(10000, Math.max(DIRTY_STEP, kcal + dir * DIRTY_STEP)); },
+        editMode: "numeric",
+        onEdit: text => { const n = parseAmount(text, { integer: true, max: 10000 }); if (n === null || n <= 0) return "x"; kcal = n; return ""; },
+        doneLabel: "Agregar",
+        cancelLabel: "Cancelar",
+        onClose: ok => {
+            if (!ok) return;
+            addFoodEntry({
+                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                n: "Volumen sucio", g: FREE_GROUP, p: 1, k: kcal, t: `+${fmtNum(kcal, 0)} kcal`
             });
+            renderFood();
         }
     });
 }
