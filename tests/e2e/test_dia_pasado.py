@@ -64,6 +64,11 @@ def main():
             pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)
             pg.evaluate("shiftWeekTab(-1)"); navegador.quieto(pg)
             r["pestanas_bloqueadas"] = sec() == "food" and pg.evaluate("foodKey()") == PK
+            # arrastrar de lado no mueve la pantalla (ni rebote)
+            pg.mouse.move(300, 60); pg.mouse.down(); pg.mouse.move(200, 61, steps=6)
+            r["arrastre_estatico"] = pg.evaluate("!document.querySelector('main').style.transform && !document.querySelector('main').getAnimations().length")
+            pg.mouse.move(80, 62, steps=6); pg.mouse.up(); navegador.quieto(pg)
+            r["arrastre_no_cambia"] = sec() == "food"
             r["flecha_en_comida"] = pg.evaluate("document.getElementById('homeBtn').dataset.mode") == "back"
             pg.click("#homeBtn"); navegador.quieto(pg)
             r["flecha_vuelve_al_calendario"] = sec() == "history" and pg.evaluate("viewDate()") is None

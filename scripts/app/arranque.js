@@ -175,7 +175,8 @@ function swipeContext(inHeader, axis) {
     const main = document.querySelector("main");
     const active = document.querySelector(".section.active").id;
 
-    const tabs = { el: main, axis: "x", can: () => true, run: d => shiftWeekTab(d) };
+    /* editando un día anterior no se cambia de pestaña: la pantalla no se mueve (sin arrastre ni rebote) */
+    const tabs = viewDate() ? null : { el: main, axis: "x", can: () => true, run: d => shiftWeekTab(d) };
 
     if (inHeader) return axis === "x" ? tabs : null;
 
