@@ -240,7 +240,15 @@ function changeRoutineSets(routineId, dayId, exerciseId, delta, valueBox) {
 
     /* el registro de hoy se ajusta a las series nuevas; las extra se quedan al final */
     const logged = state.logs[routineId]?.[dateKey()]?.exercises?.[exercise.id];
-    if (logged) logged.reps = Array.from({ length: n }, (_, i) => (i < before ? logged.reps[i] || 0 : 0)).concat(logged.reps.slice(before));
+    if (logged) {
+        logged.reps = Array.from({ length: n }, (_, i) => (i < before ? logged.reps[i] || 0 : 0)).concat(logged.reps.slice(before));
+        /* pesos propios: las series que quedan se mantienen; las extra se corren con sus repeticiones */
+        if (logged.kgs) {
+            const kgs = {};
+            for (const i in logged.kgs) { const k = Number(i); if (k < Math.min(before, n)) kgs[k] = logged.kgs[i]; else if (k >= before) kgs[k - before + n] = logged.kgs[i]; }
+            if (Object.keys(kgs).length) logged.kgs = kgs; else delete logged.kgs;
+        }
+    }
     saveState();
     if (valueBox && n !== before) animateValue(valueBox, delta > 0 ? 1 : -1, String(n));
 }
@@ -282,7 +290,6 @@ function openRangeEditor(routineId, dayId, exerciseId, onDone = () => renderDayS
         const d = dir || 1;
         if (nlo !== lo && !(typed != null && which === "min")) animateValue(boxes.min, d, String(nlo));
         if (nhi !== hi && !(typed != null && which === "max")) animateValue(boxes.max, d, String(nhi));
-        paintNote();
     };
 
     ["min", "max"].forEach(which => {
@@ -318,13 +325,6 @@ function openRangeEditor(routineId, dayId, exerciseId, onDone = () => renderDayS
         cols.appendChild(col);
     });
 
-    const note = document.createElement("div");
-    note.className = "stepper-hint";
-    const paintNote = () => {
-        const r = rangeOf(ex());
-        note.textContent = r[0] === r[1] ? `Número fijo: ${r[0]} repeticiones` : `Rango: de ${r[0]} a ${r[1]} repeticiones`;
-    };
-    paintNote();
 
     const done = document.createElement("button");
     done.type = "button";
@@ -332,5 +332,5 @@ function openRangeEditor(routineId, dayId, exerciseId, onDone = () => renderDayS
     done.textContent = "Listo";
     done.onclick = close;
 
-    sheet.append(sub, cols, note, done);
+    sheet.append(sub, cols, done);   /* sin texto debajo: el mínimo y el máximo ya se ven en sus columnas */
 }

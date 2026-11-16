@@ -3,11 +3,14 @@
     Ventana más grande que el cuadro original: un área grande para deslizar
     arriba/abajo, botones ▲ ▼ (mantenerlos presionados repite) y, en el peso,
     un acceso para escribirlo exacto.
+    Sin textos debajo de las flechas: la unidad, si cambia (kg/lb, rebanada/rebanadas), va en el subtítulo.
+    second: un segundo número al lado (columna derecha), p. ej. el peso de una sola serie:
+            { label, read, step, onEdit, editMode }; con él, cada columna lleva su nombre arriba (firstLabel / label).
 ========================================================= */
 
 let stepperOverlay = null;
 
-function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extra, onClose, doneLabel, cancelLabel }) {
+function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extra, onClose, doneLabel, cancelLabel, second, firstLabel }) {
     if (stepperOverlay) return;
 
     const overlay = document.createElement("div");
@@ -23,7 +26,10 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
     heading.textContent = title;
     const sub = document.createElement("div");
     sub.className = "stepper-sub";
-    sub.textContent = subtitle;
+    /* la unidad que cambia (kg/lb, 1 rebanada/2 rebanadas) se muestra en el subtítulo; la fija ya la dice el subtítulo */
+    const unitText = () => (typeof unit === "function" ? unit() : "");
+    const paintSub = () => { const u = unitText(); sub.textContent = u ? `${subtitle} · ${u}` : subtitle; };
+    paintSub();
 
     const up = document.createElement("button");
     up.type = "button";
@@ -41,15 +47,6 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
     box.className = "stepper-value";
     box.textContent = read();
 
-    const unitEl = document.createElement("div");
-    unitEl.className = "stepper-unit";
-    const unitText = () => (typeof unit === "function" ? unit() : unit);
-    unitEl.textContent = unitText();
-
-    const hint = document.createElement("div");
-    hint.className = "stepper-hint";
-    hint.textContent = onEdit ? "Usa ▲ ▼, desliza el número o tócalo para escribirlo" : "Usa ▲ ▼ o desliza el número";
-
     const actions = document.createElement("div");
     actions.className = "dialog-actions";
     if (extra) {
@@ -58,7 +55,7 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
         extraBtn.className = "dialog-btn ghost";
         const paintExtra = () => {
             extraBtn.textContent = typeof extra.label === "function" ? extra.label() : extra.label;
-            unitEl.textContent = unitText();
+            paintSub();
         };
         paintExtra();
         extraBtn.onclick = () => {
@@ -83,7 +80,39 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
     done.textContent = doneLabel || "Listo";
     actions.appendChild(done);
 
-    sheet.append(heading, sub, up, box, unitEl, down, hint, actions);
+    /* Segundo número (columna derecha) */
+    let box2 = null;
+    if (second) {
+        const mk = (cls, label, txt) => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.setAttribute("aria-label", label); b.textContent = txt; return b; };
+        const up2 = mk("stepper-btn", `Subir ${second.label}`, "▲"), down2 = mk("stepper-btn", `Bajar ${second.label}`, "▼");
+        box2 = document.createElement("div");
+        box2.className = "stepper-value";
+        box2.textContent = second.read();
+        const apply2 = dir => {
+            const before = second.read();
+            second.step(dir);
+            const after = second.read();
+            if (after !== before) animateValue(box2, dir, after);
+        };
+        bindHold(up2, () => apply2(1));
+        bindHold(down2, () => apply2(-1));
+        attachValueSwipe(box2, apply2, () => { if (second.onEdit && ready()) editInBox(box2, { read: second.read, onEdit: second.onEdit, editMode: second.editMode }); }, 34);
+        const col = (label, ...els) => {
+            const c = document.createElement("div");
+            c.className = "stepper-col";
+            const l = document.createElement("div");
+            l.className = "stepper-col-label";
+            l.textContent = label;
+            c.append(l, ...els);
+            return c;
+        };
+        const cols = document.createElement("div");
+        cols.className = "stepper-cols";
+        cols.append(col(firstLabel || "", up, box, down), col(second.label, up2, box2, down2));
+        sheet.append(heading, sub, cols, actions);
+    } else {
+        sheet.append(heading, sub, up, box, down, actions);
+    }
     overlay.appendChild(sheet);
 
     const apply = dir => {
@@ -94,7 +123,7 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
     };
 
     /* unidad que cambia con la cantidad (1 rebanada / 2 rebanadas): se repinta cada vez que cambia el número */
-    if (typeof unit === "function") new MutationObserver(() => { unitEl.textContent = unitText(); }).observe(box, { childList: true, characterData: true, subtree: true });
+    if (typeof unit === "function") new MutationObserver(paintSub).observe(box, { childList: true, characterData: true, subtree: true });
 
     bindHold(up, () => apply(1));
     bindHold(down, () => apply(-1));

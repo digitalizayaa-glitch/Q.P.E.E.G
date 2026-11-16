@@ -200,7 +200,7 @@ function toggleActiveRoutine(routineId) {
 function addRoutine() {
     openPicker({
         title: "Nueva rutina",
-        groups: [{ items: ROUTINE_PRESETS.map(p => ({ label: p.name, sub: p.days.join(" · "), value: p })) }],
+        groups: [{ items: ROUTINE_PRESETS.map(p => ({ label: p.name, value: p })) }],   /* sin subtítulo: el nombre ya dice los días */
         createLabel: "Rutina personalizada",
         onPick: preset => createRoutine(preset.name, preset.key),
         onCreate: async () => {

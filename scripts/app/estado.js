@@ -153,7 +153,14 @@ function sanitizeState(src) {
             const exercises = {};
             for (const id in (isObj(e.exercises) ? e.exercises : {})) {
                 const x = e.exercises[id];
-                if (isObj(x)) exercises[id] = { kg: num(x.kg), reps: (Array.isArray(x.reps) ? x.reps : []).map(num), extra: Math.min(MAX_EXTRA_SERIES, Math.round(num(x.extra))) };
+                if (!isObj(x)) continue;
+                exercises[id] = { kg: num(x.kg), reps: (Array.isArray(x.reps) ? x.reps : []).map(num), extra: Math.min(MAX_EXTRA_SERIES, Math.round(num(x.extra))) };
+                /* peso propio de algunas series: { índice: kg }; las demás usan el peso del ejercicio */
+                if (isObj(x.kgs)) {
+                    const kgs = {};
+                    for (const i in x.kgs) if (/^\d+$/.test(i) && Number(i) < 16 && Number.isFinite(Number(x.kgs[i])) && Number(x.kgs[i]) >= 0) kgs[i] = Math.min(9999, Number(x.kgs[i]));
+                    if (Object.keys(kgs).length) exercises[id].kgs = kgs;
+                }
             }
             const entry = { dayId: typeof e.dayId === "string" ? e.dayId : "", exercises };
             if (e.done === true) entry.done = true;   /* ✓ del entreno: día dado por terminado */
@@ -430,6 +437,7 @@ function readExerciseLog(routineId, key, ex) {
     const extra = stored ? stored.extra || 0 : 0;
     return {
         kg: stored ? stored.kg : ex.kg,
+        kgs: stored && stored.kgs ? { ...stored.kgs } : {},   /* peso propio de algunas series */
         extra,
         reps: Array.from({ length: ex.series.length + extra }, (_, i) => (stored ? (stored.reps[i] || 0) : 0))
     };

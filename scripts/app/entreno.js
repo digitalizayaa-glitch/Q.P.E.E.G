@@ -232,6 +232,7 @@ function renderWorkoutSeries(routineId, dayId, exerciseId, cardEl) {
         wrap.innerHTML = `
             <span class="serie-label">${isExtra ? "+" : ""}${toRoman(index + 1)}</span>
             <div class="reps-value">${reps}</div>
+            ${log.kgs && log.kgs[index] != null ? `<span class="serie-kg" title="Peso de esta serie">${fmtNum(log.kgs[index], 2)}</span>` : ""}
         `;
         const valueBox = wrap.querySelector(".reps-value");
         const current = () => readExerciseLog(routineId, getWorkoutDateKey(), getWorkoutExercise(routineId, dayId, exerciseId));
@@ -240,8 +241,16 @@ function renderWorkoutSeries(routineId, dayId, exerciseId, cardEl) {
             subtitle: isExtra
                 ? `Serie extra ${toRoman(index + 1)} · repeticiones (cuenta como progreso)`
                 : `Serie ${toRoman(index + 1)} · repeticiones (meta ${fmtRange(targetsFor(routineId, getWorkoutDateKey(), ex)[index] || rangeOf(ex))})`,
-            unit: "reps",
+            firstLabel: "Reps",
             read: () => String(current().reps[index] ?? 0),
+            /* a la derecha, el peso de solo esta serie (las demás siguen con el del ejercicio) */
+            second: {
+                label: unitOf(ex) === "lb" ? "Peso lb" : "Peso kg",
+                read: () => fmtNum(serieKg(current(), index), 2),
+                step: dir => changeSerieKg(routineId, dayId, exerciseId, index, dir * KG_STEP),
+                editMode: "decimal",
+                onEdit: text => { const n = parseAmount(text); if (n === null) return "x"; setSerieKg(routineId, dayId, exerciseId, index, n); return ""; }
+            },
             step: dir => changeWorkoutReps(routineId, dayId, exerciseId, index, dir, null),
             editMode: "numeric",
             onEdit: text => { const n = parseAmount(text, { integer: true, max: 999 }); if (n === null) return "x"; setWorkoutReps(routineId, dayId, exerciseId, index, n, false); return ""; },
@@ -291,6 +300,12 @@ function removeExtraSerie(routineId, dayId, exerciseId, index) {
     if (!log.extra || index < ex.series.length) return;
     log.reps.splice(index, 1);
     log.extra -= 1;
+    /* los pesos propios de las series que siguen se corren un lugar */
+    if (log.kgs) {
+        const kgs = {};
+        for (const i in log.kgs) { const n = Number(i); if (n < index) kgs[n] = log.kgs[i]; else if (n > index) kgs[n - 1] = log.kgs[i]; }
+        if (Object.keys(kgs).length) log.kgs = kgs; else delete log.kgs;
+    }
     saveState();
 }
 
@@ -338,6 +353,25 @@ function changeWorkoutKg(routineId, dayId, exerciseId, delta) {
     const box = document.getElementById(`kg-${exerciseId}`);
     if (box && log.kg !== before) animateValue(box, delta > 0 ? 1 : -1, String(log.kg));
 }
+
+/* Peso de una serie: el suyo propio si se le puso, si no el del ejercicio */
+const serieKg = (log, index) => (log.kgs && log.kgs[index] != null ? log.kgs[index] : log.kg);
+
+/* Peso propio de una sola serie; las demás siguen con el peso del ejercicio. Igual al del ejercicio = sin peso propio */
+function setSerieKg(routineId, dayId, exerciseId, index, value) {
+    const ex = getWorkoutExercise(routineId, dayId, exerciseId);
+    const log = ensureExerciseLog(routineId, getWorkoutDateKey(), dayId, ex);
+    const v = Math.max(0, Math.round(value * 100) / 100);
+    if (v === log.kg) { if (log.kgs) delete log.kgs[index]; }
+    else (log.kgs ||= {})[index] = v;
+    if (log.kgs && !Object.keys(log.kgs).length) delete log.kgs;
+    saveState();
+}
+const changeSerieKg = (routineId, dayId, exerciseId, index, delta) => {
+    const ex = getWorkoutExercise(routineId, dayId, exerciseId);
+    const log = ensureExerciseLog(routineId, getWorkoutDateKey(), dayId, ex);
+    setSerieKg(routineId, dayId, exerciseId, index, Math.max(0, serieKg(log, index) + delta));
+};
 
 function changeWorkoutReps(routineId, dayId, exerciseId, index, delta, valueBox) {
     const ex = getWorkoutExercise(routineId, dayId, exerciseId);

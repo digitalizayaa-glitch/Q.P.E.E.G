@@ -11,6 +11,8 @@ const CHANGELOG = [
     {
         v: "2.4.0",
         items: [
+            "Peso por serie: al tocar una serie en el entreno ves las repeticiones a la izquierda y su peso a la derecha. Si hiciste una serie con otro peso, cámbialo ahí: solo cambia esa serie y las demás siguen con el peso del ejercicio (se ve chiquito en la esquina de la serie).",
+            "Cuadros de números más limpios, sin textos debajo de las flechas.",
             "Deportes con una carga nueva y más realista: 100 = 40 minutos de ejercicio moderado. Sale de la distancia, el tiempo y la subida, y de tu cuerpo (altura, peso, sexo y edad). Al registrar ves si fue suave, moderada o intensa y las calorías aproximadas.",
             "Fútbol, básquetbol y tenis cuentan por la distancia que recorres en el partido; voleibol, por tiempo.",
             "Los números deslizables: en el entreno, el editor de rutinas y las ventanas largas, tócalos para activarlos (el pulso ahora es más suave) y dejan de latir al soltar. Todo el cuadro responde, letras incluidas. En el resto de la app se deslizan directo.",

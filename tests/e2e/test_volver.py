@@ -86,6 +86,11 @@ def main():
             box.click(); navegador.quieto(pg); box.click(); navegador.quieto(pg)
             r["entreno_dos_toques_abren"] = pg.locator(".picker-overlay, .stepper-overlay").count() > 0
             shot(pg, "volver_4_cuadro")
+            # El cuadro de la serie: reps a la izquierda y el peso de solo esa serie a la derecha; sin textos debajo
+            r["serie_dos_columnas"] = pg.locator(".stepper-col").count() == 2
+            r["sin_texto_debajo"] = pg.locator(".stepper-hint, .stepper-unit").count() == 0
+            pg.locator(".stepper-col").nth(1).locator(".stepper-btn").first.click(); navegador.quieto(pg)
+            r["peso_de_una_serie"] = pg.evaluate("JSON.stringify(state.logs.r1[getWorkoutDateKey()].exercises.e0.kgs)") == '{"0":%s}' % pg.evaluate("String(state.logs.r1[getWorkoutDateKey()].exercises.e0.kg + 2.5)")
             pg.keyboard.press("Escape"); navegador.quieto(pg)
             if pg.locator(".picker-overlay, .stepper-overlay").count(): pg.locator(".picker-close").first.click(); navegador.quieto(pg)
             pg.evaluate("delete state.logs.r1[getWorkoutDateKey()].exercises.e0; saveState()")

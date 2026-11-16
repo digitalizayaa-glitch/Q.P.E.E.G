@@ -323,6 +323,16 @@ test("pan cuadrado: se cuenta por rebanada (1 rebanada = 1 harina)", () => {
     assert.deepEqual(ev("FOOD_CALIBRATION['Pan cuadrado blanco Bimbo'].pt"), { h: 1 });
 });
 
+test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
+    const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
+        e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });
+    assert.deepEqual(st.logs.r1["2026-11-01"].exercises.e0.kgs, { 1: 45 });
+    app(`state.routines = [{ id: "r1", name: "R", days: [{ id: "d1", name: "D", exercises: [{ id: "e0", name: "Press", kg: 40, unit: "kg", series: [{ min: 8, max: 12 }, { min: 8, max: 12 }, { min: 8, max: 12 }] }] }] }];
+         state.logs = ${JSON.stringify(st.logs)};`);
+    const vol = ev("daySessions('2026-11-01')[0].volume");
+    assert.equal(vol, 40 * 10 + 45 * 10 + 40 * 10, "cada serie con su peso");
+});
+
 test("catálogo: la calibración vive en la misma línea del alimento (sin nombres repetidos en otra lista)", () => {
     const withCal = ev("Object.values(FOOD_CATALOG).flat().filter(i => typeof i[i.length - 1] === 'object').length");
     assert.equal(withCal, ev("Object.keys(FOOD_CALIBRATION).length"));

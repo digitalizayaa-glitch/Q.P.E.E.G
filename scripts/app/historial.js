@@ -234,8 +234,9 @@ function daySessions(key) {
         for (const id in entry.exercises) {
             const x = entry.exercises[id];
             const ex = routine && routine.days.flatMap(d => d.exercises).find(e => e.id === id);
-            const kg = (x.kg || 0) * (ex && ex.unit === "lb" ? LB_TO_KG : 1);
-            volume += kg * x.reps.reduce((a, r) => a + (r || 0), 0);     /* peso × repeticiones de cada serie */
+            const toKg = ex && ex.unit === "lb" ? LB_TO_KG : 1;
+            /* peso × repeticiones de cada serie (con el peso propio de la serie si lo tiene) */
+            x.reps.forEach((r, i) => { volume += (x.kgs && x.kgs[i] != null ? x.kgs[i] : (x.kg || 0)) * toKg * (r || 0); });
         }
         if (volume <= 0) continue;
         const day = routine && findDay(routine, entry.dayId);

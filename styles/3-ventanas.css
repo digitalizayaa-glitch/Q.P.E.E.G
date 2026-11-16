@@ -268,8 +268,13 @@ main { overflow-x: hidden; }
 }
 
 .stepper-value .v { display: inline-block; will-change: transform, opacity; }
-.stepper-unit { margin: 4px 0 8px; color: var(--muted); font-size: 13px; letter-spacing: 1px; }
-.stepper-hint { margin: 10px 0 2px; color: var(--faint); font-size: 11px; }
+/* Sin textos debajo de las flechas: el ▼ va justo después del número */
+.stepper-sheet > .stepper-value + .stepper-btn { margin-top: 8px; }
+/* Dos números lado a lado (reps | peso de la serie), cada uno en vertical */
+.stepper-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stepper-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.stepper-col .stepper-value { margin: 0; font-size: 44px; }
+.stepper-col-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
 .stepper-sheet .dialog-actions { margin-top: 12px; }
 
 /* Respaldo e historial por meses */
