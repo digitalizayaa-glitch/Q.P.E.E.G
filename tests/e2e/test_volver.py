@@ -150,7 +150,12 @@ def main():
             pg.evaluate("state.logs.r1[getWorkoutDateKey()].exercises.e0 = { kg: 40, reps: [10, 10, 10], extra: 0 }; saveState()")
             r["sin_check_rojo"] = status(pg) == "red"
             pg.click("#dayDoneBtn"); navegador.quieto(pg)
-            r["con_check_verde"] = status(pg) == "red" and pg.evaluate("document.getElementById('dayDoneBtn').classList.contains('on')")
+            r["check_pregunta"] = pg.locator(".dialog-btn.accept", has_text="Completar").count() == 1
+            pg.locator(".dialog-btn.accept", has_text="Completar").click(); navegador.quieto(pg)
+            # ✓ marcado: se desvanece al calendario de entrenos y el día pulsa 2 s
+            r["check_va_al_calendario"] = section(pg) == "history" and pg.evaluate(
+                "document.querySelector(`.history-cell[data-key='${getWorkoutDateKey()}']`).classList.contains('done')")
+            r["con_check_verde"] = status(pg) == "red" and pg.evaluate("state.logs.r1[getWorkoutDateKey()].done === true")
             shot(pg, "volver_2_check")
             pg.reload(); navegador.quieto(pg)
             r["check_se_guarda"] = pg.evaluate("state.logs.r1[getWorkoutDateKey()].done === true") and pg.evaluate("workoutDayDone(getWorkoutDateKey())")

@@ -139,13 +139,48 @@ function updateDayDoneButton(sectionId) {
     hint.classList.toggle("on", !!entry && !on);
 }
 
-function toggleDayDone() {
+async function toggleDayDone() {
     const entry = workoutEntry();
     if (!entry) return;
-    if (entry.done) delete entry.done; else entry.done = true;
+    if (entry.done) {   /* quitarlo: sin preguntar y sin salir */
+        delete entry.done;
+        saveState();
+        updateDayDoneButton("workout");
+        return;
+    }
+    const ok = await askConfirm({ title: "¿Estás seguro?", message: "El día se dará por terminado.", confirmLabel: "Completar", danger: false });
+    if (!ok || workoutEntry() !== entry) return;
+    entry.done = true;
     saveState();
     updateDayDoneButton("workout");
-    if (entry.done) glowOnce(document.getElementById("dayDoneBtn"));
+    showDoneDay(getWorkoutDateKey());
+}
+
+/* Día completado: se desvanece el entreno, aparece el calendario de entrenos en su mes y el día pulsa 2 s */
+async function showDoneDay(key) {
+    if (navFading || SWIPE.busy) return;
+    navFading = true;
+    const parts = () => [document.querySelector("main"), document.querySelector(".week-tab-label"), document.getElementById("weekDate")].filter(Boolean);
+    try {
+        await Promise.all(parts().map(t => t.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).settled));
+        const now = new Date(), d = parseKey(key);
+        historyMode = "workout";
+        historyView = "calendar";
+        historyOffset = (d.getFullYear() - now.getFullYear()) * 12 + d.getMonth() - now.getMonth();
+        showSection("history");
+    } finally {
+        parts().forEach(t => {
+            t.getAnimations().forEach(a => a.cancel());
+            t.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320 * NAV_SPEED, easing: "ease-out" });
+        });
+        navFading = false;
+    }
+    const cell = document.querySelector(`.history-cell[data-key="${key}"]`);
+    if (cell) cell.animate([
+        { boxShadow: "0 0 0 2px rgba(var(--ui-rgb), .5), 0 0 0 0 rgba(var(--ui-rgb), 0)", transform: "scale(1)" },
+        { boxShadow: "0 0 0 3px var(--ui), 0 0 26px 6px rgba(var(--ui-rgb), .85)", transform: "scale(1.12)" },
+        { boxShadow: "0 0 0 2px rgba(var(--ui-rgb), .5), 0 0 0 0 rgba(var(--ui-rgb), 0)", transform: "scale(1)" }
+    ], { duration: 500, iterations: 4, easing: "ease-in-out", delay: 200 * NAV_SPEED });
 }
 
 function goHome() {
