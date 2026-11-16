@@ -137,10 +137,12 @@ def main():
             pg.locator(".food-done").click(); navegador.quieto(pg)
             if SHOTS: pg.screenshot(path=f"{SHOTS}/volumen_sucio.png")
             box = pg.locator(".stepper-sheet .stepper-value")
-            start = int(box.inner_text())
+            num = lambda: int(box.inner_text().replace("kcal", "").strip())
+            r["numero_con_kcal"] = box.inner_text().strip().endswith("kcal")
+            start = num()
             r["volumen_sucio_de_200"] = start % 200 == 0
             pg.locator(".stepper-sheet .stepper-btn").first.click(); navegador.quieto(pg)
-            r["sube_200"] = int(box.inner_text()) == start + 200
+            r["sube_200"] = num() == start + 200
             r["dice_en_cuanto_queda"] = f"{now + start + 200:,}".replace(",", ".") in pg.locator(".stepper-sub").inner_text() or str(now + start + 200) in pg.locator(".stepper-sub").inner_text().replace(".", "")
             pg.locator(".stepper-sheet .dialog-btn.accept").click(); navegador.quieto(pg)
             r["se_suma"] = round(pg.evaluate("foodTotals(foodEntries()).kcal")) == now + start + 200
