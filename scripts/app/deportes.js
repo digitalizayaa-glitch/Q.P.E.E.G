@@ -10,18 +10,23 @@ function sportSummary(sp) {
 }
 
 /* ---------- Añadir y editar deporte ---------- */
-function addSport() {
+/* opts (desde el calendario): { key, fromCalendar, onSaved } — la fecha, sin "Cancelar", y qué hacer al guardar */
+function addSport(opts = {}) {
+    const key = opts.key || getWorkoutDateKey();
+    const done = state.sports[key] || [];
     openPicker({
         title: "Añadir deporte",
         groups: [
+            ...(opts.fromCalendar && done.length ? [{ title: "Registrados ese día", items: done.map(sp => ({ label: sp.n, sub: sportSummary(sp), value: { edit: sp } })) }] : []),
             { title: "Con distancia", items: SPORTS.filter(s => !s.hidden && s.ref.km).map(s => ({ label: s.name, sub: s.ref.up ? "Tiempo, km y desnivel" : "Tiempo y km", value: s })) },
             { title: "Por tiempo", items: SPORTS.filter(s => !s.hidden && !s.ref.km).map(s => ({ label: s.name, sub: s.ref.rounds ? "Rounds y minutos por round" : "Tiempo", value: s })) }
         ],
         createLabel: "Otro deporte",
-        onPick: sport => askSportData(sport),
+        onPick: v => v.edit ? askSportData({ ...sportDef(v.edit.k), k: v.edit.k, name: v.edit.n }, { key, entry: v.edit }, opts)
+                            : askSportData(v, null, opts),
         onCreate: async query => {
             const name = await askText({ title: "Otro deporte", label: "Nombre del deporte", value: query || "", maxLength: 30 });
-            if (name) askSportData({ ...SPORT_BY_KEY.custom, name });
+            if (name) askSportData({ ...SPORT_BY_KEY.custom, name }, null, opts);
         }
     });
 }
@@ -34,7 +39,7 @@ function editSport(key, id) {
 
 /* Tiempo, distancia y desnivel: cada uno opcional ("—" = sin dato). Cada campo con ▲ arriba y ▼ abajo,
    se puede deslizar o tocar para escribir. Muestra la carga (promedio de los datos) mientras se ajusta */
-function askSportData(sport, editing) {
+function askSportData(sport, editing, opts = {}) {
     const fields = sportFields(sport.k);
     const vals = {};
     fields.forEach(({ f }) => { vals[f] = editing ? editing.entry[f] || 0 : 0; });
@@ -64,7 +69,7 @@ function askSportData(sport, editing) {
     saveBtn.type = "button";
     saveBtn.className = "dialog-btn accept";
     saveBtn.textContent = editing ? "Guardar" : "Añadir";
-    actions.append(cancel, saveBtn);
+    if (opts.fromCalendar) actions.append(saveBtn); else actions.append(cancel, saveBtn);   /* desde el calendario: solo confirmar */
 
     const sk = sportDef(sport.k).k;
     const who = editing && editing.entry.bp ? editing.entry.bp : sportBodyNow();      /* cuerpo con que se calcula */
@@ -165,13 +170,14 @@ function askSportData(sport, editing) {
         if (vals.rounds !== undefined) { const t = sportMinutes(entry); if (t > 0) entry.min = t; else delete entry.min; }
         if (who) entry.bp = { ...who }; else delete entry.bp;     /* el cuerpo de ese día: bajar de peso no cambia el historial */
         if (!fields.some(({ f }) => entry[f] > 0)) return;
-        const key = editing ? editing.key : getWorkoutDateKey();
+        const key = editing ? editing.key : (opts.key || getWorkoutDateKey());
         const list = (state.sports[key] ??= []);
         const at = list.findIndex(x => x.id === entry.id);
         if (at >= 0) list[at] = withLegacy(entry); else list.push(withLegacy(entry));
         saveState();
         close();
         renderWeekSection();
+        if (opts.onSaved) opts.onSaved();
     };
 
     body.append(grid, load, actions);

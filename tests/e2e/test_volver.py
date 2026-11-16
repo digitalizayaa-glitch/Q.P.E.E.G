@@ -154,7 +154,7 @@ def main():
             pg.locator(".dialog-btn.accept", has_text="Completar").click(); navegador.quieto(pg)
             # ✓ marcado: se desvanece al calendario de entrenos y el día pulsa 2 s
             r["check_va_al_calendario"] = section(pg) == "history" and pg.evaluate(
-                "document.querySelector(`.history-cell[data-key='${getWorkoutDateKey()}']`).classList.contains('done')")
+                "workoutDayDone(dateKey())")
             r["con_check_verde"] = status(pg) == "red" and pg.evaluate("state.logs.r1[getWorkoutDateKey()].done === true")
             shot(pg, "volver_2_check")
             pg.reload(); navegador.quieto(pg)

@@ -13,7 +13,13 @@ const TAB_ORDER = [
 /* Deslizar recorre TAB_ORDER en bucle; desde Entreno
    (que no pertenece a TAB_ORDER) salen tomando "Semana" como base */
 function shiftWeekTab(direction) {
-    /* El día que se está viendo se mantiene al cambiar de pestaña (solo "Hoy" o la casita vuelven a hoy) */
+    /* Editando un día anterior (abierto desde el calendario) no se cambia de pestaña:
+       se sale con el ✓ (Entreno), la flecha (vuelve al calendario) o "Hoy" (Comida) */
+    if (viewDate()) {
+        const exit = document.querySelector("#dayDoneBtn:not([hidden]), #todayBtn:not([hidden])") || document.getElementById("homeBtn");
+        if (exit) glowOnce(exit);
+        return;
+    }
 
     const current = document.querySelector(".section.active").id;
     let currentIndex = TAB_ORDER.findIndex(tab => tab.id === current);

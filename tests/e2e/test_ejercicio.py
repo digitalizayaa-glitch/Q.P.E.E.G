@@ -49,8 +49,8 @@ def main():
             first, sizes, places = pos(), set(), set()
             kinds = []
             for _ in range(3):
-                kinds.append(pg.inner_text("#historyKind")); pg.click("#histModeBtn"); navegador.quieto(pg)
-            r["titulo_calendario"] = kinds == ["ENTRENOS", "CALORÍAS", "DEPORTES"]
+                kinds.append(pg.inner_text("#historyTitle")); pg.click("#histModeBtn"); navegador.quieto(pg)
+            r["titulo_calendario"] = [k.upper() for k in kinds] == ["ENTRENOS", "CALORÍAS", "DEPORTES"]
             r["calendario_con_palabras"] = all(c for c in pg.evaluate("[...document.querySelectorAll('.history-cell:not(.blank)')].map(c => c.getAttribute('aria-label'))")) and "hoy" in pg.evaluate("document.querySelector('.history-cell.today').getAttribute('aria-label')")
             r["hoy_con_pulso"] = pg.evaluate("getComputedStyle(document.querySelector('.history-cell.today')).animationName") == "today-pulse"
             pg.click("#histChartBtn"); navegador.quieto(pg)

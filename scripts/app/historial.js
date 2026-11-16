@@ -47,7 +47,6 @@ function renderHistory(animate) {
 
     /* Entre el calendario y los botones: en qué calendario se está (en la gráfica ya lo dice su título) */
     const kind = document.getElementById("historyKind");
-    kind.textContent = HISTORY_KIND[historyMode];
     kind.hidden = isChart;
 
     if (isChart) {
@@ -56,8 +55,10 @@ function renderHistory(animate) {
         return;
     }
 
+    /* arriba qué calendario es (Entrenos, Calorías, Deportes); abajo, el mes */
     const title = view.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
-    document.getElementById("historyTitle").textContent = title.charAt(0).toUpperCase() + title.slice(1);
+    document.getElementById("historyTitle").textContent = HISTORY_KIND[historyMode];
+    kind.textContent = title.charAt(0).toUpperCase() + title.slice(1);
 
     grid.innerHTML = "";
 
@@ -104,16 +105,14 @@ function renderHistory(animate) {
         if (status === "red") cell.classList.add("red");
         if (status === "gold") cell.classList.add("gold");
         if (status === "sport") cell.classList.add("sport");
-        if (historyMode !== "sport" && state.sports[key]) cell.classList.add("has-sport");   /* punto: ese día hubo deporte */
         if (key === todayKey) cell.classList.add("today");
-        if (historyMode === "workout" && workoutDayDone(key)) cell.classList.add("done");   /* ✓: día dado por terminado */
 
         if (key > todayKey) {
             cell.classList.add("future");
         } else if (historyMode === "workout") {
             cell.onclick = () => navFade(() => openHistoryDay(key));
         } else if (historyMode === "sport") {
-            cell.onclick = () => navFade(() => { setViewDate(key); showSection("week"); });
+            cell.onclick = () => openSportDay(key);   /* la ventana de deportes de ese día, sin salir del calendario */
         } else {
             cell.onclick = () => navFade(() => { setViewDate(key); showSection("food"); });
         }
@@ -510,6 +509,11 @@ function workoutDayStatus(key) {
 /* ¿Se marcó el ✓ de ese día (rutina activa o entreno extraordinario)? */
 function workoutDayDone(key) {
     return [state.activeRoutineId, EXTRA_ROUTINE_ID].some(rid => rid && state.logs[rid]?.[key]?.done);
+}
+
+/* Deportes: tocar un día abre la ventana de deportes de esa fecha; al guardar, el día pulsa */
+function openSportDay(key) {
+    addSport({ key, fromCalendar: true, onSaved: () => { renderHistory(); pulseCalendarDay(key); } });
 }
 
 function openHistoryDay(key) {

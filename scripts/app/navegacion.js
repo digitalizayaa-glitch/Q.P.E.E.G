@@ -10,11 +10,11 @@ function setViewDate(key) {
     foodDate = k;
 }
 
-/* Botón "Hoy" a la derecha del título: solo aparece al ver otro día */
+/* Botón "Hoy" a la derecha del título: solo en Comida al ver otro día (en Entreno el ✓ lleva de vuelta al calendario) */
 function updateTodayButton(sectionId) {
     const btn = document.getElementById("todayBtn");
     if (!btn) return;
-    const show = !!viewDate() && sectionId !== "exercises" && sectionId !== "workout";
+    const show = !!viewDate() && sectionId === "food";
     btn.hidden = !show;
     btn.onclick = show ? () => navFade(() => { setViewDate(null); showSection(sectionId); }) : null;
 }
@@ -60,6 +60,9 @@ function showSection(sectionId) {
     } else {
         setHeaderDateText("");
     }
+
+    /* Editando un día anterior (desde el calendario): la flecha regresa al calendario */
+    if (viewDate() && (sectionId === "week" || sectionId === "food")) setHeaderBack(() => returnToCalendar(viewDate()));
 
     updateTodayButton(sectionId);
     updateDayDoneButton(sectionId);
@@ -142,7 +145,9 @@ function updateDayDoneButton(sectionId) {
 async function toggleDayDone() {
     const entry = workoutEntry();
     if (!entry) return;
-    if (entry.done) {   /* quitarlo: sin preguntar y sin salir */
+    /* día anterior ya terminado: el ✓ solo regresa al calendario */
+    if (entry.done && viewDate()) { returnToCalendar(getWorkoutDateKey(), true); return; }
+    if (entry.done) {   /* hoy: quitarlo sin preguntar y sin salir */
         delete entry.done;
         saveState();
         updateDayDoneButton("workout");
@@ -153,19 +158,21 @@ async function toggleDayDone() {
     entry.done = true;
     saveState();
     updateDayDoneButton("workout");
-    showDoneDay(getWorkoutDateKey());
+    returnToCalendar(getWorkoutDateKey(), true, "workout");
 }
 
-/* Día completado: se desvanece el entreno, aparece el calendario de entrenos en su mes y el día pulsa 2 s */
-async function showDoneDay(key) {
+/* Vuelta al calendario (✓ del entreno, flecha de un día anterior, deporte guardado): se desvanece,
+   aparece el calendario en el mes de ese día y, si se pide, el día pulsa una vez. Deja de ver el día anterior. */
+async function returnToCalendar(key, pulse = false, mode = null) {
     if (navFading || SWIPE.busy) return;
     navFading = true;
     const parts = () => [document.querySelector("main"), document.querySelector(".week-tab-label"), document.getElementById("weekDate")].filter(Boolean);
     try {
         await Promise.all(parts().map(t => t.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260 * NAV_SPEED, easing: "ease-in", fill: "forwards" }).settled));
         const now = new Date(), d = parseKey(key);
-        historyMode = "workout";
+        if (mode) historyMode = mode;
         historyView = "calendar";
+        setViewDate(null);
         historyOffset = (d.getFullYear() - now.getFullYear()) * 12 + d.getMonth() - now.getMonth();
         showSection("history");
     } finally {
@@ -175,7 +182,11 @@ async function showDoneDay(key) {
         });
         navFading = false;
     }
-    /* el día recién completado: el pulso de "hoy" (mismo ritmo, 3,4 s), con el doble de intensidad, una vez */
+    if (pulse) pulseCalendarDay(key);
+}
+
+/* el día recién completado: el pulso de "hoy" (mismo ritmo, 3,4 s), con el doble de intensidad, una vez */
+function pulseCalendarDay(key) {
     const cell = document.querySelector(`.history-cell[data-key="${key}"]`);
     if (cell) {
         cell.classList.add("just-done");

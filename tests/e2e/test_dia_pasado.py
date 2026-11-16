@@ -59,16 +59,41 @@ def main():
             r["boton_hoy"] = today_btn()
             if SHOTS: pg.screenshot(path=f"{SHOTS}/dia_pasado_comida.png")
 
-            # Deslizar a otras pestañas mantiene el día
-            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)        # Historial
-            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)        # Semana
-            r["semana_mismo_dia"] = pg.evaluate("getWorkoutDateKey()") == PK
-            r["semana_titulo_dia"] = str(past.day) in title() and fits()
+            # Editando un día anterior no se cambia de pestaña (deslizar no hace nada); la flecha vuelve al calendario
+            sec = lambda: pg.evaluate("document.querySelector('.section.active').id")
+            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)
+            pg.evaluate("shiftWeekTab(-1)"); navegador.quieto(pg)
+            r["pestanas_bloqueadas"] = sec() == "food" and pg.evaluate("foodKey()") == PK
+            r["flecha_en_comida"] = pg.evaluate("document.getElementById('homeBtn').dataset.mode") == "back"
+            pg.click("#homeBtn"); navegador.quieto(pg)
+            r["flecha_vuelve_al_calendario"] = sec() == "history" and pg.evaluate("viewDate()") is None
+            # Entreno con registro ese día: directo a su entreno, sin "Hoy", bloqueado; la flecha va al selector y luego al calendario
+            pg.evaluate("historyMode = 'workout'; renderHistory()"); navegador.quieto(pg)
+            pg.locator(f".history-grid [data-key='{PK}']").click(); navegador.quieto(pg)
+            r["entreno_del_dia"] = sec() == "workout" and pg.evaluate("getWorkoutDateKey()") == PK and not today_btn()
+            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)
+            r["entreno_bloqueado"] = sec() == "workout"
+            pg.click("#homeBtn"); navegador.quieto(pg)
+            r["flecha_al_selector"] = sec() == "week" and pg.evaluate("getWorkoutDateKey()") == PK and not today_btn()
             if SHOTS: pg.screenshot(path=f"{SHOTS}/dia_pasado_semana.png")
-            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)        # Rutinas
-            r["rutinas_sin_boton"] = not today_btn()
-            pg.evaluate("shiftWeekTab(1)"); navegador.quieto(pg)        # Comida
-            r["comida_sigue"] = pg.evaluate("foodKey()") == PK
+            pg.click("#homeBtn"); navegador.quieto(pg)
+            r["selector_vuelve"] = sec() == "history" and pg.evaluate("viewDate()") is None
+            # Entreno sin registro (otro día anterior): al selector de días
+            other = (past - timedelta(days=2)).isoformat()
+            pg.evaluate(f"openHistoryDay('{other}')"); navegador.quieto(pg)
+            r["sin_registro_al_selector"] = sec() == "week" and pg.evaluate("getWorkoutDateKey()") == other
+            pg.click("#homeBtn"); navegador.quieto(pg)
+            # Deportes: la ventana de deportes de ese día, sin salir del calendario
+            pg.evaluate("historyMode = 'sport'; renderHistory()"); navegador.quieto(pg)
+            pg.locator(f".history-grid [data-key='{PK}']").click(); navegador.quieto(pg)
+            r["deportes_ventana"] = sec() == "history" and pg.locator(".picker-overlay").count() > 0
+            pg.locator(".picker-item", has_text="Correr").click(); navegador.quieto(pg)
+            r["deportes_solo_confirmar"] = pg.locator(".sport-form .dialog-btn").count() == 1
+            pg.locator(".sport-form .dialog-btn.accept").click(); navegador.quieto(pg)
+            r["deportes_guardado_ese_dia"] = pg.evaluate(f"(state.sports['{PK}'] || []).some(s => s.k === 'run')")
+            # de vuelta a Comida de ese día para probar "Hoy"
+            pg.evaluate("historyMode = 'food'; renderHistory()"); navegador.quieto(pg)
+            pg.locator(f".history-grid [data-key='{PK}']").click(); navegador.quieto(pg)
 
             # "Hoy" vuelve a hoy en todas
             diag = lambda: pg.evaluate("({ vis: document.visibilityState, navFading, busy: SWIPE.busy, view: viewDate(), food: foodKey(), btnHidden: document.getElementById('todayBtn').hidden, sec: document.querySelector('.section.active').id, anims: document.getAnimations().length })")
@@ -80,13 +105,6 @@ def main():
             r["hoy_vuelve"] = pg.evaluate("foodKey() === dateKey() && getWorkoutDateKey() === dateKey()") and not today_btn()
             if not r["hoy_vuelve"]: r_diag["despues_de_hoy"] = diag(); print("DIAGNÓSTICO", json.dumps(r_diag, ensure_ascii=False))
 
-            # Desde el calendario de entreno lleva al día y también a su comida
-            pg.evaluate(f"setViewDate(null); showSection('history'); historyMode = 'workout'; openHistoryDay('{PK}')"); navegador.quieto(pg)
-            pg.evaluate("showSection('food')")
-            try: pg.wait_for_function(f"foodKey() === '{PK}'", timeout=4000, polling=100)
-            except Exception: pass
-            r["entreno_luego_comida_mismo_dia"] = pg.evaluate("foodKey()") == PK
-            if not r["entreno_luego_comida_mismo_dia"]: print("DIAGNÓSTICO 2", json.dumps(diag(), ensure_ascii=False))
             ctx.close(); b.close()
     finally:
         srv.terminate()

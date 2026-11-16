@@ -314,10 +314,6 @@
     HISTORIAL: días con deporte y gráfica de deportes
 ========================================================= */
 .history-cell { position: relative; }
-.history-cell.has-sport::after {
-    content: ""; position: absolute; left: 50%; bottom: 4px; width: 5px; height: 5px; margin-left: -2.5px;
-    border-radius: 50%; background: var(--ui); box-shadow: 0 0 0 1.5px var(--bg);
-}
 .history-cell.sport { background: rgba(var(--ui-rgb), .35); border-color: var(--ui); color: var(--text); }
 .chart-panel { display: flex; flex-direction: column; gap: 6px; }
 .chart-panel + .chart-panel { margin-top: 6px; }
@@ -647,11 +643,6 @@
     4%, 32% { opacity: .85; transform: translate(0, -50%); }
     37% { opacity: 0; transform: translate(0, -50%); }
 }
-/* calendario: días con el ✓ marcado */
-.history-cell.done::before {
-    content: "✓"; position: absolute; top: 2px; right: 5px; font-size: 12px; font-weight: bold; line-height: 1; color: inherit; opacity: .85;
-}
-
 /* Semana: los días pulsan suave (como "Añadir deporte"); el que se está entrenando, más fuerte (85 % del de "hoy"
    del calendario); casi terminado (≥ 76 %), el suave. La sección deja 16 px alrededor para que el brillo no se corte. */
 #week.section.active, #history.section.active { padding: 16px; margin: -16px; width: calc(100% + 32px); max-width: none; box-sizing: border-box; }
