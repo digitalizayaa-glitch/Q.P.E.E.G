@@ -59,6 +59,11 @@ const FOOD_CATALOG = {
         ["Garbanzo enlatado", "1/3 taza (65 g)"],
         ["Pasta (varias)", "1/2 taza (50 g)"],
         ["Canelón", "2 unidades"],
+        /* Canelones rellenos y gratinados, 1 canelón ≈ 110 g (pasta cocida ~35 g, relleno ~45 g, salsa y queso
+        encima ~30 g) */
+        ["Canelones de queso con salsa de tomate", "1 canelón (110 g)", "canelones", 1, { k: 170, c: 14, p: 9.5, f: 8.5, pt: { h: 1, mg: 1, g: 0.5 } }],
+        ["Canelones de atún y huevo", "1 canelón (110 g)", "canelones", 1, { k: 155, c: 14, p: 11, f: 6, pt: { h: 1, mg: 1 } }],
+        ["Canelones de carne molida y huevo", "1 canelón (110 g)", "canelones", 1, { k: 175, c: 14, p: 11, f: 8.5, pt: { h: 1, mg: 1, g: 0.5 } }],
         ["Papa / Camote hervido", "1/2 taza (100 g)"],
         /* Costillas (USDA, carne sin hueso, grasa incluida). La de res es la más grasosa. */
         /* Picadillos de papa a la tica (papa, carne, sofrito y un poco de aceite), ≈ 140 kcal por 100 g;
