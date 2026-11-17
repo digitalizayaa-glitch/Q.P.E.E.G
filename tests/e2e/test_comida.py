@@ -133,6 +133,12 @@ def main():
             pg.locator(".picker-close").click(); navegador.quieto(pg)
 
             # Volumen sucio: un solo deslizable de 200 en 200, el subtítulo dice en cuánto queda el día
+            # cada alimento del catálogo (también los calibrados, como la miel) abre su cuadro de cantidad
+            rotos = pg.evaluate("""(() => { const bad = []; for (const g in FOOD_CATALOG) FOOD_CATALOG[g].forEach(it => {
+                try { askFoodAmount(g, it); if (!document.querySelector('.stepper-sheet')) bad.push(it[0]); } catch (e) { bad.push(it[0]); }
+                document.querySelectorAll('.stepper-overlay').forEach(o => o.remove()); stepperOverlay = null; }); return bad; })()""")
+            r["catalogo_se_puede_agregar"] = rotos == []
+            if rotos: print("NO ABREN:", rotos)
             now = round(pg.evaluate("foodTotals(foodEntries()).kcal"))
             pg.locator(".food-done").click(); navegador.quieto(pg)
             if SHOTS: pg.screenshot(path=f"{SHOTS}/volumen_sucio.png")

@@ -108,7 +108,8 @@ const FOOD_CATALOG = {
         ["Mezcla pancakes Tosh", "2 cdas (23 g)"],
         /* Azúcar: carbohidrato puro (15–16 g = 1 harina). 2 cdtas = 1/2 porción */
         ["Azúcar (blanca o morena)", "4 cdtas (16 g)", { k: 62,  c: 16,   p: 0,   f: 0,   pt: { h: 1 } }],
-        ["Miel", "1 cda (25 ml)", { k: 108, c: 29,   p: 0.1, f: 0,   pt: { h: 1.5 } }],
+        /* Miel de abeja (USDA): 1 cda = 21 g = 64 kcal, 17 g de azúcares, sin grasa ni proteína apreciable → 1 harina */
+        ["Miel", "1 cda (21 g)", { k: 64,  c: 17,   p: 0.1, f: 0,   pt: { h: 1 } }],
         ["Mermelada con azúcar", "1 cda (25 g)", { k: 70,  c: 17,   p: 0.1, f: 0,   pt: { h: 1 } }],
         ["Pasas", "1 cda (20 g)", { k: 60,  c: 15.9, p: 0.6, f: 0.1, pt: { h: 1 } }],
         ["Cocoa 0% azúcar", "4 cdtas (20 g)"],

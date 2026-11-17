@@ -95,7 +95,7 @@ function editFoodEntry(e) {
     }
     if (!FOOD_GROUP[e.g]) return;
     const item = (FOOD_CATALOG[e.g] || []).find(i => i[0] === e.n) || [e.n, "1 porción"];
-    askFoodAmount(e.g, item, null, { id: e.id, qty: e.q ?? Math.round(e.p / (item[3] || 1) * 100) / 100 });
+    askFoodAmount(e.g, item, null, { id: e.id, qty: e.q ?? Math.round(e.p / ((typeof item[3] === "number" && item[3]) || 1) * 100) / 100 });
 }
 
 /* existing ({ id, qty }): cambiar un agua ya registrada (0 = quitarla) */

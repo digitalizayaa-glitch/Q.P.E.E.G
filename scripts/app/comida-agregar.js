@@ -134,7 +134,8 @@ function amountStepper({ title, subtitle, unit, unitOne, existing, makeEntry, do
 }
 
 function askFoodAmount(groupKey, item, done, existing) {
-    const [name, equiv, unit, per] = item;
+    /* la calibración ({ k, c, p, f, pt }) va al final de la línea: no es la unidad */
+    const [name, equiv, unit, per] = item.filter(x => !x || typeof x !== "object");
     const perUnit = per || 1;
     const unitName = unit || "porciones";
     const cal = FOOD_CALIBRATION[name] || null;    /* alimentos calibrados: calorías reales y porciones en varios grupos */
