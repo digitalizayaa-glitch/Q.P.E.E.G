@@ -301,6 +301,14 @@ const FAST_FOOD = [
         ["Maní con limón y chile (Yummies) — bolsa de 60 g", "bolsa (60 g)", "bolsas (60 g)", 372, 7.2, 14.4, 31.2, { h: 0.5, bg: 1.5, g: 6 }],
         ["Maní con limón y chile (Yummies) — bolsa de 150 g", "bolsa (150 g)", "bolsas (150 g)", 930, 18, 36, 78, { h: 1.5, bg: 4, g: 14.5 }]
     ] },
+    /* Pastelitos Bimbo (Costa Rica, 2 unidades = 80 g). Chocolate "Bimboletes": etiqueta, 40 g = 158 kcal,
+       grasa saturada 2,9 g, azúcar 12,3 g; grasa total, carbohidratos y proteína estimados de su tipo.
+       Vainilla (paquete de 2 y de 8): sin etiqueta a mano, mismos valores que el de chocolate. */
+    { chain: "Pastelitos", super: true, items: [
+        ["Cupcake Bimbo chocolate (Bimboletes)", "paquete (2 unidades, 80 g)", "paquetes (2 unidades, 80 g)", 316, 44, 4, 14, { h: 2.5, g: 2.5 }],
+        ["Cupcake Bimbo vainilla", "paquete (2 unidades, 80 g)", "paquetes (2 unidades, 80 g)", 316, 44, 4, 14, { h: 2.5, g: 2.5 }],
+        ["Cupcake Bimbo vainilla (suelto, paquete de 8)", "unidad (40 g)", "unidades (40 g)", 158, 22, 2, 7, { h: 1.5, g: 1 }]
+    ] },
     { chain: "Chocolates", super: true, items: [
         ["Milka (tableta 100 g)", "tableta (100 g)", "tabletas (100 g)", 530, 59, 6.3, 29, { h: 4, g: 4.5 }],
         ["M&M's de chocolate (bolsita 48 g)", "bolsita", "bolsitas", 240, 34, 2, 10, { h: 2, g: 1.5 }],
