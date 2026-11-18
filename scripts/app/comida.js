@@ -158,7 +158,7 @@ function renderFood() {
     const hasFood = entries.some(e => e.g !== "agua");
     const dayGiven = entries.some(e => e.g === FREE_GROUP);
     /* metas de fibra, azúcar añadido, sodio y edulcorantes; un valor pasado de su máximo va en naranja */
-    const xg = extraGoals(kcalGoal, n.profile.weight);
+    const xg = extraGoals(kcalGoal, n.profile.weight, n.profile.activity);
     const over = (have, max) => (have > max + 1e-9 ? ' class="over"' : "");
 
     const chip = g => {

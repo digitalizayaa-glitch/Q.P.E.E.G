@@ -77,7 +77,7 @@ const EXTRA_BY_NAME = {
     "Huevo (completo)": [0, 70, 0, 0], "Carne de res (+15% grasa)": [0, 18, 0, 0], "Cerdo (chuleta / beef steak)": [0, 18, 0, 0],
     "Carne mechada (en salsa)": [0.2, 120, 0, 0], "Costilla de cerdo al horno o a la parrilla": [0, 25, 0, 0],
     "Costilla de cerdo en salsa BBQ": [0.1, 180, 3.5, 0], "Costilla de cerdo frita o en olla": [0, 40, 0, 0],
-    "Costilla de res en olla o en sopa": [0, 90, 0, 0], "Tocineta": [0, 280, 0, 0], "Salchicha de pavo": [0, 450, 0.5, 0],
+    "Costilla de res en olla o en sopa": [0, 90, 0, 0], "Tocineta": [0, 220, 0, 0], "Salchicha de pavo": [0, 450, 0.5, 0],
     "Nuggets de pollo Pipasa": [0.3, 230, 0, 0], "Queso (Turrialba, semiduro, fresco, mozzarella)": [0, 170, 0, 0],
     "Mozzarella Great Value Low skin": [0, 170, 0, 0], "Queso Delactomy rallado": [0, 180, 0, 0],
     "Queso Turrialba del Prado": [0, 150, 0, 0], "Queso Dos Pinos 50%+ proteína": [0, 200, 0, 0],
@@ -229,14 +229,18 @@ function entryUnitExtras(e) {
     return out;
 }
 
+/* Sodio extra según el entreno del test TDEE: lo que se pierde en el sudor, en promedio por día
+   (≈ 1 L de sudor por hora de entreno con ≈ 0,9 g de sodio por litro, repartido en la semana) */
+const SODIUM_BY_ACTIVITY = { 1.2: 0, 1.375: 300, 1.55: 500, 1.725: 800, 1.9: 1200 };
+
 /* Metas del día: fibra 14 g por cada 1000 kcal (mínimo); azúcar añadido < 10 % de las calorías;
-   sodio < 2000 mg (OMS); edulcorantes: ~20 % de la IDA del aspartame (40 mg/kg) contando ~180 mg por porción
-   (una lata de refresco sin azúcar) → ≈ 1 porción por cada 22 kg de peso */
-function extraGoals(kcal, weight) {
+   sodio < 2000 mg (OMS) + lo que se suda entrenando; edulcorantes: ~20 % de la IDA del aspartame (40 mg/kg)
+   contando ~180 mg por porción (una lata de refresco sin azúcar) → ≈ 1 porción por cada 22 kg de peso */
+function extraGoals(kcal, weight, activity) {
     return {
         fb: Math.round(kcal / 1000 * 14),
         az: Math.round(kcal * 0.10 / 4),
-        na: 2000,
+        na: 2000 + (SODIUM_BY_ACTIVITY[activity] || 0),
         ed: Math.max(1, Math.floor((weight || 70) * 40 * 0.2 / 180))
     };
 }

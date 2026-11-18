@@ -402,9 +402,11 @@ test("comida: fibra, azúcar añadido, sodio y edulcorantes", () => {
     assert.equal(x.fb, 9);
     assert.equal(x.az, 16);
     assert.equal(x.ed, 2);
-    assert.equal(x.na, 2 * 200 + 2 * 40 + 0 + 3 * 70);
+    assert.equal(x.na, 2 * 200 + 2 * 40 + 0 + 3 * 70);   /* frijol, refresco cero, azúcar, 3 porciones BG */
     /* metas: fibra 14 g/1000 kcal, azúcar < 10 % kcal, sodio 2000 mg, edulcorantes según el peso */
-    assert.deepEqual(call("extraGoals", 2500, 75), { fb: 35, az: 63, na: 2000, ed: 3 });
+    assert.deepEqual(call("extraGoals", 2500, 75, 1.2), { fb: 35, az: 63, na: 2000, ed: 3 });
+    /* más entreno en el test, más sodio (lo que se suda) */
+    assert.deepEqual([1.375, 1.55, 1.725, 1.9].map(a => call("extraGoals", 2500, 75, a).na), [2300, 2500, 2800, 3200]);
     assert.equal(call("extraGoals", 2000, 50).ed, 2);
     assert.equal(call("extraGoals", 3000, 100).ed, 4);
     /* la opción de ocultarlos se guarda */
