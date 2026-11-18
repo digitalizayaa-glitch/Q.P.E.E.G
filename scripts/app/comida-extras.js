@@ -75,7 +75,7 @@ const EXTRA_BY_NAME = {
     "Queso oreado semidescremado (INISA)": [0, 250, 0, 0], "Casilán (INISA)": [0, 40, 0, 0],
     /* ---- Proteína media grasa ---- */
     "Huevo (completo)": [0, 70, 0, 0], "Carne de res (+15% grasa)": [0, 18, 0, 0], "Cerdo (chuleta / beef steak)": [0, 18, 0, 0],
-    "Carne mechada (en salsa)": [0.2, 120, 0, 0], "Pollo en salsa de coco (presa de alita)": [0.1, 40, 0, 0], "Costilla de cerdo al horno o a la parrilla": [0, 25, 0, 0],
+    "Carne mechada (en salsa)": [0.2, 120, 0, 0], "Pollo en salsa de coco (presa de alita)": [0.2, 80, 0, 0], "Costilla de cerdo al horno o a la parrilla": [0, 25, 0, 0],
     "Costilla de cerdo en salsa BBQ": [0.1, 180, 3.5, 0], "Costilla de cerdo frita o en olla": [0, 40, 0, 0],
     "Costilla de res en olla o en sopa": [0, 90, 0, 0], "Tocineta": [0, 220, 0, 0], "Salchicha de pavo": [0, 450, 0.5, 0],
     "Nuggets de pollo Pipasa": [0.3, 230, 0, 0], "Queso (Turrialba, semiduro, fresco, mozzarella)": [0, 170, 0, 0],

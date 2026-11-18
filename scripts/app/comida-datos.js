@@ -154,8 +154,8 @@ const FOOD_CATALOG = {
         ["Carne mechada (en salsa)", "35 g", { k: 65,  c: 1,  p: 7.5, f: 3.4, pt: { mg: 1 } }],
         /* Pollo en salsa de coco (casero, con cebolla, chile y olores), por presa chica de alita (muslito con huesito).
            Pesadas: 15–20 g cada una con hueso y salsa → ~13 g de carne con piel (24 % proteína, 13 % grasa) + ~3 g de salsa
-           ≈ 36 kcal, 3,3 g proteína, 2,4 g grasa: 2 presas ≈ 1 porción de proteína MG */
-        ["Pollo en salsa de coco (presa de alita)", "1 presa (muslito de alita)", "presas (muslitos de alita)", 1, { k: 36, c: 0.4, p: 3.3, f: 2.4, pt: { mg: 0.5 } }],
+           ≈ 36 kcal, 3,3 g proteína, 2,4 g grasa cada una: 1 porción de proteína MG = 2 presas */
+        ["Pollo en salsa de coco (presa de alita)", "2 presas (muslitos de alita)", { k: 72, c: 0.8, p: 6.6, f: 4.8, pt: { mg: 1 } }],
         ["Costilla de cerdo al horno o a la parrilla", "25 g (sin hueso)", { k: 73,  c: 0,   p: 5.8, f: 5.4,  pt: { mg: 1 } }],
         ["Costilla de cerdo en salsa BBQ", "35 g (sin hueso)", { k: 120, c: 4.5, p: 7.5, f: 7.8,  pt: { mg: 1, h: 0.5 } }],
         ["Costilla de cerdo frita o en olla", "25 g (sin hueso)", { k: 99,  c: 0,   p: 7.3, f: 7.6,  pt: { mg: 1, g: 0.5 } }],
