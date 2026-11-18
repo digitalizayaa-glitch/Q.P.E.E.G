@@ -201,7 +201,8 @@ function sanitizeState(src) {
     const p = isObj(nu) && isObj(nu.profile) ? nu.profile : null;
     const okNum = v => typeof v === "number" && isFinite(v) && v > 0;
     s.nutrition = p && okNum(p.age) && okNum(p.height) && okNum(p.weight) && okNum(p.activity) && (p.sex === "m" || p.sex === "f")
-        ? { profile: { ...p, bf: okNum(p.bf) ? p.bf : null }, goal: ["maintain", "bulk", "cut"].includes(nu.goal) ? nu.goal : "maintain", diet: ["mod", "high", "low"].includes(nu.diet) ? nu.diet : "mod" }
+        ? { profile: { ...p, bf: okNum(p.bf) ? p.bf : null }, goal: ["maintain", "bulk", "cut"].includes(nu.goal) ? nu.goal : "maintain", diet: ["mod", "high", "low"].includes(nu.diet) ? nu.diet : "mod",
+            ...(nu.extras === false ? { extras: false } : {}) }
         : null;
 
     const sports = isObj(s.sports) ? s.sports : {};

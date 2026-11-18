@@ -387,6 +387,31 @@ test("entreno: rojo solo con ≥25 % de series en rojo o sin hacer (las extra cu
     app("state.logs = {}; state.routines = []");
 });
 
+test("comida: fibra, azúcar añadido, sodio y edulcorantes", () => {
+    /* cada alimento del catálogo tiene sus valores; las piezas de comida rápida salen de su tipo */
+    assert.deepEqual(ev("Object.values(FOOD_CATALOG).flat().map(i => i[0]).filter(n => !EXTRA_BY_NAME[n])"), []);
+    assert.ok(ev("[...FAST_FOOD_BY_KEY].every(([k, h]) => { const x = fastExtras(k, h.chain, h.item, h.drink); return [x.fb, x.na, x.az, x.ed].every(Number.isFinite); })"));
+    const day = [
+        { n: "Frijol entero o molido", g: "h", p: 2 },
+        { n: "Refrescos · Coca-Cola Sin Azúcar", g: "rapida", p: 2, k: 0, mc: 0, mp: 0, mf: 0 },
+        { n: "Azúcar (blanca o morena)", g: "h", p: 1, k: 62, mc: 16, mp: 0, mf: 0 },
+        { n: "Proteína BG", g: "bg", p: 3 },
+        { n: "Volumen sucio", g: "libre", p: 1, k: 800 }
+    ];
+    const x = call("foodTotals", day).x;
+    assert.equal(x.fb, 9);
+    assert.equal(x.az, 16);
+    assert.equal(x.ed, 2);
+    assert.equal(x.na, 2 * 200 + 2 * 40 + 0 + 3 * 70);
+    /* metas: fibra 14 g/1000 kcal, azúcar < 10 % kcal, sodio 2000 mg, edulcorantes según el peso */
+    assert.deepEqual(call("extraGoals", 2500, 75), { fb: 35, az: 63, na: 2000, ed: 3 });
+    assert.equal(call("extraGoals", 2000, 50).ed, 2);
+    assert.equal(call("extraGoals", 3000, 100).ed, 4);
+    /* la opción de ocultarlos se guarda */
+    const st = call("stateFrom", { nutrition: { profile: { sex: "m", age: 25, height: 175, weight: 75, activity: 1.55 }, goal: "maintain", diet: "mod", extras: false } });
+    assert.equal(st.nutrition.extras, false);
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

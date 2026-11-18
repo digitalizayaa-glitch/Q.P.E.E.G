@@ -1,6 +1,6 @@
 {
   "name": "qpeeg",
-  "version": "2.4.22",
+  "version": "2.5.0",
   "private": true,
   "description": "Q.P.E.E.G: rutinas de entrenamiento, series, progreso y nutrición. PWA 100 % offline.",
   "scripts": {

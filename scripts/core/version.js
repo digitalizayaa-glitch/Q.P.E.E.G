@@ -5,9 +5,25 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "2.4.22";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "2.5.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "2.5.0",
+        items: [
+            "Comida: debajo de carbohidratos, proteína y grasa ahora ves fibra, azúcar añadido, sodio y edulcorantes del día. Metas: fibra 14 g por cada 1000 kcal, azúcar añadido menos del 10 % de tus calorías, sodio menos de 2000 mg y edulcorantes según tu peso (unas 3 porciones al día con 75 kg).",
+            "Cualquier valor que pase su máximo se pone en naranja, también carbohidratos, proteína y grasa.",
+            "Si prefieres no verlos, ocúltalos en Dieta (al final de la lista).",
+            "Todos los alimentos traen sus valores: los del catálogo, la comida rápida, los snacks y las bebidas (las versiones cero o light cuentan como edulcorante).",
+            "Ejercicios extra: al final del entreno de un día puedes añadir ejercicios para reemplazar los que no hiciste; sus series cuentan.",
+            "El día queda en rojo solo si un 25 % o más de las series quedó en rojo o sin hacer, y en amarillo solo si toda la rutina quedó en meta y algo se superó.",
+            "El ✓ del entreno pregunta si estás seguro y te lleva al calendario, donde el día pulsa. El día que estás entrenando pulsa más fuerte en Semana hasta llegar al 76 %.",
+            "Días anteriores desde el calendario: entrenos abre ese entreno (o el selector si no hubo), calorías abre la comida de ese día y deportes abre la ventana de deportes. Mientras editas no se cambia de pestaña; arriba sale el nombre del día y abajo su fecha.",
+            "Nuevo deporte: Boxeo, por rounds y minutos por round.",
+            "Comidas nuevas: canelones (de queso, de atún y huevo, de carne molida y huevo), cupcakes Bimbo de chocolate y vainilla, y la leche Coronado Nutritiva 1,5 %.",
+            "Arreglos: la miel, el azúcar, los picadillos, las leches, los yogurts y otros alimentos se pueden agregar otra vez; la miel ahora es 1 cda = 21 g = 64 kcal."
+        ]
+    },
     {
         v: "2.4.0",
         items: [

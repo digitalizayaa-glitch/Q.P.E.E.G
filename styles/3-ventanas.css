@@ -536,3 +536,11 @@ main { overflow-x: hidden; }
 .t-submit { flex: none; flex-shrink: 0; }
 
 /* ---- Plan: objetivo y dieta ---- */
+
+/* Comida: fibra, azúcar añadido, sodio y edulcorantes, chiquitos y centrados bajo los macros */
+.food-extras { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 9.5px; color: var(--muted); }
+.food-extras span { text-align: center; }
+.food-extras b { display: block; font-size: 11px; color: var(--text-2); }
+/* un valor pasado de su máximo, en naranja */
+.food-macros b.over, .food-extras b.over { color: #e08a3c; }
+.plan-opt.extras-opt { margin-top: 10px; border-style: dashed; }

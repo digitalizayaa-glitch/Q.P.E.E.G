@@ -109,7 +109,10 @@ const portionsText = pt => Object.entries(pt).map(([k, v]) => `${fmtNum(v, 1)} $
 function foodTotals(entries) {
     const portions = {};
     let kcal = 0, c = 0, p = 0, f = 0;
+    const x = { fb: 0, na: 0, az: 0, ed: 0 };   /* fibra, sodio, azúcar añadido, edulcorantes */
     entries.forEach(e => {
+        const u = entryUnitExtras(e);
+        if (u) for (const k in x) x[k] += (u[k] || 0) * e.p;
         if (hasOwnKcal(e)) {
             kcal += e.p * e.k;
             c += e.p * (e.mc || 0);
@@ -126,7 +129,7 @@ function foodTotals(entries) {
         p += e.p * g.p;
         f += e.p * g.f;
     });
-    return { portions, kcal, c, p, f };
+    return { portions, kcal, c, p, f, x };
 }
 
 /* ---------- pantalla ---------- */
@@ -154,6 +157,9 @@ function renderFood() {
     const mlHave = entries.reduce((s, e) => s + entryWaterMl(e), 0);
     const hasFood = entries.some(e => e.g !== "agua");
     const dayGiven = entries.some(e => e.g === FREE_GROUP);
+    /* metas de fibra, azúcar añadido, sodio y edulcorantes; un valor pasado de su máximo va en naranja */
+    const xg = extraGoals(kcalGoal, n.profile.weight);
+    const over = (have, max) => (have > max + 1e-9 ? ' class="over"' : "");
 
     const chip = g => {
         const have = t.portions[g.k] || 0;
@@ -183,10 +189,16 @@ function renderFood() {
             </div>
             <div class="food-bar"><i class="${hasFood ? kcalStatus(t.kcal) : ""}" style="width:${pct}%"></i></div>
             <div class="food-macros">
-                <span>Carbohidratos <b>${fmtNum(t.c, 0)} / ${fmtNum(plan.macros.c, 0)} g</b></span>
-                <span>Proteína <b>${fmtNum(t.p, 0)} / ${fmtNum(plan.macros.p, 0)} g</b></span>
-                <span>Grasa <b>${fmtNum(t.f, 0)} / ${fmtNum(plan.macros.f, 0)} g</b></span>
+                <span>Carbohidratos <b${over(t.c, plan.macros.c)}>${fmtNum(t.c, 0)} / ${fmtNum(plan.macros.c, 0)} g</b></span>
+                <span>Proteína <b${over(t.p, plan.macros.p)}>${fmtNum(t.p, 0)} / ${fmtNum(plan.macros.p, 0)} g</b></span>
+                <span>Grasa <b${over(t.f, plan.macros.f)}>${fmtNum(t.f, 0)} / ${fmtNum(plan.macros.f, 0)} g</b></span>
             </div>
+            ${n.extras === false ? "" : `<div class="food-extras">
+                <span>Fibra <b>${fmtNum(t.x.fb, 0)} / ${fmtNum(xg.fb, 0)} g</b></span>
+                <span>Azúcar añad. <b${over(t.x.az, xg.az)}>${fmtNum(t.x.az, 0)} / ${fmtNum(xg.az, 0)} g</b></span>
+                <span>Sodio <b${over(t.x.na, xg.na)}>${fmtNum(t.x.na, 0)} / ${fmtNum(xg.na, 0)} mg</b></span>
+                <span>Edulcorantes <b${over(t.x.ed, xg.ed)}>${fmtNum(t.x.ed, 1)} / ${xg.ed}</b></span>
+            </div>`}
             <div class="food-plan-row">
                 <button class="food-plan" data-act="goal" aria-label="Cambiar objetivo: ${GOALS[n.goal].short}">
                     <span><small>Objetivo</small><b>${GOALS[n.goal].short}</b></span><i aria-hidden="true">›</i>

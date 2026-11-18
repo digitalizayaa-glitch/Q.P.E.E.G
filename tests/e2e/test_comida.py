@@ -138,6 +138,13 @@ def main():
                 try { askFoodAmount(g, it); if (!document.querySelector('.stepper-sheet')) bad.push(it[0]); } catch (e) { bad.push(it[0]); }
                 document.querySelectorAll('.stepper-overlay').forEach(o => o.remove()); stepperOverlay = null; }); return bad; })()""")
             r["catalogo_se_puede_agregar"] = rotos == []
+            # fibra, azúcar añadido, sodio y edulcorantes bajo los macros; lo que pasa de su máximo, en naranja
+            pg.evaluate("renderFood()")
+            r["extras_visibles"] = pg.locator(".food-extras span").count() == 4
+            pg.evaluate("addFoodEntry({ id: 'ed1', n: 'Refrescos · Coca-Cola Sin Azúcar', g: 'rapida', p: 9, k: 0, mc: 0, mp: 0, mf: 0, t: '', ts: Date.now() }); renderFood()")
+            r["extras_naranja"] = pg.locator(".food-extras b.over").count() >= 1
+            pg.evaluate("removeFoodEntry('ed1'); renderFood()")
+
             if rotos: print("NO ABREN:", rotos)
             now = round(pg.evaluate("foodTotals(foodEntries()).kcal"))
             pg.locator(".food-done").click(); navegador.quieto(pg)

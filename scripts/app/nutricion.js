@@ -320,5 +320,18 @@ function choosePlanOption(key) {
         b.onclick = () => { state.nutrition[key] = k; saveState(); renderFood(); close(); };
         list.appendChild(b);
     });
+    /* Tipo de dieta: mostrar u ocultar fibra, azúcar añadido, sodio y edulcorantes */
+    if (key === "diet") {
+        const on = state.nutrition.extras !== false;
+        const t = el("button", "t-opt plan-opt extras-opt" + (on ? " active" : ""),
+            `<span class="t-opt-name">Fibra, azúcar, sodio y edulcorantes</span><small>${on ? "Se muestran debajo de los macros · tocar para ocultar" : "Ocultos · tocar para mostrarlos"}</small>`);
+        t.type = "button";
+        t.setAttribute("aria-pressed", on);
+        t.onclick = () => {
+            if (on) state.nutrition.extras = false; else delete state.nutrition.extras;
+            saveState(); renderFood(); close();
+        };
+        list.appendChild(t);
+    }
     sheet.appendChild(list);
 }
