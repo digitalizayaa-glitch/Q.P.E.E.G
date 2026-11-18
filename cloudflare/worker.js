@@ -12,6 +12,8 @@
       POST /rest/v1/rpc/qpeeg_snapshot   { p_id }                 → (vacío)   guarda ya una copia de la versión actual
       POST /rest/v1/rpc/qpeeg_retire     { p_id }                 → (vacío)   la cuenta cambió de código: se borra y queda dada de baja
       POST /rest/v1/rpc/qpeeg_error      { p_msg, p_stack, p_ver, p_ua } → (vacío)   error anónimo de la app (sin datos de cuentas)
+      POST /rest/v1/rpc/qpeeg_feedback   { p_id, p_kind, p_text, p_ver } → 1 | -4 (ya mandó uno hoy) | -3 (tope del día)
+                                                                          comentario de la sección de comida, id anónimo propio
       POST /rest/v1/rpc/qpeeg_share      { p_id, p_ver, p_data }  → (vacío) | -3   datos de entrenamiento que el usuario aceptó compartir
                                                                           (id anónimo propio, no el de la cuenta; p_data null = borrarlos)
     Una cuenta dada de baja responde [{ gone: true }] a qpeeg_get y -2 a qpeeg_put (no se puede volver a crear).
@@ -36,6 +38,11 @@ const ERRORS_KEEP = 300;             /* errores distintos guardados como mucho (
 const ERRORS_DAYS = 60;              /* y se borran a los 60 días sin repetirse */
 const MAX_SHARE = 300_000;           /* datos de entrenamiento compartidos: uno por teléfono, se reemplaza */
 const SHARE_TOTAL = 100_000_000;     /* tope de todo lo compartido */
+const FEEDBACK_KINDS = ["alimento", "queja", "sugerencia"];
+const FEEDBACK_MAX = 600;            /* caracteres por comentario */
+const FEEDBACK_PER_DAY = 500;        /* comentarios de todos en un día, como mucho */
+const FEEDBACK_KEEP = 3000;          /* se guardan los más nuevos */
+const FEEDBACK_DONE_DAYS = 60;       /* los ya atendidos se borran a los 60 días */
 /* Orígenes exactos de la app (el propio origen del Worker siempre vale). Otros: variable ALLOWED_ORIGINS, con comas */
 const ALLOWED_ORIGINS = [
     "https://qpeeg.digitalizayaa.workers.dev",
@@ -155,6 +162,24 @@ export const handlers = {
         return undefined;
     },
 
+    /* Comentario de la sección de comida: uno por teléfono al día (id anónimo, no el de la cuenta) */
+    async qpeeg_feedback(db, a) {
+        const id = needId(a.p_id);
+        const kind = FEEDBACK_KINDS.includes(a.p_kind) ? a.p_kind : null;
+        if (!kind) throw new BadRequest("tipo no válido");
+        const text = needText(typeof a.p_text === "string" ? a.p_text.trim() : a.p_text, FEEDBACK_MAX, "texto");
+        const ver = typeof a.p_ver === "string" ? a.p_ver.slice(0, 20) : "?";
+        const now = Date.now();
+        const day = new Date(now).toISOString().slice(0, 10);
+        const today = await db.prepare("SELECT COUNT(*) AS n FROM feedback WHERE day = ?").bind(day).first();
+        if (today && today.n >= FEEDBACK_PER_DAY) return -3;
+        const row = await db.prepare("INSERT INTO feedback (id, day, kind, text, ver, created_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (id, day) DO NOTHING RETURNING created_at")
+            .bind(id, day, kind, text, ver, now).first();
+        if (!row) return -4;
+        await db.prepare("DELETE FROM feedback WHERE rowid NOT IN (SELECT rowid FROM feedback ORDER BY created_at DESC LIMIT ?)").bind(FEEDBACK_KEEP).run();
+        return 1;
+    },
+
     /* Solo si el usuario lo aceptó en la app. Sin cifrar (es para estudiarlo), sin código ni cuenta */
     async qpeeg_share(db, a) {
         const id = needId(a.p_id);
@@ -202,7 +227,8 @@ export async function cleanup(db, now = Date.now()) {
         db.prepare("DELETE FROM vaults WHERE COALESCE(seen_at, updated_at) < ?").bind(limit),
         db.prepare("DELETE FROM pairs WHERE expires_at < ?").bind(now),
         db.prepare("DELETE FROM app_errors WHERE last_at < ?").bind(now - ERRORS_DAYS * 86400 * 1000),
-        db.prepare("DELETE FROM shared_training WHERE updated_at < ?").bind(limit)
+        db.prepare("DELETE FROM shared_training WHERE updated_at < ?").bind(limit),
+        db.prepare("DELETE FROM feedback WHERE done = 1 AND created_at < ?").bind(now - FEEDBACK_DONE_DAYS * 86400 * 1000)
     ]);
     return gone ? gone.n : 0;
 }

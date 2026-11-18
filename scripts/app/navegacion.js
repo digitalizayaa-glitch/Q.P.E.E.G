@@ -78,6 +78,7 @@ function showSection(sectionId) {
     if (viewDate() && (sectionId === "week" || sectionId === "food")) setHeaderBack(() => returnToCalendar(viewDate()));
 
     updateTodayButton(sectionId);
+    updateInfoButton(sectionId);
     updateDayDoneButton(sectionId);
     requestAnimationFrame(fitHeaderDate);
 

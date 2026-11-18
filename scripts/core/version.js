@@ -5,9 +5,17 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "2.5.3";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "2.6.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "2.6.0",
+        items: [
+            "Comida: nuevo botón \"i\" a la derecha del título. Explica que todo el contador es una estimación en desarrollo y te deja mandarnos un comentario al día: evaluar un alimento, una queja o una sugerencia.",
+            "El límite de sodio sube según cuánto entrenas (lo que pusiste en el test TDEE): de 2000 mg si eres sedentario hasta 3200 mg si entrenas dos veces al día.",
+            "Nuevo: pollo en salsa de coco, por presa de alita (2 presas = 1 porción de proteína media en grasa). Gallo pinto y tocineta con un sodio más realista."
+        ]
+    },
     {
         v: "2.5.0",
         items: [

@@ -54,3 +54,17 @@ CREATE TABLE IF NOT EXISTS shared_training (
     data        TEXT NOT NULL,
     updated_at  INTEGER NOT NULL
 );
+
+-- Comentarios de la sección de comida (evaluar un alimento, queja, sugerencia). Uno por teléfono al día:
+-- id anónimo propio del teléfono (no es el de la cuenta) + día (UTC). done = 1 cuando ya se atendió.
+-- Se guardan los 3000 más nuevos; los atendidos se borran a los 60 días.
+CREATE TABLE IF NOT EXISTS feedback (
+    id          TEXT NOT NULL,
+    day         TEXT NOT NULL,
+    kind        TEXT NOT NULL,
+    text        TEXT NOT NULL,
+    ver         TEXT NOT NULL,
+    created_at  INTEGER NOT NULL,
+    done        INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (id, day)
+);

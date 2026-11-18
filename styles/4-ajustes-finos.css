@@ -670,3 +670,32 @@
     font-size: 16px; font-weight: bold; letter-spacing: .3px; color: var(--muted);
 }
 .stepper-value.with-suffix { font-size: 44px; white-space: nowrap; }
+
+/* Comida: botón "i" a la derecha del título (mismo tamaño que la casita); con "Hoy", este va a su izquierda */
+.info-btn {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    width: max(30px, calc(var(--hdr) * 0.4)); height: max(30px, calc(var(--hdr) * 0.4));
+    padding: 0; border-radius: 10px; cursor: pointer;
+    font: italic bold 17px Georgia, "Times New Roman", serif; color: var(--text);
+    background: rgba(var(--ui-rgb), .18); border: 1px solid var(--ui);
+}
+.info-btn[hidden] { display: none; }
+.info-btn:active { background: rgba(var(--ui-rgb), .32); }
+.header-sub.has-info .today-btn { right: calc(max(30px, calc(var(--hdr) * 0.4)) + 8px); }
+.header-sub.has-info:has(.today-btn:not([hidden])) .week-date { padding: 0 100px 0 44px; }
+.food-info-body { display: flex; flex-direction: column; gap: 10px; }
+.food-info-note { margin: 0; font-size: 13px; line-height: 1.45; color: var(--text-2); }
+.food-info-note b { color: var(--text); }
+.food-info-kinds { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.food-info-kind {
+    flex: 1 1 auto; padding: 8px 10px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer;
+    color: var(--text-2); background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .12);
+}
+.food-info-kind.active { color: var(--text); background: rgba(var(--ui-rgb), .22); border-color: var(--ui); }
+.food-info-text {
+    width: 100%; box-sizing: border-box; resize: vertical; min-height: 90px; padding: 10px; border-radius: 10px;
+    font: inherit; font-size: 14px; color: var(--text); background: rgba(0, 0, 0, .25); border: 1px solid rgba(255, 255, 255, .15);
+}
+.food-info-count { align-self: flex-end; margin-top: -6px; font-size: 11px; color: var(--muted); }
+.food-info-send:disabled { opacity: .45; }
+.food-info-status { margin: 0; min-height: 1em; font-size: 12px; text-align: center; color: var(--text-2); }

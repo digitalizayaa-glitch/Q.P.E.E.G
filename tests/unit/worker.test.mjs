@@ -232,3 +232,22 @@ test("un solo Worker: sirve la app (\"/\" = index.html) con cabeceras de segurid
     const broken = { ...env, RL: { limit: async () => { throw new Error("x"); } } };
     assert.equal((await post("https://qpeeg.digitalizayaa.workers.dev", broken)).status, 200, "si el contador falla no se bloquea a nadie");
 });
+
+test("comentarios de comida: uno por teléfono al día, con tope, validados y limpiados al atenderse", async () => {
+    const db = fakeD1();
+    assert.equal(await handlers.qpeeg_feedback(db, { p_id: ID, p_kind: "alimento", p_text: "  El gallo pinto trae mucho sodio  ", p_ver: "2.5.4" }), 1);
+    assert.equal(await handlers.qpeeg_feedback(db, { p_id: ID, p_kind: "queja", p_text: "otra", p_ver: "2.5.4" }), -4, "uno al día");
+    assert.equal(await handlers.qpeeg_feedback(db, { p_id: ID2, p_kind: "sugerencia", p_text: "hola", p_ver: "2.5.4" }), 1);
+    await assert.rejects(handlers.qpeeg_feedback(db, { p_id: "x", p_kind: "queja", p_text: "a" }));
+    await assert.rejects(handlers.qpeeg_feedback(db, { p_id: ID2, p_kind: "otra cosa", p_text: "a" }));
+    await assert.rejects(handlers.qpeeg_feedback(db, { p_id: ID2, p_kind: "queja", p_text: "x".repeat(601) }));
+    await assert.rejects(handlers.qpeeg_feedback(db, { p_id: ID2, p_kind: "queja", p_text: "   " }));
+    const { results } = await db.prepare("SELECT id, kind, text, done FROM feedback ORDER BY created_at").all();
+    assert.deepEqual(results.map(r => [r.kind, r.text, r.done]), [["alimento", "El gallo pinto trae mucho sodio", 0], ["sugerencia", "hola", 0]]);
+    /* atendido y viejo: la limpieza lo borra; sin atender se queda */
+    await db.prepare("UPDATE feedback SET done = 1, created_at = 0 WHERE kind = 'alimento'").run();
+    await db.prepare("UPDATE feedback SET created_at = 0 WHERE kind = 'sugerencia'").run();
+    await cleanup(db);
+    const left = await db.prepare("SELECT kind FROM feedback").all();
+    assert.deepEqual(left.results.map(r => r.kind), ["sugerencia"]);
+});
