@@ -164,6 +164,11 @@ function buildExerciseCard(routineId, dayId, exerciseId) {
         read: () => String(readExerciseLog(routineId, getWorkoutDateKey(), ex()).kg),
         step: dir => changeWorkoutKg(routineId, dayId, exerciseId, dir * KG_STEP),
         onEdit: text => { const n = parseAmount(text); if (n === null) return "x"; setWorkoutKg(routineId, dayId, exerciseId, n); return ""; },
+        /* extraordinario: la unidad se cambia aquí mismo (no tiene editor en Rutinas) */
+        extra: routineId === EXTRA_ROUTINE_ID ? {
+            label: () => `Cambiar a ${unitOf(ex()) === "lb" ? "kg" : "lb"}`,
+            onClick: () => { const e = ex(); e.unit = unitOf(e) === "lb" ? "kg" : "lb"; saveState(); unitCap.textContent = unitOf(e); return false; }
+        } : null,
         onClose: refreshWorkout
     }), VALUE_STEP_PX, { area: kgBox });                   /* todo el cuadro, con "kg" */
     kgBox.append(kgValue, unitCap);
@@ -176,33 +181,21 @@ function buildExerciseCard(routineId, dayId, exerciseId) {
         return d;
     };
     const times = () => { const t = document.createElement("span"); t.className = "rx-times wb-times"; t.textContent = "×"; return t; };
-    const setsPv = planValue(String(e0.series.length), "Series");
-    const repsPv = planValue(fmtRange(ranges[0] || rangeOf(e0)), "Reps");
-    plan.append(kgBox, times(), setsPv, times(), repsPv);
-
-    if (routineId === EXTRA_ROUTINE_ID) {
+    /* Entreno extraordinario: solo el peso (sin series ni rango de reps); las series son las que se añadan */
+    const free = routineId === EXTRA_ROUTINE_ID;
+    if (free) {
+        plan.classList.add("free");
+        plan.append(kgBox);
         const xBtn = document.createElement("span");
         xBtn.className = "day-delete-x wb-x";
         xBtn.textContent = "✕";
         keyButton(xBtn, "Quitar ejercicio");
         xBtn.onclick = e => { e.stopPropagation(); deleteRoutineExercise(routineId, dayId, exerciseId, refreshWorkout); };
         head.appendChild(xBtn);
-
-        [setsPv, repsPv].forEach(el => { el.classList.add("editable"); keyButton(el, el === setsPv ? "Cambiar series" : "Cambiar repeticiones"); });
-        setsPv.onclick = () => openStepper({
-            title: e0.name, subtitle: `Series (de 1 a ${MAX_SERIES_PER_EXERCISE})`, unit: "series",
-            read: () => String(ex().series.length),
-            step: dir => changeRoutineSets(routineId, dayId, exerciseId, dir, null),
-            editMode: "numeric",
-            onEdit: text => {
-                const n = parseAmount(text, { integer: true, max: MAX_SERIES_PER_EXERCISE });
-                if (n === null || n < 1) return "x";
-                changeRoutineSets(routineId, dayId, exerciseId, n - ex().series.length, null);
-                return "";
-            },
-            onClose: refreshWorkout
-        });
-        repsPv.onclick = () => openRangeEditor(routineId, dayId, exerciseId, refreshWorkout);
+    } else {
+        const setsPv = planValue(String(e0.series.length), "Series");
+        const repsPv = planValue(fmtRange(ranges[0] || rangeOf(e0)), "Reps");
+        plan.append(kgBox, times(), setsPv, times(), repsPv);
     }
 
     const seriesRow = document.createElement("div");
@@ -235,9 +228,10 @@ function renderWorkoutSeries(routineId, dayId, exerciseId, cardEl) {
 
     row.innerHTML = "";
     const regular = ex.series.length;
+    const free = routineId === EXTRA_ROUTINE_ID;   /* extraordinario: sin metas, sin series extra; solo "Añadir serie" */
 
     log.reps.forEach((reps, index) => {
-        const isExtra = index >= regular;
+        const isExtra = !free && index >= regular;
         const wrap = document.createElement("div");
         wrap.className = "wb-serie" + (isExtra ? " extra" : "");
         wrap.dataset.i = index;
@@ -250,7 +244,8 @@ function renderWorkoutSeries(routineId, dayId, exerciseId, cardEl) {
         const current = () => readExerciseLog(routineId, getWorkoutDateKey(), getWorkoutExercise(routineId, dayId, exerciseId));
         attachValueSwipe(valueBox, dir => changeWorkoutReps(routineId, dayId, exerciseId, index, dir, valueBox), () => openStepper({
             title: ex.name,
-            subtitle: isExtra
+            subtitle: free ? `Serie ${toRoman(index + 1)} · repeticiones`
+                : isExtra
                 ? `Serie extra ${toRoman(index + 1)} · repeticiones (cuenta como progreso)`
                 : `Serie ${toRoman(index + 1)} · repeticiones (meta ${fmtRange(targetsFor(routineId, getWorkoutDateKey(), ex)[index] || rangeOf(ex))})`,
             firstLabel: "Reps",
@@ -266,7 +261,9 @@ function renderWorkoutSeries(routineId, dayId, exerciseId, cardEl) {
             step: dir => changeWorkoutReps(routineId, dayId, exerciseId, index, dir, null),
             editMode: "numeric",
             onEdit: text => { const n = parseAmount(text, { integer: true, max: 999 }); if (n === null) return "x"; setWorkoutReps(routineId, dayId, exerciseId, index, n, false); return ""; },
-            extra: isExtra
+            extra: free
+                ? (regular > 1 ? { label: "Quitar serie", onClick: () => { removeFreeSerie(routineId, dayId, exerciseId, index); return true; } } : null)
+                : isExtra
                 ? { label: "Quitar serie extra", onClick: () => { removeExtraSerie(routineId, dayId, exerciseId, index); return true; } }
                 : (index < log.reps.length - 1 ? { label: "Rellenar", onClick: () => { setWorkoutReps(routineId, dayId, exerciseId, index, current().reps[index], true); return true; } } : null),
             onClose: refreshWorkout
@@ -278,13 +275,13 @@ function renderWorkoutSeries(routineId, dayId, exerciseId, cardEl) {
     if (log.reps.length < MAX_SERIES_PER_EXERCISE) {
         const add = document.createElement("div");
         add.className = "wb-serie wb-add-serie";
-        add.innerHTML = `<span class="serie-label">Extra</span>`;
+        add.innerHTML = `<span class="serie-label">${free ? "Serie" : "Extra"}</span>`;
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "reps-value wb-add-btn";
-        btn.setAttribute("aria-label", "Añadir serie extra");
+        btn.setAttribute("aria-label", free ? "Añadir serie" : "Añadir serie extra");
         btn.textContent = "+";
-        btn.onclick = () => addExtraSerie(routineId, dayId, exerciseId);
+        btn.onclick = () => (free ? addFreeSerie : addExtraSerie)(routineId, dayId, exerciseId);
         add.appendChild(btn);
         row.appendChild(add);
     }
@@ -304,6 +301,34 @@ function addExtraSerie(routineId, dayId, exerciseId) {
     const card = document.querySelector(`.exercise[data-exercise="${exerciseId}"]`);
     const added = card && [...card.querySelectorAll(".wb-serie:not(.wb-add-serie)")].pop();
     if (added) { added.animate([{ opacity: 0, transform: "scale(.8)" }, { opacity: 1, transform: "none" }], { duration: 300 * NAV_SPEED, easing: "cubic-bezier(.2,.8,.2,1)" }); glowOnce(added.querySelector(".reps-value")); }
+}
+
+/* Extraordinario: "+" añade una serie normal (sin meta) y se puede quitar cualquiera, dejando al menos una */
+function addFreeSerie(routineId, dayId, exerciseId) {
+    const ex = getWorkoutExercise(routineId, dayId, exerciseId);
+    if (ex.series.length >= MAX_SERIES_PER_EXERCISE) return;
+    const log = ensureExerciseLog(routineId, getWorkoutDateKey(), dayId, ex);
+    ex.series.push({ min: 0, max: 0 });
+    log.reps = Array.from({ length: ex.series.length }, (_, i) => log.reps[i] || 0);
+    saveState();
+    refreshWorkout();
+    const card = document.querySelector(`.exercise[data-exercise="${exerciseId}"]`);
+    const added = card && [...card.querySelectorAll(".wb-serie:not(.wb-add-serie)")].pop();
+    if (added) { added.animate([{ opacity: 0, transform: "scale(.8)" }, { opacity: 1, transform: "none" }], { duration: 300 * NAV_SPEED, easing: "cubic-bezier(.2,.8,.2,1)" }); glowOnce(added.querySelector(".reps-value")); }
+}
+
+function removeFreeSerie(routineId, dayId, exerciseId, index) {
+    const ex = getWorkoutExercise(routineId, dayId, exerciseId);
+    if (ex.series.length <= 1) return;
+    const log = ensureExerciseLog(routineId, getWorkoutDateKey(), dayId, ex);
+    ex.series.splice(index, 1);
+    log.reps.splice(index, 1);
+    if (log.kgs) {
+        const kgs = {};
+        for (const i in log.kgs) { const n = Number(i); if (n < index) kgs[n] = log.kgs[i]; else if (n > index) kgs[n - 1] = log.kgs[i]; }
+        if (Object.keys(kgs).length) log.kgs = kgs; else delete log.kgs;
+    }
+    saveState();
 }
 
 function removeExtraSerie(routineId, dayId, exerciseId, index) {
@@ -414,15 +439,20 @@ function updateSemaphore(routineId, dayId, exerciseId) {
     const key = getWorkoutDateKey();
     const ranges = targetsFor(routineId, key, ex);
     const reps = readExerciseLog(routineId, key, ex).reps;
-    const status = exerciseStatus(ranges, reps);
+    /* extraordinario: sin metas → solo verde (hecho) o sin empezar */
+    const free = routineId === EXTRA_ROUTINE_ID;
+    const marked = reps.filter(r => r > 0).length;
+    const status = free ? (marked === 0 ? "pending" : "green") : exerciseStatus(ranges, reps);
 
     badge.className = `wb-badge ${status}`;
-    badge.querySelector("span").textContent = SERIE_LABEL[status];
+    badge.querySelector("span").textContent = free
+        ? (marked === 0 ? "Sin empezar" : `${marked} ${marked === 1 ? "serie" : "series"}`)
+        : SERIE_LABEL[status];
 
     const row = document.getElementById(`series-row-${exerciseId}`);
     if (row) row.querySelectorAll(".wb-serie").forEach(el => {
         const i = Number(el.dataset.i);
-        const st = i >= ex.series.length ? "gold" : serieStatus(ranges[i] || rangeOf(ex), reps[i]);
+        const st = free ? (reps[i] > 0 ? "green" : "") : i >= ex.series.length ? "gold" : serieStatus(ranges[i] || rangeOf(ex), reps[i]);
         el.classList.remove("green", "gold", "red");
         if (st) el.classList.add(st);
     });

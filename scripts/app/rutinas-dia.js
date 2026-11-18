@@ -91,7 +91,9 @@ function createExercise(routineId, dayId, name, onCreated) {
     name = name.slice(0, EXERCISE_NAME_MAX).trim();
     if (!name || day.exercises.length >= MAX_EXERCISES_PER_DAY) return;
 
-    const exercise = { id: newId("ex"), name, kg: 0, unit: "kg", series: [{ min: 0, max: 0 }, { min: 0, max: 0 }, { min: 0, max: 0 }] };
+    /* entreno extraordinario: empieza con una serie y se añaden las que se hagan */
+    const n = routineId === EXTRA_ROUTINE_ID ? 1 : 3;
+    const exercise = { id: newId("ex"), name, kg: 0, unit: "kg", series: Array.from({ length: n }, () => ({ min: 0, max: 0 })) };
     day.exercises.push(exercise);
     saveState();
     if (onCreated) onCreated(exercise.id); else renderDaySheet(exercise.id);

@@ -414,6 +414,20 @@ test("comida: fibra, azúcar añadido, sodio y edulcorantes", () => {
     assert.equal(st.nutrition.extras, false);
 });
 
+test("entreno extraordinario: sin metas ni series extra, lo hecho es verde", () => {
+    const k = "2026-11-18";
+    const st = call("stateFrom", {
+        routines: [{ id: "__extra", name: "Extraordinario", days: [{ id: "xd-" + k, name: "Extraordinario", exercises: [{ id: "dom", name: "Dominadas", kg: 15, unit: "kg", series: [{ min: 6, max: 8 }, { min: 6, max: 8 }, { min: 6, max: 8 }] }] }] }],
+        logs: { __extra: { [k]: { dayId: "xd-" + k, exercises: { dom: { kg: 15, reps: [6, 5, 6, 5], extra: 1 } } } } }
+    });
+    /* la serie extra de antes pasa a ser una serie normal */
+    assert.equal(st.routines.find(r => r.id === "__extra").days[0].exercises[0].series.length, 4);
+    assert.equal(st.logs.__extra[k].exercises.dom.extra, undefined);
+    app(`state = stateFrom(${JSON.stringify(st)})`);
+    assert.equal(ev(`dayStatus(findRoutine("__extra"), "${k}")`), "green", "5 reps con meta 6–8 ya no es rojo");
+    app("state = stateFrom({})");
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

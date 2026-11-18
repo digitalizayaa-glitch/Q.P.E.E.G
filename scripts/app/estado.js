@@ -482,6 +482,21 @@ function fixEntryDays(s) {
             let best = null, most = cur;
             routine.days.forEach(d => { const n = markedSeriesOf(entry, d); if (n > most) { most = n; best = d; } });
             if (best) { entry.dayId = best.id; entry.plan = planOf(best); }
+            /* extraordinario: ya no tiene series extra; las que había pasan a ser series normales */
+            if (rid === EXTRA_ROUTINE_ID) {
+                const day = routine.days.find(d => d.id === entry.dayId);
+                let changed = false;
+                if (day) day.exercises.forEach(ex => {
+                    const log = entry.exercises[ex.id];
+                    if (!log || !log.extra) return;
+                    const n = Math.min(MAX_SERIES_PER_EXERCISE, ex.series.length + log.extra);
+                    while (ex.series.length < n) ex.series.push({ min: 0, max: 0 });
+                    log.reps = log.reps.slice(0, n);
+                    delete log.extra;
+                    changed = true;
+                });
+                if (changed) entry.plan = planOf(day);
+            }
         }
     }
 }
@@ -525,11 +540,12 @@ function dayProgress(routine, key) {
     if (!plan || plan.length === 0) return null;
 
     let total = 0, red = 0, unmarked = 0, extra = 0, gold = false;
+    const free = routine.id === EXTRA_ROUTINE_ID;   /* extraordinario: sin metas, lo hecho es verde */
     plan.forEach(p => {
         const reps = entry.exercises[p.id]?.reps || [];
         p.t.forEach((range, i) => {
             total++;
-            const st = reps[i] > 0 ? serieStatus(range, reps[i]) : "";
+            const st = reps[i] > 0 ? (free ? "green" : serieStatus(range, reps[i])) : "";
             if (!st) unmarked++;
             else { if (st === "red") red++; if (st === "gold") gold = true; }
         });
@@ -548,6 +564,7 @@ function dayProgress(routine, key) {
 function dayStatus(routine, key) {
     const d = dayProgress(routine, key);
     if (!d || d.marked + d.extra === 0) return "empty";
+    if (routine.id === EXTRA_ROUTINE_ID) return "green";   /* extraordinario: sin metas, lo hecho cuenta como verde */
     /* rojo solo si al menos el 25 % de las series quedó en rojo o sin hacer (las extra cuentan como hechas) */
     if (d.red >= d.total * 0.25 || d.missing >= d.total * 0.25) return "red";
     /* amarillo solo si toda la rutina quedó hecha y en meta (ninguna serie sin marcar ni en rojo) y algo se superó */
