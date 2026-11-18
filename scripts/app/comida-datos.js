@@ -241,9 +241,9 @@ const FOOD_CATALOG = {
         /* Leches (250 ml) */
         ["Leche entera", "1 taza (250 ml)", { k: 157, c: 12.4, p: 8.1, f: 8.4, pt: { l: 1, g: 1 } }],
         ["Leche semidescremada (2 %)", "1 taza (250 ml)", { k: 128, c: 12.4, p: 8.2, f: 5,   pt: { l: 1, g: 0.5 } }],
-        /* Coronado Nutritiva semidescremada 1,5 %: 8 g de proteína por porción (empaque); grasa 1,5 % → 3,75 g en 250 ml;
-           carbohidratos los de la leche (~12 g) → ≈ 114 kcal */
-        ["Leche semidescremada 1,5 % (Coronado Nutritiva)", "1 taza (250 ml)", { k: 114, c: 12, p: 8, f: 3.75, pt: { l: 1, g: 0.5 } }],
+        /* Coronado Nutritiva semidescremada 1,5 % (etiqueta, 250 ml): 116 kcal, 12 g carbohidratos (sin azúcar añadido),
+           8 g proteína, 4 g grasa (2 g saturada); con vitaminas A y D, hierro y ácido fólico */
+        ["Leche semidescremada 1,5 % (Coronado Nutritiva)", "1 taza (250 ml)", { k: 116, c: 12, p: 8, f: 4, pt: { l: 1, g: 0.5 } }],
         ["Leche descremada", "1 taza (250 ml)", { k: 87,  c: 12.5, p: 8.6, f: 0.2, pt: { l: 1 } }],
         /* Yogurts: natural (sin azúcar) y de sabor */
         ["Yogurt 0 % grasa natural", "1/2 taza (200 ml)", { k: 112, c: 15.4, p: 11.4, f: 0.4, pt: { l: 1 } }],
