@@ -21,7 +21,7 @@ const EXTRA_GROUP = {
 const EXTRA_BY_NAME = {
     /* ---- Harinas ---- */
     "Arroz blanco": [0.3, 120, 0, 0], "Arroz integral / Lentejas": [2.5, 100, 0, 0],
-    "Frijol entero o molido": [4.5, 200, 0, 0], "Gallo pinto / Yuca": [2.5, 200, 0, 0],
+    "Frijol entero o molido": [4.5, 200, 0, 0], "Gallo pinto / Yuca": [2.5, 150, 0, 0],
     "Garbanzo cocido": [3.8, 120, 0, 0], "Garbanzo enlatado": [4, 250, 0, 0],
     "Pasta (varias)": [0.9, 60, 0, 0], "Canelón": [0.9, 5, 0, 0],
     "Canelones de queso con salsa de tomate": [1.2, 320, 1.5, 0], "Canelones de atún y huevo": [1, 300, 1, 0],
