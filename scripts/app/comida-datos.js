@@ -28,10 +28,10 @@ const BASE_PLAN_KCAL = FOOD_GROUPS.reduce((sum, g) => sum + (g.goal || 0) * grou
 const planKcal = () => (typeof nutritionPlan === "function" && nutritionPlan()?.kcal) || BASE_PLAN_KCAL;
 const groupGoal = g => { const pl = typeof nutritionPlan === "function" ? nutritionPlan() : null; return pl ? (pl.goals[g.k] ?? null) : g.goal; };
 
-/* Franjas del día (minutos desde las 0:00): mañana 5:00-9:00, mediodía 9:01-14:00, tarde 14:01-18:00, noche el resto */
+/* Franjas del día (minutos desde las 0:00): mañana 5:00-9:59, mediodía 10:00-14:00, tarde 14:01-18:00, noche el resto */
 const TIME_BANDS = [
-    { k: "m", name: "Mañana",   hint: "5:00 – 9:00",   from: 300,  to: 540 },
-    { k: "d", name: "Mediodía", hint: "9:01 – 14:00",  from: 541,  to: 840 },
+    { k: "m", name: "Mañana",   hint: "5:00 – 9:59",   from: 300,  to: 599 },
+    { k: "d", name: "Mediodía", hint: "10:00 – 14:00", from: 600,  to: 840 },
     { k: "t", name: "Tarde",    hint: "14:01 – 18:00", from: 841,  to: 1080 },
     { k: "n", name: "Noche",    hint: "18:01 – 4:59",  from: 1081, to: 1799 }
 ];
