@@ -105,7 +105,7 @@ function amountStepper({ title, subtitle, unit, unitOne, existing, makeEntry, do
     openStepper({
         title,
         subtitle,
-        unit: () => (unitOne && qty > 0 && qty <= 1 ? unitOne : unit),
+        unit: () => (!unit ? "" : unitOne && qty > 0 && qty <= 1 ? unitOne : unit),
         doneLabel: existing ? "Guardar" : "Agregar",
         cancelLabel: "Cancelar",
         read: () => fmtNum(qty, 2),
@@ -139,10 +139,13 @@ function askFoodAmount(groupKey, item, done, existing) {
     const perUnit = per || 1;
     const unitName = unit || "porciones";
     const cal = FOOD_CALIBRATION[name] || null;    /* alimentos calibrados: calorías reales y porciones en varios grupos */
+    /* porciones sueltas ("1 porción" a secas): cuánto vale una porción de ese grupo, sin repetir "porción" */
+    const loose = !unit && equiv === "1 porción";
     amountStepper({
         title: name,
-        subtitle: (unit ? equiv : `1 porción = ${equiv}`) + (cal ? `\n= ${fmtNum(cal.k, 0)} kcal · ${portionsText(cal.pt)}` : ""),
-        unit: unitName,
+        subtitle: loose ? `1 porción ≈ ${fmtNum(groupKcal(FOOD_GROUP[groupKey]), 0)} kcal`
+            : (unit ? equiv : `1 porción = ${equiv}`) + (cal ? `\n= ${fmtNum(cal.k, 0)} kcal · ${portionsText(cal.pt)}` : ""),
+        unit: "",   /* el subtítulo ya dice qué cuenta el número (porción, rebanada, lata…) */
         unitOne: unit ? unit.replace(/s$/, "") : "porción",   /* latas, scoops, rebanadas */
         existing,
         done,
