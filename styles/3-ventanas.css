@@ -549,5 +549,7 @@ main { overflow-x: hidden; }
 .food-facts { display: flex; flex-direction: column; align-items: stretch; gap: 4px; margin-top: 2px; }
 .food-facts-eq { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; color: var(--text); text-align: center; }
 .food-facts-kcal { font-size: 13.5px; color: var(--text-2); text-align: center; }
-.food-facts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 8px; margin-top: 4px; font-size: 11px; color: var(--muted); text-align: center; }
+/* 3 por fila; la última fila incompleta queda centrada */
+.food-facts-grid { display: flex; flex-wrap: wrap; justify-content: center; row-gap: 6px; margin-top: 4px; font-size: 11px; color: var(--muted); text-align: center; }
+.food-facts-grid > span { flex: 0 0 33.33%; }
 .food-facts-grid b { display: block; font-size: 13.5px; color: var(--text-2); }   /* misma letra que las kcal */
