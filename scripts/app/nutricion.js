@@ -225,7 +225,11 @@ function runTdeeTest() {
             return;
         }
         const profile = { age: v.age, sex: v.sex, height: v.height, weight: v.weight, activity: v.activity, bf: bfUnknown ? null : v.bf };
-        state.nutrition = { profile, goal: state.nutrition?.goal || "maintain", diet: state.nutrition?.diet || "mod" };
+        const prev = state.nutrition;
+        /* cada test queda en el historial con su fecha (uno por día: repetirlo el mismo día lo corrige) */
+        const tests = (prev?.tests || []).filter(t => t.d !== dateKey());
+        tests.push({ d: dateKey(), profile: { ...profile } });
+        state.nutrition = { ...(prev || {}), profile, goal: prev?.goal || "maintain", diet: prev?.diet || "mod", tests: tests.slice(-60) };
         saveState();
         renderFood();
         close();
@@ -238,13 +242,15 @@ function runTdeeTest() {
 
 /* ---------- resultado: mismas tarjetas que el test ---------- */
 
-/* calibrate: abierto desde "Calibración" (con botones para repetir o reiniciar el test) */
-function showTdeeResult({ calibrate = false } = {}) {
+/* calibrate: abierto desde "Calibración" (con botones para repetir el test y ver el historial);
+   test: uno del historial ({ d, profile }), con sus resultados de ese día */
+function showTdeeResult({ calibrate = false, test = null } = {}) {
     const n = nutrition();
     if (!n) return;
-    const p = n.profile, t = calcTDEE(p);
+    const p = test ? test.profile : n.profile, t = calcTDEE(p);
     const f = (x, d = 0) => fmtNum(x, d);
-    const { sheet, close } = openSheet("tdee-sheet tdee-result", calibrate ? "Calibración" : "Tu resultado");
+    const title = test ? (test.d ? `Test del ${testDate(test.d)}` : "Test anterior") : calibrate ? "Calibración" : "Tu resultado";
+    const { sheet, close } = openSheet("tdee-sheet tdee-result", title);
     const body = el("div", "t-body");
     sheet.appendChild(body);
 
@@ -287,21 +293,48 @@ function showTdeeResult({ calibrate = false } = {}) {
     ok.type = "button";
     ok.onclick = close;
 
+    if (test) {
+        /* datos con los que se hizo ese test */
+        const act = ACTIVITY.find(a => a.k === p.activity);
+        body.insertBefore(card("Tus datos ese día", [
+            tTile("Peso", f(p.weight, 1), "kg"), tTile("Altura", f(p.height), "cm"), tTile("Edad", f(p.age), "años")
+        ], [`<span class="t-chip">${p.sex === "f" ? "Mujer" : "Hombre"}</span>`, act ? `<span class="t-chip">${act.name}</span>` : "",
+            `<span class="t-chip">${p.bf ? `Grasa ${f(p.bf)} %` : "Grasa no indicada"}</span>`]), body.firstChild);
+    }
+
     if (calibrate) {
         const row = el("div", "dialog-actions t-actions");
         const again = el("button", "dialog-btn ghost", "Repetir el test");
         again.type = "button";
         again.onclick = () => { close(); runTdeeTest(); };
-        const reset = el("button", "dialog-btn danger", "Reiniciar plan");
-        reset.type = "button";
-        reset.onclick = async () => {
-            if (!await askConfirm({ title: "Reiniciar plan", message: "Se borrará el test, el objetivo y la dieta. Tu historial de comidas se mantiene.", confirmLabel: "Reiniciar" })) return;
-            state.nutrition = null; saveState(); renderFood(); close();
-        };
-        row.append(again, reset);
+        const hist = el("button", "dialog-btn ghost", "Historial de tests");
+        hist.type = "button";
+        hist.onclick = () => showTestHistory();
+        row.append(again, hist);
         body.append(row);
     }
     body.appendChild(ok);
+}
+
+const testDate = d => parseKey(d).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }).replace(".", "");
+
+/* Historial de tests: fecha, peso, altura, edad y % de grasa; al tocar uno, sus resultados exactos */
+function showTestHistory() {
+    const n = nutrition();
+    if (!n) return;
+    const { sheet } = openSheet("tdee-sheet test-history", "Historial de tests");
+    const list = el("div", "t-body t-opts");
+    [...n.tests].reverse().forEach((test, i) => {
+        const p = test.profile;
+        const bf = p.bf ? `${fmtNum(p.bf, 0)} % grasa` : `≈ ${fmtNum(calcTDEE(p).bf, 0)} % grasa (est.)`;
+        const b = el("button", "t-opt test-row" + (i === 0 ? " active" : ""),
+            `<span class="t-opt-name">${test.d ? testDate(test.d) : "Antes del historial"}${i === 0 ? " · actual" : ""}</span>
+             <small>${fmtNum(p.weight, 1)} kg · ${fmtNum(p.height, 0)} cm · ${fmtNum(p.age, 0)} años · ${bf}</small>`);
+        b.type = "button";
+        b.onclick = () => showTdeeResult({ test });
+        list.appendChild(b);
+    });
+    sheet.appendChild(list);
 }
 
 /* ---------- Objetivo o dieta: una ventana con las opciones (la elegida, marcada) ---------- */

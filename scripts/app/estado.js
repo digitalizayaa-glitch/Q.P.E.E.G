@@ -200,9 +200,18 @@ function sanitizeState(src) {
     const nu = s.nutrition;
     const p = isObj(nu) && isObj(nu.profile) ? nu.profile : null;
     const okNum = v => typeof v === "number" && isFinite(v) && v > 0;
-    s.nutrition = p && okNum(p.age) && okNum(p.height) && okNum(p.weight) && okNum(p.activity) && (p.sex === "m" || p.sex === "f")
+    const okProfile = p => isObj(p) && okNum(p.age) && okNum(p.height) && okNum(p.weight) && okNum(p.activity) && (p.sex === "m" || p.sex === "f");
+    const cleanProfile = p => ({ age: p.age, sex: p.sex, height: p.height, weight: p.weight, activity: p.activity, bf: okNum(p.bf) ? p.bf : null });
+    /* historial de tests: { d: "AAAA-MM-DD" (o null si es anterior al historial), profile }, del más viejo al más nuevo */
+    const tests = isObj(nu) && Array.isArray(nu.tests)
+        ? nu.tests.filter(t => isObj(t) && okProfile(t.profile)).slice(-60)
+            .map(t => ({ d: /^\d{4}-\d{2}-\d{2}$/.test(t.d) ? t.d : null, profile: cleanProfile(t.profile) }))
+        : [];
+    s.nutrition = okProfile(p)
         ? { profile: { ...p, bf: okNum(p.bf) ? p.bf : null }, goal: ["maintain", "bulk", "cut"].includes(nu.goal) ? nu.goal : "maintain", diet: ["mod", "high", "low"].includes(nu.diet) ? nu.diet : "mod",
-            ...(nu.extras === false ? { extras: false } : {}) }
+            ...(nu.extras === false ? { extras: false } : {}),
+            /* el test actual siempre está en el historial (los de antes del historial, sin fecha) */
+            tests: tests.length ? tests : [{ d: null, profile: cleanProfile(p) }] }
         : null;
 
     const sports = isObj(s.sports) ? s.sports : {};

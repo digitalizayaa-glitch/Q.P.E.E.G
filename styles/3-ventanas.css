@@ -553,3 +553,7 @@ main { overflow-x: hidden; }
 .food-facts-grid { display: flex; flex-wrap: wrap; justify-content: center; row-gap: 6px; margin-top: 4px; font-size: 11px; color: var(--muted); text-align: center; }
 .food-facts-grid > span { flex: 0 0 33.33%; }
 .food-facts-grid b { display: block; font-size: 13.5px; color: var(--text-2); }   /* misma letra que las kcal */
+
+/* Historial de tests: la fecha arriba y los datos en un renglón debajo */
+.t-opt.test-row { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; }
+.t-opt.test-row small { margin: 0; white-space: nowrap; }

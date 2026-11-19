@@ -428,6 +428,16 @@ test("entreno extraordinario: sin metas ni series extra, lo hecho es verde", () 
     app("state = stateFrom({})");
 });
 
+test("nutrición: historial de tests", () => {
+    const prof = { sex: "m", age: 17, height: 175, weight: 72, activity: 1.55, bf: null };
+    /* un plan de antes del historial: queda su test actual, sin fecha */
+    const st = call("stateFrom", { nutrition: { profile: prof, goal: "maintain", diet: "mod" } });
+    assert.deepEqual(st.nutrition.tests, [{ d: null, profile: prof }]);
+    /* con fecha y datos inválidos fuera */
+    const st2 = call("stateFrom", { nutrition: { profile: prof, goal: "maintain", diet: "mod", tests: [{ d: "2026-11-19", profile: { ...prof, weight: 75, bf: 16 } }, { d: "x", profile: { age: -1 } }] } });
+    assert.deepEqual(st2.nutrition.tests, [{ d: "2026-11-19", profile: { ...prof, weight: 75, bf: 16 } }]);
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

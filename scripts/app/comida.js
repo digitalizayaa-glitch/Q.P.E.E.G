@@ -207,7 +207,7 @@ function renderFood() {
                     <span><small>Dieta</small><b>${DIETS[n.diet].short}</b></span><i aria-hidden="true">›</i>
                 </button>
             </div>
-            <button class="food-plan" data-act="calib" aria-label="Calibración: ver, repetir o reiniciar el test TDEE">
+            <button class="food-plan" data-act="calib" aria-label="Calibración: ver o repetir el test TDEE y su historial">
                 <span><small>Calibración</small><b>TDEE ${fmtNum(calcTDEE(n.profile).tdee, 0)} kcal</b></span><i aria-hidden="true">⚙</i>
             </button>
         </div>
