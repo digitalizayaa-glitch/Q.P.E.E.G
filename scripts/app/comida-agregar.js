@@ -99,12 +99,43 @@ function openFoodPicker(groupKey) {
 /* Cuadro de cantidad común. Con "existing" ({ id, qty }) abre en la cantidad ya agregada en este menú:
    se puede subir, bajar o dejar en 0 para quitarla. done({ id, qty }) al guardar, done(null) al quitar. */
 /* unitOne: la unidad en singular, para 1 o menos ("1 rebanada", "2 rebanadas") */
-function amountStepper({ title, subtitle, unit, unitOne, existing, makeEntry, done }) {
+/* Ficha de un alimento, por 1 unidad de lo que cuenta el número:
+     1 taza (250 ml) = 1 lácteo · 0,5 grasa        ← equivalencia, siempre en un renglón
+     128 kcal                                      ← un poco más chico
+     Carbohidratos 12 g · Proteína 8 g · Grasa 5 g  ← 3 columnas: macros, fibra, azúcar, sodio, edulcorante */
+function foodFacts(equiv, entry) {
+    const t = foodTotals([entry]);
+    const pt = hasOwnKcal(entry) && entry.pt ? entry.pt : { [entry.g]: entry.p };
+    const wrap = el("div", "food-facts");
+    const line = el("div", "food-facts-eq");
+    line.textContent = `${equiv} = ${portionsText(pt)}`;
+    const kcal = el("div", "food-facts-kcal");
+    kcal.textContent = `${fmtNum(t.kcal, 0)} kcal`;
+    const grid = el("div", "food-facts-grid");
+    const cell = (label, value) => { const c = el("span", "", `${label} <b></b>`); c.querySelector("b").textContent = value; grid.appendChild(c); };
+    cell("Carbohidratos", `${fmtNum(t.c, 1)} g`);
+    cell("Proteína", `${fmtNum(t.p, 1)} g`);
+    cell("Grasa", `${fmtNum(t.f, 1)} g`);
+    if (t.x.fb > 0) cell("Fibra", `${fmtNum(t.x.fb, 1)} g`);
+    if (t.x.az > 0) cell("Azúcar añad.", `${fmtNum(t.x.az, 1)} g`);
+    if (t.x.na > 0) cell("Sodio", `${fmtNum(t.x.na, 0)} mg`);
+    if (t.x.ed > 0) cell("Edulcorante", t.x.ed === 1 ? "Sí" : `${fmtNum(t.x.ed, 2)} porc.`);
+    wrap.append(line, kcal, grid);
+    /* la equivalencia no se parte: si no cabe, la letra se achica */
+    requestAnimationFrame(() => {
+        let size = parseFloat(getComputedStyle(line).fontSize) || 15;
+        while (line.scrollWidth > line.clientWidth + 1 && size > 10) { size -= 0.5; line.style.fontSize = size + "px"; }
+    });
+    return wrap;
+}
+
+function amountStepper({ title, subtitle, unit, unitOne, existing, makeEntry, done, equiv }) {
     let qty = existing ? existing.qty : 1;
     const allowZero = !!existing;
     openStepper({
         title,
         subtitle,
+        subNode: equiv ? foodFacts(equiv, makeEntry(1)) : null,
         unit: () => (!unit ? "" : unitOne && qty > 0 && qty <= 1 ? unitOne : unit),
         doneLabel: existing ? "Guardar" : "Agregar",
         cancelLabel: "Cancelar",
@@ -143,9 +174,8 @@ function askFoodAmount(groupKey, item, done, existing) {
     const loose = !unit && equiv === "1 porción";
     amountStepper({
         title: name,
-        subtitle: loose ? `1 porción ≈ ${fmtNum(groupKcal(FOOD_GROUP[groupKey]), 0)} kcal`
-            : (unit ? equiv : `1 porción = ${equiv}`) + (cal ? `\n= ${fmtNum(cal.k, 0)} kcal · ${portionsText(cal.pt)}` : ""),
-        unit: "",   /* el subtítulo ya dice qué cuenta el número (porción, rebanada, lata…) */
+        equiv: loose ? "1 porción" : equiv,   /* "1 taza (250 ml)", "1 rebanada (31 g)"… */
+        unit: "",   /* la ficha ya dice qué cuenta el número (porción, rebanada, lata…) */
         unitOne: unit ? unit.replace(/s$/, "") : "porción",   /* latas, scoops, rebanadas */
         existing,
         done,
@@ -168,8 +198,8 @@ function askFastFood(key, done, existing) {
     const pt = item[7] || fastPortions(c, p, f);
     amountStepper({
         title: name,
-        subtitle: `1 ${unit} = ${fmtNum(kcal, 0)} kcal\n= ${portionsText(pt)}`,
-        unit: plural,
+        equiv: `1 ${unit}`,
+        unit: "",
         unitOne: unit,
         existing,
         done,

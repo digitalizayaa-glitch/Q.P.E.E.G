@@ -10,7 +10,7 @@
 
 let stepperOverlay = null;
 
-function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extra, onClose, doneLabel, cancelLabel, second, firstLabel, suffix = "" }) {
+function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extra, onClose, doneLabel, cancelLabel, second, firstLabel, suffix = "", subNode = null }) {
     const show = () => read() + suffix;   /* el número con su símbolo (p. ej. " kcal"); al escribir, solo el número */
     if (stepperOverlay) return;
 
@@ -29,7 +29,11 @@ function openStepper({ title, subtitle, unit, read, step, onEdit, editMode, extr
     sub.className = "stepper-sub";
     /* la unidad que cambia (kg/lb, 1 rebanada/2 rebanadas) se muestra en el subtítulo; la fija ya la dice el subtítulo */
     const unitText = () => (typeof unit === "function" ? unit() : "");
-    const paintSub = () => { const u = unitText(); sub.textContent = [subtitle, u].filter(Boolean).join(" · "); };
+    const paintSub = () => {
+        if (subNode) return;   /* subtítulo armado por quien abre (p. ej. la ficha de un alimento) */
+        const u = unitText(); sub.textContent = [subtitle, u].filter(Boolean).join(" · ");
+    };
+    if (subNode) sub.appendChild(subNode);
     paintSub();
 
     const up = document.createElement("button");

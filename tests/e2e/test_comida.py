@@ -69,7 +69,7 @@ def main():
             r["arroz_marcado"] = pg.locator(".picker-item.picked", has_text="Arroz blanco").count() == 2   # en Frecuentes y en Harinas
             # Volver a tocar lo agregado: abre en la cantidad puesta y se corrige sin duplicar
             pg.locator(".picker-item.picked", has_text="Arroz blanco").first.click(); navegador.quieto(pg)
-            r["reabre_en_cantidad"] = pg.locator(".stepper-overlay").inner_text().split("porci")[0].strip().endswith("1") and \
+            r["reabre_en_cantidad"] = pg.locator(".stepper-overlay .stepper-value").inner_text().strip() == "1" and \
                 pg.locator(".stepper-overlay button", has_text="Guardar").count() == 1
             pg.locator(".stepper-overlay .stepper-arrow, .stepper-overlay button").filter(has_text="▲").first.click(); navegador.quieto(pg)
             pg.locator(".stepper-overlay button", has_text="Guardar").click(); navegador.quieto(pg)
