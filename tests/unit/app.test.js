@@ -444,6 +444,18 @@ test("comida: colores de las calorías del día", () => {
     assert.deepEqual([50, 75, 76, 80, 81, 100, 115, 116, 140].map(at), ["red", "red", "orange", "orange", "green", "green", "green", "orange", "orange"]);
 });
 
+test("deportes: desnivel comparado con el típico (baja poco, sube cada vez más desde 3 veces)", () => {
+    const f = up => call("sportClimbFactor", "run", 7, up, 60);
+    assert.equal(f(0), 1, "sin desnivel anotado: no se sabe");
+    assert.ok(f(5) >= 0.95 && f(5) < f(30) && f(30) < f(60));
+    assert.equal(Math.round(f(60) * 100), 100);
+    const ups = [180, 500, 1000, 1500, 2000].map(f);
+    for (let i = 1; i < ups.length; i++) assert.ok(ups[i] - ups[i - 1] > 0);
+    assert.ok(ups[1] > 2 && ups[4] > 7 && ups[4] <= 8, ups.join(" "));
+    /* lo de subir pesa mucho más que lo de bajar */
+    assert.ok(f(120) - 1 > 1 - f(5));
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

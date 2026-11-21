@@ -171,11 +171,32 @@ function sportPaceDetail(sp) {
     const sex = body ? body.s : "m";
     const unit = SPORT_MODERATE.min * trimpMin(SPORT_MODERATE.x, sex);
     const kg = body ? body.w : 75;
+    const climb = sportClimbFactor(k, km, up, minutes);
     return {
-        expected, minutes, speed: v, met, x, zone: sportZone(x), tooFast,
+        expected, minutes, speed: v, met, x, zone: sportZone(x), tooFast, climb,
         kcal: met * minutes * kg / 60,
-        load: Math.pow(minutes * trimpMin(x, sex) / unit, SPORT_POW) * 100 * sportBoost(k)
+        load: Math.pow(minutes * trimpMin(x, sex) / unit, SPORT_POW) * 100 * sportBoost(k) * climb
     };
+}
+
+/* Multiplicador por desnivel, comparado con el típico del deporte para esa distancia (o ese tiempo):
+   r = desnivel hecho / desnivel típico.
+   - Menos que el típico: baja poco y proporcional, hasta ×0,95 (penaliza mucho menos de lo que premia subir).
+   - Más que el típico: sube cada vez más rápido: ×(1 + 0,058·(r − 1)^1,17), y desde 3 veces el típico
+     suma además 0,08·(r − 3)^1,1; hasta ×8.
+     Correr 7 km (típico +60 m): +500 → ×2,1 · +1000 → ×3,9 · +1500 → ×5,8 · +2000 → ×7,8
+   Sin desnivel anotado: ×1 (no se sabe). */
+const CLIMB_FLAT = 0.95, CLIMB_A = 0.058, CLIMB_B = 1.17, CLIMB_MAX = 8;
+const CLIMB_FROM = 3, CLIMB_A2 = 0.08, CLIMB_B2 = 1.1;   /* el empujón extra desde 3 veces el típico */
+function sportClimbFactor(k, km, up, minutes) {
+    const base = sportDef(k).ref;
+    if (!base.up || !(up > 0)) return 1;
+    const typical = base.km && km > 0 ? base.up / base.km * km : base.up * minutes / base.min;
+    if (!(typical > 0)) return 1;
+    const r = up / typical;
+    if (r <= 1) return CLIMB_FLAT + (1 - CLIMB_FLAT) * r;
+    const extra = r > CLIMB_FROM ? CLIMB_A2 * Math.pow(r - CLIMB_FROM, CLIMB_B2) : 0;
+    return Math.min(CLIMB_MAX, 1 + CLIMB_A * Math.pow(r - 1, CLIMB_B) + extra);
 }
 
 /* Salida típica de este usuario en un deporte ({ min, km, up } según aplique) */
