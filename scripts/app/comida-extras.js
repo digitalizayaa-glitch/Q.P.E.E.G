@@ -150,12 +150,18 @@ const EXTRA_FAST_TYPES = [
     { re: /zero|sin azúcar|sugarfree|cero azúcar|pepsi black|light \(con endulzante\)|arnold palmer lite|^sprite$|^fresca|té negro melocotón|fresh cítricos|hawaiian punch/i,
       fb: 0, na: 0, az: 1, ed: 1 },
     { re: /natural \(sin azúcar añadida\)/i, fb: 0.04, na: 0.15, az: 0, ed: 0 },
+    /* fresco natural de restaurante: fruta con agua y algo de azúcar */
+    { re: /bebida natural/i, fb: 0.01, na: 0.1, az: 0.5, ed: 0 },
     { re: /ponche de leche/i, fb: 0, na: 0.8, az: 0.7, ed: 0 },
     { re: /gatorade|powerade/i, fb: 0, na: 1.9, az: 1, ed: 0 },
     { re: /red bull|monster/i, fb: 0, na: 1.3, az: 1, ed: 0 },
     { re: /néctar/i, fb: 0.01, na: 0.25, az: 0.75, ed: 0 },
     { drink: true, fb: 0, na: 0.3, az: 1, ed: 0 },
     /* postres y dulces */
+    { re: /^shake/i, fb: 0.01, na: 0.5, az: 0.7, ed: 0 },
+    { re: /breadsticks|cheesesticks|jalapeñosticks|pepperonisticks|pan de ajo/i, fb: 0.04, na: 1.8, az: 0.03, ed: 0 },
+    { re: /^alitas$/i, fb: 0, na: 3, az: 0, ed: 0 },
+    { re: /spaghetti|calzone/i, fb: 0.06, na: 1.8, az: 0.06, ed: 0 },
     { re: /sundae|mcflurry|frosty|pie de manzana|galleta de chocolate|cupcake|honey-butter/i, fb: 0.02, na: 0.6, az: 0.65, ed: 0 },
     { re: /hotcakes/i, fb: 0.03, na: 0.9, az: 0.45, ed: 0 },
     { chain: /^Chocolates$/, fb: 0.035, na: 0.35, az: 0.88, ed: 0 },
