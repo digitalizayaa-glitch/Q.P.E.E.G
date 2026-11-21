@@ -73,6 +73,17 @@ function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX, opts = {}) 
     });
     requestAnimationFrame(markTappable);
     let lastY = null, pointer = null, startX = 0, startY = 0, startT = 0, moved = false, live = false, free = false;
+    /* acelerador (opcional): pasos seguidos en la misma dirección valen cada vez más (×accel cada accelEvery
+       pasos); sigue entre deslizadas seguidas (menos de 1,2 s) y vuelve a 1 al cambiar de dirección o al parar */
+    let run = 0, runDir = 0, runT = 0;
+    const stepSize = dir => {
+        if (!opts.accel) return 1;
+        const now = performance.now();
+        if (dir !== runDir || now - runT > 1200) { runDir = dir; run = 0; }
+        runT = now;
+        run++;
+        return Math.max(1, Math.round(Math.pow(opts.accel, Math.floor((run - 1) / (opts.accelEvery || 10)))));
+    };
     /* el modo se decide cuando ya está en pantalla (y otra vez cuando la ventana termina de abrir; al cambiar de tamaño, el escuchador global) */
     requestAnimationFrame(() => syncValueMode(el));
     setTimeout(() => syncValueMode(el), 450);
@@ -103,7 +114,7 @@ function attachValueSwipe(el, onStep, onTap, stepPx = VALUE_STEP_PX, opts = {}) 
         let dy = e.clientY - lastY;
         while (Math.abs(dy) >= stepPx) {
             const dir = dy < 0 ? 1 : -1;          /* arriba = subir */
-            onStep(dir);
+            onStep(dir, stepSize(dir));
             lastY -= dir * stepPx;
             dy = e.clientY - lastY;
         }

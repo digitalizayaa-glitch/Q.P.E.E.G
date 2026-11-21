@@ -51,7 +51,7 @@ const sportDef = k => SPORT_BY_KEY[k] || SPORT_BY_KEY.custom;
 const SPORT_FIELDS = [
     { f: "min", label: "Tiempo",    unit: "min", step: 5,   max: 1440, fmt: v => fmtDuration(v), mode: "numeric" },
     { f: "km",  label: "Distancia", unit: "km",  step: 0.5, max: 500,  fmt: v => `${fmtNum(v, 1)} km`, mode: "decimal" },
-    { f: "up",  label: "Desnivel",  unit: "m",   step: 5,   max: 9000, fmt: v => `+${fmtNum(v, 0)} m`, mode: "numeric" },
+    { f: "up",  label: "Desnivel",  unit: "m",   step: 1,   max: 9000, fmt: v => `+${fmtNum(v, 0)} m`, mode: "numeric" },
     { f: "rounds", label: "Rounds", unit: "rounds", step: 1, max: 50, fmt: v => `${fmtNum(v, 0)} ${v === 1 ? "round" : "rounds"}`, mode: "numeric" },
     { f: "rmin", label: "Por round", unit: "min", step: 0.5, max: 15, fmt: v => `${fmtNum(v, 1)} min`, mode: "decimal" }
 ];

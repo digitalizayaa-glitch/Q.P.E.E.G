@@ -129,9 +129,9 @@ function askSportData(sport, editing, opts = {}) {
             fit();
         };
         const step = field.f === "km" && (sport.k === "bike" || sport.k === "mtb") ? 1 : field.step;
-        const apply = dir => {
+        const apply = (dir, size = 1) => {   /* size: el acelerador del deslizador (desnivel) */
             const before = text();
-            vals[field.f] = Math.min(field.max, Math.max(0, Math.round((vals[field.f] + dir * step) * 10) / 10));
+            vals[field.f] = Math.min(field.max, Math.max(0, Math.round((vals[field.f] + dir * step * size) * 10) / 10));
             const after = text();
             if (after !== before) animateValue(box, dir, after);
             paintHint();
@@ -155,7 +155,9 @@ function askSportData(sport, editing, opts = {}) {
         new MutationObserver(() => {
             if (!box.classList.contains("editing") && !box.querySelector(".v") && box.textContent !== text()) { box.textContent = text(); paintHint(); paintLoad(); }
         }).observe(box, { attributes: true, attributeFilter: ["class"], childList: true });
-        attachValueSwipe(box, apply, startEdit, 22);
+        /* desnivel: de 1 en 1, un 25 % más sensible y con acelerador (cada 6 pasos seguidos, ×1,5) */
+        if (field.f === "up") attachValueSwipe(box, apply, startEdit, 22 * 0.75, { accel: 1.5, accelEvery: 6 });
+        else attachValueSwipe(box, apply, startEdit, 22);
         hints.push(paintHint);
         paintHint();
         col.append(label, up, box, down, hint);
