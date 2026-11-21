@@ -579,8 +579,8 @@
 .history-kind[hidden] { display: none; }
 
 /* Verde, amarillo y rojo más vivos y con más contraste; brillo arriba y un filtro del color de la app */
-:root { --cal-green: #19d35c; --cal-gold: #ffc81a; --cal-red: #ff3b3b; }
-.history-cell.green, .history-cell.gold, .history-cell.red {
+:root { --cal-green: #19d35c; --cal-gold: #ffc81a; --cal-red: #ff3b3b; --cal-orange: #ff8c2a; }
+.history-cell.green, .history-cell.gold, .history-cell.red, .history-cell.orange {
     --cal: var(--cal-green);
     color: #0b0b0b; border: 1.5px solid rgba(0, 0, 0, .3);   /* iOS < 16.2 */
     border-color: color-mix(in srgb, var(--cal) 70%, #000);
@@ -591,6 +591,7 @@
     text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
 }
 .history-cell.gold { --cal: var(--cal-gold); }
+.history-cell.orange { --cal: var(--cal-orange); }   /* calorías: un poco bajas (76–80 %) o pasadas (> 115 %) */
 .history-cell.red { --cal: var(--cal-red); color: #fff; text-shadow: 0 1px 1px rgba(0, 0, 0, .35); }
 
 /* Hoy: en vez del borde negro, un contorno con pulso del color de la app (el doble del de los botones) */
@@ -699,3 +700,8 @@
 .food-info-count { align-self: flex-end; margin-top: -6px; font-size: 11px; color: var(--muted); }
 .food-info-send:disabled { opacity: .45; }
 .food-info-status { margin: 0; min-height: 1em; font-size: 12px; text-align: center; color: var(--text-2); }
+
+/* "Volver a hoy": flecha de regreso, cuadrada como la casita */
+.today-btn { width: max(30px, calc(var(--hdr) * 0.4)); padding: 0; display: grid; place-items: center; }
+.today-btn[hidden] { display: none; }
+.today-btn svg { width: 58%; height: 58%; fill: none; stroke: var(--text); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }

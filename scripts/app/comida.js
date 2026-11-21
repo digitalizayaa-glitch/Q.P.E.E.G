@@ -45,11 +45,12 @@ function removeFoodEntry(id) {
 /* Calorías del día frente a la meta del plan: ≤60 % rojo, 61-75 % amarillo, 76-120 % verde, ≥121 % rojo.
    Se usa igual en la barra de Comida y en el calendario de calorías. */
 function kcalStatus(kcal) {
-    const pct = kcal / planKcal() * 100;
-    if (pct <= 60) return "red";
-    if (pct < 76) return "gold";
-    if (pct <= 120) return "green";
-    return "red";
+    /* rojo hasta 75 %, naranja de 76 a 80 %, verde de 81 a 115 %, naranja si se pasa de 115 % */
+    const pct = Math.round(kcal / planKcal() * 100);
+    if (pct <= 75) return "red";
+    if (pct <= 80) return "orange";
+    if (pct <= 115) return "green";
+    return "orange";
 }
 
 /* Entradas con calorías propias: comida rápida ("rapida") y el día dado como volumen sucio ("libre") */

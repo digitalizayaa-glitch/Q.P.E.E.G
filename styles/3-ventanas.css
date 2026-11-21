@@ -463,6 +463,7 @@ main { overflow-x: hidden; }
 .food-bar i { background: var(--accent); transition: width .3s, background-color .3s; }
 .food-bar i.red { background: var(--accent-red); }
 .food-bar i.gold { background: var(--accent-gold); }
+.food-bar i.orange { background: var(--cal-orange, #ff8c2a); }
 .food-bar i.green { background: var(--accent); }
 
 /* ---- Nutrición: test, plan, agua, historial ---- */

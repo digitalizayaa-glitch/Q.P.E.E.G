@@ -34,7 +34,7 @@ function feedbackSentToday() {
 function updateInfoButton(sectionId) {
     const btn = document.getElementById("infoBtn");
     if (!btn) return;
-    btn.hidden = sectionId !== "food" || !nutrition();
+    btn.hidden = sectionId !== "food" || !nutrition() || !!viewDate();   /* en un día anterior, no */
     btn.parentElement.classList.toggle("has-info", !btn.hidden);
 }
 

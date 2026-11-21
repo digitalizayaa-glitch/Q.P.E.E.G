@@ -104,6 +104,7 @@ function renderHistory(animate) {
         if (status === "green") cell.classList.add("green");
         if (status === "red") cell.classList.add("red");
         if (status === "gold") cell.classList.add("gold");
+        if (status === "orange") cell.classList.add("orange");
         if (status === "sport") cell.classList.add("sport");
         if (key === todayKey) cell.classList.add("today");
 
@@ -127,7 +128,7 @@ function renderHistory(animate) {
 
 const DAY_STATUS_WORDS = {
     workout: { green: "entreno en meta", gold: "entreno superado", red: "faltaron repeticiones", empty: "sin entreno" },
-    food: { green: "calorías en meta", gold: "calorías algo bajas", red: "calorías fuera de meta", empty: "sin comidas" },
+    food: { green: "calorías en meta", orange: "calorías un poco fuera de meta", red: "calorías muy bajas", empty: "sin comidas" },
     sport: { sport: "con deporte", empty: "sin deporte" }
 };
 function dayAriaLabel(key, d, status) {

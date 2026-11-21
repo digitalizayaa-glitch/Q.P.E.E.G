@@ -438,6 +438,12 @@ test("nutrición: historial de tests", () => {
     assert.deepEqual(st2.nutrition.tests, [{ d: "2026-11-19", profile: { ...prof, weight: 75, bf: 16 } }]);
 });
 
+test("comida: colores de las calorías del día", () => {
+    const goal = ev("planKcal()");
+    const at = pct => call("kcalStatus", goal * pct / 100);
+    assert.deepEqual([50, 75, 76, 80, 81, 100, 115, 116, 140].map(at), ["red", "red", "orange", "orange", "green", "green", "green", "orange", "orange"]);
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });
