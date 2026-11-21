@@ -197,8 +197,8 @@ test("deportes: carga TRIMP (100 = 40 min de ejercicio moderado), casos reales",
     /* bici tranquila con subida: cuenta, pero debajo de 100 */
     within({ k: "bike", km: 9, min: 60, up: 200 }, 70, 99);
     assert.equal(ev("sportPaceDetail({ k: 'bike', km: 9, min: 60, up: 200 }).zone"), "suave");
-    within({ k: "walk", km: 4, min: 45 }, 30, 60);
-    within({ k: "walk", km: 6.6 }, 40, 75);
+    within({ k: "walk", km: 4, min: 45 }, 40, 80);   /* caminar: +30 % desde 2.6.13 */
+    within({ k: "walk", km: 6.6 }, 55, 100);
     within({ k: "bike", km: 15, min: 50 }, 90, 120);
     within({ k: "run", km: 5, min: 30 }, 120, 180);
     within({ k: "run", km: 10, min: 60 }, 180, 260);

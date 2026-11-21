@@ -105,7 +105,7 @@ const SPORT_MODERATE = { min: 40, x: 0.5 };                     /* = 100 */
    Potencia 0,6: el doble de minutos suma ≈ 1,5 veces, no el doble; así una salida de 3 h no se dispara a 1000 */
 const SPORT_PAR = 5, SPORT_POW = 0.6;
 /* Ajuste final por deporte (comparado con cómo se sienten las sesiones reales): bici +5 %, caminar +12 %, el resto +10 % */
-const SPORT_BOOST = { bike: 1.05, mtb: 1.05, walk: 1.12, boxing: 1.35 };   /* boxeo: +35 % */
+const SPORT_BOOST = { bike: 1.05, mtb: 1.05, walk: 1.12 * 1.3, boxing: 1.35 };   /* caminar: +12 % y luego +30 %; boxeo: +35 % */
 const sportBoost = k => SPORT_BOOST[k] || 1.10;
 
 /* Cuerpo del perfil (sin plan: null → persona de referencia) */
