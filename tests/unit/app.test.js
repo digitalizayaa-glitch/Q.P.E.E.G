@@ -486,6 +486,17 @@ test("nutrición: recordatorio de la próxima marca", () => {
     assert.equal(call("addDaysKey", "2026-11-25", 60), "2027-01-24");
 });
 
+test("historial: días borrados y extraordinarios van juntos como Extraordinario, con estrella", () => {
+    app(`state.routines = [{ id: "r1", name: "R", days: [{ id: "push", name: "Push", exercises: [{ id: "a", name: "Press", kg: 50, unit: "kg", series: [{ min: 8, max: 10 }] }] }] }];
+        state.logs = { r1: { "2026-11-20": { dayId: "push", exercises: { a: { kg: 50, reps: [10] } } }, "2026-11-21": { dayId: "borrado", exercises: { a: { kg: 50, reps: [10] } } } },
+                       __extra: { "2026-11-21": { dayId: "xd", exercises: { z: { kg: 10, reps: [10] } } } } };`);
+    assert.deepEqual(call("daySessions", "2026-11-20").map(s => [s.group, s.name]), [["r1/push", "Push"]]);
+    assert.deepEqual(call("daySessions", "2026-11-21").map(s => [s.group, s.name]), [["extra", "Extraordinario"], ["extra", "Extraordinario"]]);
+    const style = ev(`(() => { const st = workoutStyleOf([{ group: "r1/push" }, { group: "extra" }, { group: "r1/pull" }], ["a", "b"]); return [st("extra"), st("r1/push"), st("r1/pull")]; })()`);
+    assert.deepEqual(style.map(s => s.shape), [-1, 0, 1], "estrella reservada; los demás en orden, sin contar el extraordinario");
+    app("state.logs = {}; state.routines = []");
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

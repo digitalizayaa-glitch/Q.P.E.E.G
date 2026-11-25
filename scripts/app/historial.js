@@ -209,20 +209,47 @@ function glowVariants(n) {
     return Array.from({ length: n }, (_, i) => `hsl(${Math.round(h + OFFS[i % 6])} ${Math.round(Math.max(45, Math.min(85, sat * 100)))}% ${Math.round(LIGHT[i % 6] * 100)}%)`);
 }
 
-/* Forma de punto n.º i centrada en (x, y) con radio r */
+/* Formas distintas antes de repetir (la estrella queda reservada para los entrenos extraordinarios) */
+const MARKER_SHAPES = 11, MARKER_STAR = -1;
+const WORKOUT_EXTRA_GROUP = "extra", EXTRA_COLOR = "#c9c3d6";
+
+/* Forma de punto n.º i centrada en (x, y) con radio r (MARKER_STAR: estrella) */
 function markerPath(i, x, y, r) {
     const pts = (n, rot, rr = r) => Array.from({ length: n }, (_, k) => {
         const a = rot + (k * 2 * Math.PI) / n;
         return `${(x + rr * Math.cos(a)).toFixed(1)},${(y + rr * Math.sin(a)).toFixed(1)}`;
     }).join(" L");
-    switch (i % 6) {
+    if (i === MARKER_STAR) {   /* estrella de 5 puntas */
+        return "M" + Array.from({ length: 10 }, (_, k) => {
+            const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * 0.62 : r * 1.45;
+            return `${(x + rr * Math.cos(a)).toFixed(1)},${(y + rr * Math.sin(a)).toFixed(1)}`;
+        }).join(" L") + " Z";
+    }
+    switch (((i % MARKER_SHAPES) + MARKER_SHAPES) % MARKER_SHAPES) {
         case 0: return `M${x - r},${y} a${r},${r} 0 1,0 ${2 * r},0 a${r},${r} 0 1,0 ${-2 * r},0`;   /* círculo */
         case 1: return `M${pts(4, Math.PI / 4, r * 1.25)} Z`;                                              /* cuadrado */
         case 2: return `M${pts(4, 0, r * 1.3)} Z`;                                                         /* rombo */
         case 3: return `M${pts(3, -Math.PI / 2, r * 1.35)} Z`;                                             /* triángulo */
         case 4: return `M${pts(3, Math.PI / 2, r * 1.35)} Z`;                                              /* triángulo invertido */
-        default: return `M${pts(6, 0, r * 1.2)} Z`;                                                        /* hexágono */
+        case 5: return `M${pts(6, 0, r * 1.2)} Z`;                                                         /* hexágono */
+        case 6: return `M${pts(5, -Math.PI / 2, r * 1.25)} Z`;                                             /* pentágono */
+        case 7: return `M${pts(3, 0, r * 1.35)} Z`;                                                        /* triángulo a la derecha */
+        case 8: return `M${pts(3, Math.PI, r * 1.35)} Z`;                                                  /* triángulo a la izquierda */
+        case 9: { const a = r * 0.42, b = r * 1.2;                                                         /* cruz */
+            return `M${x - a},${y - b} h${2 * a} v${b - a} h${b - a} v${2 * a} h${a - b} v${b - a} h${-2 * a} v${a - b} h${a - b} v${-2 * a} h${b - a} Z`; }
+        default: return `M${pts(5, Math.PI / 2, r * 1.3)} Z`;                                              /* pentágono invertido */
     }
+}
+
+/* Estilo de cada grupo de la gráfica de entrenos: los extraordinarios (y los días borrados) siempre estrella y gris;
+   el resto, forma propia sin repetir mientras alcancen (11) */
+function workoutStyleOf(groups, colors) {
+    const regular = groups.filter(g => g.group !== WORKOUT_EXTRA_GROUP);
+    return group => {
+        if (group === WORKOUT_EXTRA_GROUP) return { color: EXTRA_COLOR, shape: MARKER_STAR };
+        const k = Math.max(0, regular.findIndex(g => g.group === group));
+        return { color: colors[k], shape: k };
+    };
 }
 
 /* Sesiones de entreno de un día: [{ group, name, volume }]. group = rutina + día (Push, Pull...) */
@@ -242,7 +269,9 @@ function daySessions(key) {
         }
         if (volume <= 0) continue;
         const day = routine && findDay(routine, entry.dayId);
-        out.push({ group: `${rid}/${entry.dayId}`, name: day ? day.name : "Día borrado", volume });
+        /* extraordinarios y días que ya no existen: un solo grupo, "Extraordinario" */
+        if (rid === EXTRA_ROUTINE_ID || !day) out.push({ group: WORKOUT_EXTRA_GROUP, name: "Extraordinario", volume });
+        else out.push({ group: `${rid}/${entry.dayId}`, name: day.name, volume });
     }
     return out;
 }
@@ -284,11 +313,11 @@ function renderHistoryChart(box, animate) {
                 points.push({ i, value: g.total / g.n, group, name: g.name, n: g.n });   /* promedio por sesión */
             });
         });
-        const colors = glowVariants(groups.length);
+        const colors = glowVariants(Math.max(1, groups.filter(g => g.group !== WORKOUT_EXTRA_GROUP).length));
         const total = buckets.reduce((a, b) => a + b.keys.reduce((s2, k) => s2 + daySessions(k).reduce((t, x) => t + x.volume, 0), 0), 0);
         dotPanel(box, {
             buckets, points, groups, animate, aria: "Peso levantado",
-            styleOf: group => { const k = Math.max(0, groups.findIndex(g => g.group === group)); return { color: colors[k], shape: k }; },
+            styleOf: workoutStyleOf(groups, colors),
             summary: () => `Total <b>${fmt(total)} kg</b> levantados${perDay ? "" : " · puntos = promedio por sesión"}`,
             detail: p => `${p.name} · ${buckets[p.i].title} · <b>${fmt(p.value)} kg</b>${p.n > 1 ? ` (promedio de ${p.n} sesiones)` : ""}`,
             empty: "Aún no hay entrenos registrados en este periodo."
