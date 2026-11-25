@@ -219,7 +219,9 @@ function sanitizeState(src) {
         ? { profile: { ...p, bf: okNum(p.bf) ? p.bf : null }, goal: ["maintain", "bulk", "cut"].includes(nu.goal) ? nu.goal : "maintain", diet: ["mod", "high", "low"].includes(nu.diet) ? nu.diet : "mod",
             ...(nu.extras === false ? { extras: false } : {}),
             /* el test actual siempre está en el historial (los de antes del historial, sin fecha) */
-            tests: tests.length ? tests : [{ d: null, profile: cleanProfile(p) }] }
+            tests: tests.length ? tests : [{ d: null, profile: cleanProfile(p) }],
+            /* día para recordar la próxima marca (15, 30 o 60 días después de un test) */
+            ...(/^\d{4}-\d{2}-\d{2}$/.test(nu.nextTest) ? { nextTest: nu.nextTest } : {}) }
         : null;
 
     const sports = isObj(s.sports) ? s.sports : {};

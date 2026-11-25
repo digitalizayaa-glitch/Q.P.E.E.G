@@ -705,3 +705,12 @@
 .today-btn { width: max(30px, calc(var(--hdr) * 0.4)); padding: 0; display: grid; place-items: center; }
 .today-btn[hidden] { display: none; }
 .today-btn svg { width: 58%; height: 58%; fill: none; stroke: var(--text); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Calendario: el día para registrar una nueva marca (anillo punteado con una banderita) */
+.history-cell.test-day { outline: 2px dashed var(--ui); outline-offset: -3px; }
+.history-cell.test-day::before { content: "⚑"; position: absolute; top: 1px; right: 4px; font-size: 11px; color: var(--ui); }
+/* Comida: aviso de que toca la nueva marca */
+.test-due { display: block; width: 100%; margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; font-weight: bold; font-size: 13px; cursor: pointer;
+    color: var(--text); background: rgba(var(--ui-rgb), .18); border: 1px dashed var(--ui); }
+.test-next { margin: 0 0 8px; font-size: 12px; color: var(--text-2); text-align: center; }
+.history-cell.future.test-day { opacity: 1; }   /* el día de la próxima marca se ve aunque sea futuro */

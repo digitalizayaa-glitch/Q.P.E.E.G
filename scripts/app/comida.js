@@ -181,7 +181,7 @@ function renderFood() {
     const top = FOOD_GROUPS.slice(0, -1).map(chip).join("");
     const last = FOOD_GROUPS[FOOD_GROUPS.length - 1];
 
-    root.innerHTML = `
+    root.innerHTML = `${testDue() ? `<button class="test-due" data-act="test">Toca registrar una nueva marca · hacer el test</button>` : ""}
         <div class="food-summary">
             <div class="food-kcal"><b>${fmtNum(t.kcal, 0)}</b><span>/ ${fmtNum(kcalGoal, 0)} kcal</span>
                 <button class="food-done${dayGiven ? " on" : ""}" data-act="done" aria-label="${dayGiven ? "Quitar el día dado (volumen sucio)" : "Volumen sucio: sumar calorías que no se pueden contar"}">

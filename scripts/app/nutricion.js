@@ -233,7 +233,7 @@ function runTdeeTest() {
         saveState();
         renderFood();
         close();
-        showTdeeResult();
+        askNextTest(() => showTdeeResult());
     };
 
     body.append(about, bodyCard, act, fat, error, submit);
@@ -302,27 +302,49 @@ function showTdeeResult({ calibrate = false, test = null } = {}) {
             `<span class="t-chip">${p.bf ? `Grasa ${f(p.bf)} %` : "Grasa no indicada"}</span>`]), body.firstChild);
     }
 
+    /* Calibración: un solo botón "Historial" (ahí abajo está "Registrar nueva marca") */
     if (calibrate) {
-        const row = el("div", "dialog-actions t-actions");
-        const again = el("button", "dialog-btn ghost", "Repetir el test");
-        again.type = "button";
-        again.onclick = () => { close(); runTdeeTest(); };
-        const hist = el("button", "dialog-btn ghost", "Historial de tests");
+        const hist = el("button", "dialog-btn accept t-submit", "Historial");
         hist.type = "button";
-        hist.onclick = () => showTestHistory();
-        row.append(again, hist);
-        body.append(row);
+        hist.onclick = () => showTestHistory(close);
+        body.append(hist);
     }
     body.appendChild(ok);
 }
 
+/* Después de una nueva marca: cuándo recordar la siguiente (queda marcado ese día en el calendario) */
+const NEXT_TEST_DAYS = [15, 30, 60];
+function askNextTest(then) {
+    openPicker({
+        title: "¿Cuándo registras la próxima marca?",
+        groups: [{ items: [
+            ...NEXT_TEST_DAYS.map(d => ({ label: `En ${d} días`, sub: parseKey(addDaysKey(dateKey(), d)).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" }), value: d })),
+            { label: "Sin recordatorio", value: 0 }
+        ] }],
+        onPick: d => {
+            if (d) state.nutrition.nextTest = addDaysKey(dateKey(), d); else delete state.nutrition.nextTest;
+            saveState();
+            renderFood();
+            if (then) then();
+        }
+    });
+}
+function addDaysKey(key, days) {
+    const d = parseKey(key);
+    d.setDate(d.getDate() + days);
+    return dateKey(d);
+}
+/* ¿Toca registrar una nueva marca? (desde el día marcado) */
+const testDue = () => { const n = nutrition(); return !!(n && n.nextTest && n.nextTest <= dateKey()); };
+
 const testDate = d => parseKey(d).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }).replace(".", "");
 
 /* Historial de tests: fecha, peso, altura, edad y % de grasa; al tocar uno, sus resultados exactos */
-function showTestHistory() {
+/* closeParent: cierra también la Calibración de abajo al ir a registrar una nueva marca */
+function showTestHistory(closeParent = null) {
     const n = nutrition();
     if (!n) return;
-    const { sheet } = openSheet("tdee-sheet test-history", "Historial de tests");
+    const { sheet, close } = openSheet("tdee-sheet test-history", "Historial de tests");
     sheet.appendChild(testChart(n));   /* la gráfica (deslizable) arriba de la lista */
     const list = el("div", "t-body t-opts");
     [...n.tests].reverse().forEach((test, i) => {
@@ -336,6 +358,15 @@ function showTestHistory() {
         list.appendChild(b);
     });
     sheet.appendChild(list);
+    /* registrar una nueva marca (el test otra vez) */
+    const again = el("button", "dialog-btn accept t-submit test-again", "Registrar nueva marca");
+    again.type = "button";
+    again.onclick = () => { close(); if (closeParent) closeParent(); runTdeeTest(); };
+    const next = n.nextTest ? el("p", "test-next", `Próxima marca: ${parseKey(n.nextTest).toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}`) : null;
+    const foot = el("div", "t-body");
+    if (next) foot.appendChild(next);
+    foot.appendChild(again);
+    sheet.appendChild(foot);
 }
 
 /* ---------- Objetivo o dieta: una ventana con las opciones (la elegida, marcada) ---------- */

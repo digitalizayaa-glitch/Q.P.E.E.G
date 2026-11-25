@@ -118,7 +118,8 @@ function renderHistory(animate) {
             cell.onclick = () => navFade(() => { setViewDate(key); showSection("food"); });
         }
         if (key === viewDate()) cell.classList.add("viewing");   /* el día que se está viendo */
-        cell.setAttribute("aria-label", dayAriaLabel(key, d, status));   /* el color también en palabras (lectores de pantalla) */
+        if (state.nutrition && state.nutrition.nextTest === key) { cell.classList.add("test-day"); cell.title = "Registrar nueva marca"; }
+        cell.setAttribute("aria-label", dayAriaLabel(key, d, status) + (state.nutrition && state.nutrition.nextTest === key ? ", toca registrar una nueva marca" : ""));   /* el color también en palabras (lectores de pantalla) */
 
         grid.appendChild(cell);
     }

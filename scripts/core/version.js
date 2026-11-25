@@ -5,14 +5,15 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "2.8.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "2.8.1";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
     {
         v: "2.8.0",
         items: [
             "Historial de tests con gráfica: peso (con tu peso ideal), grasa corporal, masa magra, calorías de mantenimiento y entrenos por mes. Desliza a izquierda o derecha, o usa las flechas ‹ ›, para cambiar de gráfica.",
-            "Entrenos por mes cuenta los días con un entreno marcado o un deporte registrado, desde el mes de tu primer test."
+            "Entrenos por mes cuenta los días con un entreno marcado o un deporte registrado, desde el mes de tu primer test.",
+            "Calibración: un solo botón \"Historial\", y ahí abajo \"Registrar nueva marca\". Al terminar eliges cuándo registrar la próxima (en 15, 30 o 60 días): ese día queda marcado en el calendario y en Comida te avisa."
         ]
     },
     {

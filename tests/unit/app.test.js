@@ -478,6 +478,14 @@ test("historial de tests: entrenos por mes (entreno con series marcadas o deport
     app("state.logs = {}; state.sports = {}");
 });
 
+test("nutrición: recordatorio de la próxima marca", () => {
+    const prof = { sex: "m", age: 17, height: 175, weight: 72, activity: 1.55, bf: null };
+    assert.equal(call("stateFrom", { nutrition: { profile: prof, goal: "maintain", diet: "mod", nextTest: "2026-12-10" } }).nutrition.nextTest, "2026-12-10");
+    assert.equal(call("stateFrom", { nutrition: { profile: prof, goal: "maintain", diet: "mod", nextTest: "mañana" } }).nutrition.nextTest, undefined);
+    assert.equal(call("addDaysKey", "2026-11-25", 15), "2026-12-10");
+    assert.equal(call("addDaysKey", "2026-11-25", 60), "2027-01-24");
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });
