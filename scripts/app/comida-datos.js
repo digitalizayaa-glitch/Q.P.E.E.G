@@ -115,7 +115,12 @@ const FOOD_CATALOG = {
         ["Cocoa 0% azúcar", "4 cdtas (20 g)"],
         /* Tabla nutricional de referencia por 100 g */
         ["Torta de arroz", "1 torta (100 g)", { k: 295, c: 44,   p: 8.2, f: 9.5, pt: { h: 2.5, l: 0.5, g: 1 } }],
-        ["Chicharritos de harina o maíz (snack)", "15 g", { k: 75, c: 9, p: 1,   f: 4,   pt: { h: 0.5, g: 1 } }]
+        ["Chicharritos de harina o maíz (snack)", "15 g", { k: 75, c: 9, p: 1,   f: 4,   pt: { h: 0.5, g: 1 } }],
+        /* Palomitas de maíz (USDA): reventadas con aire ≈ 31 kcal por taza (8 g); de cine (con aceite y sal) ≈ 55 kcal
+           por taza (11 g); caseras con sal y mantequilla moderada ≈ 43 kcal por taza (9 g) */
+        ["Palomitas simples (de aire, sin aceite)", "3 tazas (24 g)", { k: 93, c: 18.6, p: 3, f: 1.1, pt: { h: 1 } }],
+        ["Palomitas de cine", "3 tazas (33 g)", { k: 165, c: 18, p: 3, f: 9.5, pt: { h: 1, g: 1.5 } }],
+        ["Palomitas con sal y mantequilla moderada", "3 tazas (27 g)", { k: 130, c: 17, p: 2.7, f: 6, pt: { h: 1, g: 1 } }]
     ],
     bg: [
         ["Pechuga de pollo", "30 g"],

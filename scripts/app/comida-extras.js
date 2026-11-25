@@ -49,6 +49,8 @@ const EXTRA_BY_NAME = {
     /* bebida de cacao "0 % azúcar": suelen endulzarse con sucralosa */
     "Cocoa 0% azúcar": [2, 40, 0, 1],
     "Torta de arroz": [0.8, 200, 3, 0], "Chicharritos de harina o maíz (snack)": [0.5, 180, 0.3, 0],
+    "Palomitas simples (de aire, sin aceite)": [3.5, 2, 0, 0], "Palomitas de cine": [3.3, 300, 0, 0],
+    "Palomitas con sal y mantequilla moderada": [3.4, 250, 0, 0],
     "Arracache (INISA)": [1.5, 20, 0, 0], "Ñame (INISA)": [2, 5, 0, 0], "Ñampí (INISA)": [1.5, 10, 0, 0],
     "Raíz de chayote (INISA)": [1.5, 5, 0, 0], "Arepa (INISA)": [1, 150, 4, 0], "Arroz crudo (INISA)": [0.3, 1, 0, 0],
     "Arroz frito (INISA)": [0.5, 250, 0, 0], "Cebada (INISA)": [3, 2, 0, 0], "Galleta dulce (INISA)": [0.4, 60, 6, 0],
