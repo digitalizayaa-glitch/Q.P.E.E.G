@@ -5,9 +5,22 @@
     Cada teléfono ve el aviso de novedades una sola vez por versión.
 ========================================================= */
 
-const APP_VERSION = "2.6.14";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
+const APP_VERSION = "2.7.0";   /* x.y.Z sin notas = hotfix: no sale en Novedades */
 
 const CHANGELOG = [
+    {
+        v: "2.7.0",
+        items: [
+            "Comidas guardadas: guarda lo que repites (por ejemplo \"Mi desayuno\") y agrégalo con un toque desde Agregar comida → Guardadas, entero o en ½, 1½, 2…",
+            "Tres formas de guardarlas: desde el historial del día (\"Guardar mañana como comida\"), eligiendo varios alimentos en el selector (\"Guardar como comida\", al lado de Porciones sueltas) o armándola desde cero (\"+ Nueva comida guardada\"). Se pueden editar o borrar.",
+            "Al agregar un alimento, una ficha más clara: la medida y sus porciones en un renglón, las kcal y debajo carbohidratos, proteína, grasa, fibra, azúcar, sodio y edulcorante.",
+            "Calibración: \"Historial de tests\" con la fecha, el peso, la altura, la edad y la grasa de cada test.",
+            "Calorías del día: rojo hasta 75 %, naranja de 76 a 80 % y pasado el 115 %, verde de 81 a 115 %.",
+            "Deportes: el desnivel se compara con el típico (baja poco si es menos, sube cada vez más desde 3 veces el típico); el deslizador de desnivel va de 1 en 1 con acelerador; caminar suma 30 % más de carga.",
+            "Entreno extraordinario solo con peso (kg o lb) y las series que añadas, todo en verde.",
+            "Comidas nuevas: menú de Peperonni's, pizzas de pepperoni por tamaño, palomitas, pollo en salsa de coco y leche Coronado."
+        ]
+    },
     {
         v: "2.6.0",
         items: [

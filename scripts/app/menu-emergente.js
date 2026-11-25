@@ -127,17 +127,36 @@ function openPicker(options) {
     list.className = "picker-list";
     sheet.appendChild(list);
 
-    if (options.onCreate) {
-        const createBtn = document.createElement("button");
-        createBtn.className = "picker-create";
-        createBtn.textContent = `+ ${options.createLabel}`;
-        createBtn.onclick = () => {
-            const query = search ? search.value.trim() : "";
-            closePicker();
-            options.onCreate(query);
-        };
-        sheet.appendChild(createBtn);
+    /* Abajo: "+ Porciones sueltas" y, si se pide, más botones que cambian según lo elegido (footer()) */
+    let footRow = null;
+    if (options.onCreate || options.footer) {
+        footRow = document.createElement("div");
+        footRow.className = "picker-foot";
+        sheet.appendChild(footRow);
     }
+    const paintFoot = () => {
+        if (!footRow) return;
+        footRow.innerHTML = "";
+        if (options.onCreate) {
+            const createBtn = document.createElement("button");
+            createBtn.className = "picker-create";
+            createBtn.textContent = `+ ${options.createLabel}`;
+            createBtn.onclick = () => {
+                const query = search ? search.value.trim() : "";
+                closePicker();
+                options.onCreate(query);
+            };
+            footRow.appendChild(createBtn);
+        }
+        (options.footer ? options.footer() : []).forEach(b => {
+            const btn = document.createElement("button");
+            btn.className = "picker-create picker-foot-extra" + (b.cls ? " " + b.cls : "");
+            btn.textContent = b.label;
+            btn.onclick = b.onClick;
+            footRow.appendChild(btn);
+        });
+        footRow.classList.toggle("two", footRow.children.length > 1);
+    };
 
     const renderList = () => {
         const query = search ? normalizeText(search.value) : "";
@@ -180,6 +199,7 @@ function openPicker(options) {
             });
         });
 
+        paintFoot();
         if (!count) {
             const empty = document.createElement("p");
             empty.className = "picker-empty";

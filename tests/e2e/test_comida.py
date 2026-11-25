@@ -58,9 +58,11 @@ def main():
             pg.evaluate("showSection('food')"); navegador.quieto(pg)
             pg.locator(".food-add").click(); navegador.quieto(pg)
             groups = pg.locator(".picker-group").all_inner_texts()
-            r["frecuentes_arriba"] = bool(groups) and groups[0].lower() == "frecuentes"
-            first = pg.locator(".picker-list > *").nth(1).inner_text()
-            r["solo_arroz_frecuente"] = "Arroz blanco" in first and pg.locator(".picker-list > *").nth(2).inner_text().lower().startswith("harinas")
+            # arriba las comidas guardadas (aún sin ninguna: solo "+ Nueva comida guardada"), luego las frecuentes
+            r["frecuentes_arriba"] = len(groups) > 1 and groups[0].lower() == "guardadas" and groups[1].lower() == "frecuentes"
+            r["nueva_guardada"] = "Nueva comida guardada" in pg.locator(".picker-list > *").nth(1).inner_text()
+            first = pg.locator(".picker-list > *").nth(3).inner_text()
+            r["solo_arroz_frecuente"] = "Arroz blanco" in first and pg.locator(".picker-list > *").nth(4).inner_text().lower().startswith("harinas")
             if SHOTS: pg.screenshot(path=f"{SHOTS}/menu_frecuentes.png")
 
             pg.locator(".picker-item", has_text="Arroz blanco").first.click(); navegador.quieto(pg)

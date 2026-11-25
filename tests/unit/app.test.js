@@ -456,6 +456,19 @@ test("deportes: desnivel comparado con el típico (baja poco, sube cada vez más
     assert.ok(f(120) - 1 > 1 - f(5));
 });
 
+test("comida: comidas guardadas", () => {
+    const st = call("stateFrom", { food: { log: {}, meals: [
+        { id: "m1", name: "Mi desayuno", items: [{ id: "x", ts: 1, n: "Gallo pinto / Yuca", g: "h", p: 6, t: "6 porciones" }, { n: "Huevo (completo)", g: "mg", p: 2, t: "2 porciones" }] },
+        { id: "m2", name: "Vacía", items: [] }, "basura"
+    ] } });
+    assert.equal(st.food.meals.length, 1, "sin las vacías ni las inválidas");
+    assert.deepEqual(Object.keys(st.food.meals[0].items[0]).sort(), ["g", "n", "p", "t"], "sin id ni hora");
+    assert.equal(call("scaleFoodText", "1 porción", 1.5), "1,5 porciones");
+    assert.equal(call("scaleFoodText", "2 rebanadas", 0.5), "1 rebanada");
+    assert.equal(call("scaleFoodText", "3 tazas (24 g)", 2), "6 tazas (48 g)");
+    assert.match(call("mealSummary", st.food.meals[0].items), /6 harinas/);
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

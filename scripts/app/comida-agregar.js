@@ -31,10 +31,13 @@ function frequentFoods(now = Date.now()) {
             : { g: s.g, item: (FOOD_CATALOG[s.g] || []).find(i => i[0] === s.n) || [s.n, "1 porción"] });
 }
 
-function openFoodPicker(groupKey) {
+/* draft (opcional): armar o editar una comida guardada ({ id?, name?, items: [...] }); lo elegido va al borrador */
+function openFoodPicker(groupKey, draft = null) {
     const keys = groupKey ? [groupKey] : FOOD_GROUPS.map(g => g.k);
     const picked = new Map();                 /* lo agregado en este menú (clave → { id, qty }): se pinta con el color de la app */
-    const keyOf = v => v.g + "|" + (v.fk || v.item[0]);
+    const sink = draft ? draftSink(draft) : FOOD_DAY_SINK;
+    if (draft) draft.items.forEach(e => picked.set(e.g + "|" + e.n, { id: e.id, qty: e.q ?? e.p }));
+    const keyOf = v => (v.meal ? "meal|" + v.meal : v.g + "|" + (v.fk || v.item[0]));
     const asItem = (g, item) => ({ label: item[0], sub: item[1], value: { g, item } });
     const fastItem = key => {
         const { item } = FAST_FOOD_BY_KEY.get(key);
@@ -53,9 +56,45 @@ function openFoodPicker(groupKey) {
         }));
     }
     if (frequent.length) groups.unshift({ title: "Frecuentes", items: frequent.map(f => f.g === FAST_GROUP ? fastItem(f.fk) : asItem(f.g, f.item)) });
+    /* Comidas guardadas, primero (no al armar una) */
+    if (!groupKey && !draft) groups.unshift({ title: "Guardadas", items: [
+        ...savedMeals().map(m => ({ label: m.name, sub: `${m.items.length} ${m.items.length === 1 ? "alimento" : "alimentos"} · ${fmtNum(foodTotals(m.items).kcal, 0)} kcal`, value: { meal: m.id } })),
+        { label: "+ Nueva comida guardada", sub: "Elige los alimentos y sus cantidades", value: { meal: "new" } }
+    ] });
+
+    const pick = (v, refresh) => {
+        if (v.meal) {
+            closePicker();
+            if (v.meal === "new") openMealBuilder();
+            else { const m = savedMeals().find(x => x.id === v.meal); if (m) askSavedMeal(m); }
+            return;
+        }
+        const key = keyOf(v);
+        /* Si ya se agregó en este menú (y sigue registrado), se abre en esa cantidad para corregirla */
+        let existing = picked.get(key) || null;
+        if (existing && !sink.entries().some(e => e.id === existing.id)) { picked.delete(key); existing = null; }
+        const done = res => {
+            if (res) picked.set(key, res); else picked.delete(key);
+            refresh();
+        };
+        foodSink = draft ? sink : null;
+        if (v.g === FAST_GROUP) askFastFood(v.fk, done, existing);
+        else askFoodAmount(v.g, v.item, done, existing);
+    };
+    /* lo elegido en este menú que sigue registrado */
+    const pickedEntries = () => [...picked.values()].map(p => sink.entries().find(e => e.id === p.id)).filter(Boolean);
 
     openPicker({
-        title: groupKey ? FOOD_GROUP[groupKey].name : "Agregar comida",
+        title: draft ? (draft.id ? `Editar: ${draft.name}` : "Nueva comida guardada") : groupKey ? FOOD_GROUP[groupKey].name : "Agregar comida",
+        footer: () => {
+            const list = pickedEntries();
+            if (draft) return [
+                ...(draft.id ? [{ label: "Borrar", cls: "danger", onClick: () => deleteSavedMeal(draft.id) }] : []),
+                ...(list.length ? [{ label: `Guardar comida (${list.length})`, cls: "accent", onClick: () => saveMealFrom(list, draft) }] : [])
+            ];
+            /* varios elegidos: guardarlos como una comida */
+            return list.length >= 2 ? [{ label: "Guardar como comida", cls: "accent", onClick: () => saveMealFrom(list) }] : [];
+        },
         searchable: true,
         keepOpen: true,
         itemClass: v => picked.has(keyOf(v)) ? "picked" : "",
@@ -71,20 +110,12 @@ function openFoodPicker(groupKey) {
             ])
         ],
         createLabel: "Porciones sueltas",
-        onPick: (v, refresh) => {
-            const key = keyOf(v);
-            /* Si ya se agregó en este menú (y sigue registrado), se abre en esa cantidad para corregirla */
-            let existing = picked.get(key) || null;
-            if (existing && !foodEntries().some(e => e.id === existing.id)) { picked.delete(key); existing = null; }
-            const done = res => {
-                if (res) picked.set(key, res); else picked.delete(key);
-                refresh();
-            };
-            if (v.g === FAST_GROUP) askFastFood(v.fk, done, existing);
-            else askFoodAmount(v.g, v.item, done, existing);
-        },
+        onPick: pick,
         onCreate: query => {
-            const loose = g => askFoodAmount(g, [query || FOOD_GROUP[g].name, "1 porción"]);
+            const loose = g => {
+                if (draft) { foodSink = sink; askFoodAmount(g, [query || FOOD_GROUP[g].name, "1 porción"], () => openFoodPicker(groupKey, draft)); return; }
+                askFoodAmount(g, [query || FOOD_GROUP[g].name, "1 porción"]);
+            };
             if (groupKey) { loose(groupKey); return; }
             openPicker({
                 title: "¿De qué grupo?",
@@ -130,6 +161,9 @@ function foodFacts(equiv, entry) {
 }
 
 function amountStepper({ title, subtitle, unit, unitOne, existing, makeEntry, done, equiv }) {
+    /* adónde va: el día, o el borrador de una comida guardada (foodSink, puesto por quien abre) */
+    const sink = foodSink || FOOD_DAY_SINK;
+    foodSink = null;
     let qty = existing ? existing.qty : 1;
     const allowZero = !!existing;
     openStepper({
@@ -150,16 +184,17 @@ function amountStepper({ title, subtitle, unit, unitOne, existing, makeEntry, do
         onClose: confirmed => {
             if (!confirmed) return;
             if (existing && qty === 0) {
-                removeFoodEntry(existing.id);
+                sink.remove(existing.id);
                 renderFood();
                 if (done) done(null);
                 return;
             }
             const entry = makeEntry(qty);
-            if (existing) updateFoodEntry(existing.id, entry);
-            else addFoodEntry(Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6) }, entry));
+            const id = existing ? existing.id : Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+            if (existing) sink.update(id, entry);
+            else sink.add(Object.assign({ id }, entry));
             renderFood();
-            if (done) done({ id: existing ? existing.id : foodEntries().at(-1).id, qty });
+            if (done) done({ id, qty });
         }
     });
 }

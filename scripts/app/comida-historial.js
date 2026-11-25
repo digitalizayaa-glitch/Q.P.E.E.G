@@ -45,7 +45,8 @@ function openFoodHistory(groupKey = null) {
                 const items = all.filter(e => bandOf(e.ts)?.k === b.k).sort((x, y) => y.ts - x.ts);
                 if (!items.length) return "";
                 const kc = items.reduce((s, e) => s + kcalOf(e), 0);
-                return `<div class="picker-group">${b.name} · ${b.hint} <span>${fmtNum(kc, 0)} kcal</span></div>${items.map(rowHtml).join("")}`;
+                const canSave = !group && items.some(e => e.g !== FREE_GROUP);
+                return `<div class="picker-group">${b.name} · ${b.hint} <span>${fmtNum(kc, 0)} kcal</span></div>${items.map(rowHtml).join("")}${canSave ? `<button class="fh-save" data-save-band="${b.k}">Guardar ${b.name.toLowerCase()} como comida</button>` : ""}`;
             }).join("");
             const old = all.filter(e => !e.ts);
             if (old.length) list += `<div class="picker-group">Sin hora registrada</div>${old.map(rowHtml).join("")}`;
@@ -76,6 +77,7 @@ function openFoodHistory(groupKey = null) {
         if (t.dataset.mode) { mode = t.dataset.mode; draw(); }
         else if (t.dataset.order) { desc = !desc; draw(); }
         else if (t.dataset.addGroup) openFoodPicker(groupKey);
+        else if (t.dataset.saveBand) saveBandAsMeal(t.dataset.saveBand);
         else if (t.dataset.id) { removeFoodEntry(t.dataset.id); renderFood(); }
     });
     body.addEventListener("keydown", e => {

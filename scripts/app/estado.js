@@ -172,10 +172,9 @@ function sanitizeState(src) {
     }
 
     const foodLog = isObj(s.food) && isObj(s.food.log) ? s.food.log : {};
+    const mealsIn = isObj(s.food) && Array.isArray(s.food.meals) ? s.food.meals : [];
     s.food = { log: {} };
-    for (const key in foodLog) {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !Array.isArray(foodLog[key])) continue;
-        const list = foodLog[key].filter(f => isObj(f) && typeof f.g === "string" && typeof f.p === "number" && isFinite(f.p))
+    const cleanFood = arr => arr.filter(f => isObj(f) && typeof f.g === "string" && typeof f.p === "number" && isFinite(f.p))
             .map(f => {
                 const out = { ...f, id: String(f.id ?? ""), n: str(f.n, 80), t: str(f.t, 80) };
                 /* Comida rápida y "dar el día": calorías y macros propios por unidad */
@@ -194,8 +193,17 @@ function sanitizeState(src) {
                 }
                 return out;
             });
+    for (const key in foodLog) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(key) || !Array.isArray(foodLog[key])) continue;
+        const list = cleanFood(foodLog[key]);
         if (list.length) s.food.log[key] = list;
     }
+    /* Comidas guardadas: { id, name, items: [entradas sin id ni hora] } */
+    const meals = mealsIn.filter(m => isObj(m) && Array.isArray(m.items)).slice(0, 30).map(m => ({
+        id: str(m.id, 40) || newId("meal"), name: str(m.name, 40) || "Comida",
+        items: cleanFood(m.items.slice(0, 20)).map(({ id, ts, ...rest }) => rest)
+    })).filter(m => m.items.length);
+    if (meals.length) s.food.meals = meals;
 
     const nu = s.nutrition;
     const p = isObj(nu) && isObj(nu.profile) ? nu.profile : null;
