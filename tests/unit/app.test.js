@@ -469,6 +469,15 @@ test("comida: comidas guardadas", () => {
     assert.match(call("mealSummary", st.food.meals[0].items), /6 harinas/);
 });
 
+test("historial de tests: entrenos por mes (entreno con series marcadas o deporte)", () => {
+    app(`state.logs = { r1: { "2026-10-03": { dayId: "d", exercises: { a: { kg: 10, reps: [8, 0] } } }, "2026-10-04": { dayId: "d", exercises: { a: { kg: 10, reps: [0] } } } },
+        __extra: { "2026-11-02": { dayId: "x", exercises: { b: { kg: 5, reps: [10] } } } } };
+        state.sports = { "2026-10-03": [{ id: "s", k: "walk", km: 3 }], "2026-11-09": [{ id: "t", k: "bike", km: 9 }] };`);
+    const m = call("trainingDaysByMonth", "2026-10-03");
+    assert.deepEqual(m.slice(0, 2).map(x => [x.ym, x.n]), [["2026-10", 1], ["2026-11", 2]], "un día cuenta una vez; sin series marcadas no cuenta");
+    app("state.logs = {}; state.sports = {}");
+});
+
 test("entreno: peso propio de una serie (se guarda limpio y cuenta en el volumen)", () => {
     const st = call("stateFrom", { logs: { r1: { "2026-11-01": { dayId: "d1", exercises: {
         e0: { kg: 40, reps: [10, 10, 10], kgs: { 1: 45, x: 3, 9: -2 } } } } } } });

@@ -323,6 +323,7 @@ function showTestHistory() {
     const n = nutrition();
     if (!n) return;
     const { sheet } = openSheet("tdee-sheet test-history", "Historial de tests");
+    sheet.appendChild(testChart(n));   /* la gráfica (deslizable) arriba de la lista */
     const list = el("div", "t-body t-opts");
     [...n.tests].reverse().forEach((test, i) => {
         const p = test.profile;

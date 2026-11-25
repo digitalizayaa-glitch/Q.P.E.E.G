@@ -570,3 +570,32 @@ main { overflow-x: hidden; }
     color: var(--text-2); background: rgba(var(--ui-rgb), .12); border: 1px dashed rgba(var(--ui-rgb), .6); }
 /* Comida guardada: resumen y lo que trae */
 .meal-items { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; font-size: 12px; color: var(--muted); text-align: center; }
+
+/* Historial de tests: gráfica deslizable (‹ Peso ›) */
+.tchart { margin: 0 14px 12px; padding: 10px 8px 8px; border-radius: 16px; background: rgba(0, 0, 0, .25); border: 1px solid rgba(255, 255, 255, .08); touch-action: pan-y; user-select: none; }
+.tchart-head { display: flex; align-items: center; gap: 6px; }
+.tchart-arrow { flex: 0 0 44px; height: 44px; border-radius: 12px; font-size: 26px; line-height: 1; cursor: pointer;
+    color: var(--text); background: rgba(var(--ui-rgb), .15); border: 1px solid rgba(var(--ui-rgb), .6); }
+.tchart-arrow:active { background: rgba(var(--ui-rgb), .3); }
+.tchart-title { flex: 1 1 auto; text-align: center; }
+.tchart-title b { display: block; font-size: 15px; }
+.tchart-dots { display: inline-flex; gap: 5px; margin-top: 4px; }
+.tchart-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, .25); }
+.tchart-dots i.on { background: var(--ui); }
+.tchart-val { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 10px 6px 2px; }
+.tchart-val b { font-size: 24px; }
+.tchart-val span { font-size: 11.5px; color: var(--text-2); text-align: right; }
+.tchart-val span.good { color: #4ade80; }
+.tchart-val span.bad { color: #ff8c2a; }
+.tchart-x { display: flex; justify-content: space-between; padding: 0 4px 0 40px; font-size: 10px; color: var(--muted); }
+.tchart svg { display: block; }
+.tg-grid { stroke: rgba(255, 255, 255, .08); stroke-width: 1; }
+.tg-axis { font-size: 10px; fill: var(--muted); }
+.tg-line { fill: none; stroke: var(--ui); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.tg-dot { fill: var(--bg); stroke: var(--ui); stroke-width: 2.5; }
+.tg-dot.last { fill: var(--ui); }
+.tg-ref { stroke: #4ade80; stroke-width: 1.5; stroke-dasharray: 5 5; }
+.tg-ref-t { font-size: 10px; fill: #4ade80; }
+.tg-bar { fill: rgba(var(--ui-rgb), .45); }
+.tg-bar.last { fill: var(--ui); }
+.tg-val { font-size: 10px; font-weight: bold; fill: var(--text); }
