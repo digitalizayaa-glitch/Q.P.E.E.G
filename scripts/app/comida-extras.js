@@ -48,6 +48,7 @@ const EXTRA_BY_NAME = {
     "Pasas": [0.8, 2, 0, 0],
     /* bebida de cacao "0 % azúcar": suelen endulzarse con sucralosa */
     "Cocoa 0% azúcar": [2, 40, 0, 1],
+    "Johnny's Chocolate (polvo)": [1, 20, 17, 0],
     "Torta de arroz": [0.8, 200, 3, 0], "Chicharritos de harina o maíz (snack)": [0.5, 180, 0.3, 0],
     "Palomitas simples (de aire, sin aceite)": [3.5, 2, 0, 0], "Palomitas de cine": [3.3, 300, 0, 0],
     "Palomitas con sal y mantequilla moderada": [3.4, 250, 0, 0],

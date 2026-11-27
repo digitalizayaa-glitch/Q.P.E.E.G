@@ -113,6 +113,9 @@ const FOOD_CATALOG = {
         ["Mermelada con azúcar", "1 cda (25 g)", { k: 70,  c: 17,   p: 0.1, f: 0,   pt: { h: 1 } }],
         ["Pasas", "1 cda (20 g)", { k: 60,  c: 15.9, p: 0.6, f: 0.1, pt: { h: 1 } }],
         ["Cocoa 0% azúcar", "4 cdtas (20 g)"],
+        /* Johnny's Chocolate, polvo malteado (etiqueta, 2 cdas = 20 g): 80 kcal, 19 g carbohidratos (17 g azúcares,
+           1 g fibra), 0 g proteína, 0 g grasa, 20 mg sodio → 1 harina (sin la leche) */
+        ["Johnny's Chocolate (polvo)", "2 cdas (20 g)", { k: 80, c: 19, p: 0, f: 0, pt: { h: 1 } }],
         /* Tabla nutricional de referencia por 100 g */
         ["Torta de arroz", "1 torta (100 g)", { k: 295, c: 44,   p: 8.2, f: 9.5, pt: { h: 2.5, l: 0.5, g: 1 } }],
         ["Chicharritos de harina o maíz (snack)", "15 g", { k: 75, c: 9, p: 1,   f: 4,   pt: { h: 0.5, g: 1 } }],
