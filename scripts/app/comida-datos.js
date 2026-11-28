@@ -179,6 +179,8 @@ const FOOD_CATALOG = {
         ["Nuggets de pollo Pipasa", "40 g", { k: 100, c: 5.6,  p: 5.6, f: 6,   pt: { h: 0.5, mg: 0.5, g: 0.5 } }],
         ["Queso (Turrialba, semiduro, fresco, mozzarella)", "28 g"],
         ["Mozzarella Great Value Low skin", "26 g"],
+        /* Queso palmito (el de hebras que se deshilacha): ~294 kcal/100 g, 25 g proteína, 20 g grasa, 2,8 g carbohidratos */
+        ["Queso palmito", "30 g (1 tira gruesa)", { k: 88, c: 0.8, p: 7.5, f: 6, pt: { mg: 1 } }],
         ["Queso Delactomy rallado", "23 g"],
         ["Queso Turrialba del Prado", "25 g"],
         ["Queso Dos Pinos 50%+ proteína", "28 g"],

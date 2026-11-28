@@ -84,6 +84,7 @@ const EXTRA_BY_NAME = {
     "Costilla de res en olla o en sopa": [0, 90, 0, 0], "Tocineta": [0, 220, 0, 0], "Salchicha de pavo": [0, 450, 0.5, 0],
     "Nuggets de pollo Pipasa": [0.3, 230, 0, 0], "Queso (Turrialba, semiduro, fresco, mozzarella)": [0, 170, 0, 0],
     "Mozzarella Great Value Low skin": [0, 170, 0, 0], "Queso Delactomy rallado": [0, 180, 0, 0],
+    "Queso palmito": [0, 190, 0, 0],
     "Queso Turrialba del Prado": [0, 150, 0, 0], "Queso Dos Pinos 50%+ proteína": [0, 200, 0, 0],
     "String cheese (stick)": [0, 200, 0, 0], "Chicharritos Jacks de cerdo (chicharrón)": [0, 170, 0, 0],
     "Atún Member Selection": [0, 100, 0, 0], "Torta Beef Angus MS": [0, 60, 0, 0],
