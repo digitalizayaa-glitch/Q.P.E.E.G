@@ -129,3 +129,6 @@ main {
 }
 
 h2 { margin-bottom: 15px; }
+
+/* Sin zoom por doble toque (iPhone) */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }

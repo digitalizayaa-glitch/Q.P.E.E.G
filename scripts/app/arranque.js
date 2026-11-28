@@ -270,6 +270,11 @@ function initSwipe() {
     }, true);
 }
 
+/* Sin zoom: Safari (iPhone) ignora user-scalable=no, así que se frena el gesto de pellizco (el doble toque lo quita touch-action en CSS).
+   maximum-scale=1 del viewport evita además el zoom automático al tocar un campo de texto */
+["gesturestart", "gesturechange", "gestureend"].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+document.addEventListener("touchmove", e => { if (e.touches.length > 1 || (e.scale !== undefined && e.scale !== 1)) e.preventDefault(); }, { passive: false });
+
 document.addEventListener("DOMContentLoaded", async () => {
     await stateReady;
     applySettings();
