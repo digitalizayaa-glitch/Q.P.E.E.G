@@ -117,6 +117,12 @@ const FOOD_CATALOG = {
            1 g fibra), 0 g proteína, 0 g grasa, 20 mg sodio → 1 harina (sin la leche) */
         ["Johnny's Chocolate (polvo)", "2 cdas (20 g)", { k: 80, c: 19, p: 0, f: 0, pt: { h: 1 } }],
         /* Tabla nutricional de referencia por 100 g */
+        /* Tamales típicos ticos (~200 g sin hoja; se venden en piña de 2): masa de maíz con manteca de cerdo,
+           arroz, chile y garbanzo o petit pois. Cerdo ≈ 400 kcal (posta y algo de grasa); frijol ≈ 360 kcal
+           (relleno de frijol molido). Tamal asado: queque horneado de masa, natilla, queso y azúcar ≈ 2,8 kcal/g */
+        ["Tamal de cerdo", "1 tamal (200 g)", "tamales", 1, { k: 400, c: 40, p: 13, f: 21, pt: { h: 2.5, mg: 1, g: 2.5 } }],
+        ["Tamal de frijol", "1 tamal (200 g)", "tamales", 1, { k: 360, c: 48, p: 10, f: 14, pt: { h: 3, g: 2.5 } }],
+        ["Tamal asado", "1 pedazo (100 g)", "pedazos", 1, { k: 280, c: 36, p: 5, f: 13, pt: { h: 2, g: 2.5 } }],
         ["Torta de arroz", "1 torta (100 g)", { k: 295, c: 44,   p: 8.2, f: 9.5, pt: { h: 2.5, l: 0.5, g: 1 } }],
         ["Chicharritos de harina o maíz (snack)", "15 g", { k: 75, c: 9, p: 1,   f: 4,   pt: { h: 0.5, g: 1 } }],
         /* Palomitas de maíz (USDA): reventadas con aire ≈ 31 kcal por taza (8 g); de cine (con aceite y sal) ≈ 55 kcal

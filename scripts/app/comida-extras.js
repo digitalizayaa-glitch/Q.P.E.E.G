@@ -49,7 +49,8 @@ const EXTRA_BY_NAME = {
     /* bebida de cacao "0 % azúcar": suelen endulzarse con sucralosa */
     "Cocoa 0% azúcar": [2, 40, 0, 1],
     "Johnny's Chocolate (polvo)": [1, 20, 17, 0],
-    "Torta de arroz": [0.8, 200, 3, 0], "Chicharritos de harina o maíz (snack)": [0.5, 180, 0.3, 0],
+    "Torta de arroz": [0.8, 200, 3, 0],
+    "Tamal de cerdo": [4, 650, 0, 0], "Tamal de frijol": [7, 550, 0, 0], "Tamal asado": [1.5, 200, 12, 0], "Chicharritos de harina o maíz (snack)": [0.5, 180, 0.3, 0],
     "Palomitas simples (de aire, sin aceite)": [3.5, 2, 0, 0], "Palomitas de cine": [3.3, 300, 0, 0],
     "Palomitas con sal y mantequilla moderada": [3.4, 250, 0, 0],
     "Arracache (INISA)": [1.5, 20, 0, 0], "Ñame (INISA)": [2, 5, 0, 0], "Ñampí (INISA)": [1.5, 10, 0, 0],
@@ -200,6 +201,8 @@ const EXTRA_FAST_LABELS = {
     "Pastelitos · Cupcake Bimbo chocolate (Bimboletes)": [1.3, 252, 24.6, 0],
     "Pastelitos · Cupcake Bimbo vainilla": [1, 252, 24.6, 0],
     "Pastelitos · Cupcake Bimbo vainilla (suelto, paquete de 8)": [0.5, 126, 12.3, 0],
+    /* de los 17,5 g de azúcares, ~3 g son del banano */
+    "Pastelitos · Pan dulce Bimbo Artesano banano con nuez": [0.5, 340, 14.5, 0],
     "Refrescos · Coca-Cola (lata 355 ml)": [0, 45, 38, 0], "Refrescos · Coca-Cola (botella 600 ml)": [0, 75, 64, 0],
     "Refrescos · Coca-Cola Sin Azúcar": [0, 40, 0, 1], "Bebidas energéticas · Monster Zero Ultra": [0, 200, 0, 1],
     "Bebidas energéticas · Red Bull Sugarfree": [0, 100, 0, 1], "Bebidas deportivas · Gatorade Zero": [0, 230, 0, 1],

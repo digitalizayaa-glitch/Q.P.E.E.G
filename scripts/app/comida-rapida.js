@@ -390,7 +390,10 @@ const FAST_FOOD = [
     { chain: "Pastelitos", super: true, items: [
         ["Cupcake Bimbo chocolate (Bimboletes)", "paquete (2 unidades, 80 g)", "paquetes (2 unidades, 80 g)", 316, 44, 4, 14, { h: 2.5, g: 2.5 }],
         ["Cupcake Bimbo vainilla", "paquete (2 unidades, 80 g)", "paquetes (2 unidades, 80 g)", 316, 44, 4, 14, { h: 2.5, g: 2.5 }],
-        ["Cupcake Bimbo vainilla (suelto, paquete de 8)", "unidad (40 g)", "unidades (40 g)", 158, 22, 2, 7, { h: 1.5, g: 1 }]
+        ["Cupcake Bimbo vainilla (suelto, paquete de 8)", "unidad (40 g)", "unidades (40 g)", 158, 22, 2, 7, { h: 1.5, g: 1 }],
+        /* Bimbo Artesano pan dulce banano con nuez (etiqueta, 1 rebanada = 78 g): 286 kcal, 34,6 g carbohidratos
+           (17,5 g azúcares, 0,5 g fibra), 4,9 g proteína, 14,2 g grasa, 340 mg sodio */
+        ["Pan dulce Bimbo Artesano banano con nuez", "rebanada (78 g)", "rebanadas (78 g)", 286, 34.6, 4.9, 14.2, { h: 2.5, g: 2 }]
     ] },
     { chain: "Chocolates", super: true, items: [
         ["Milka (tableta 100 g)", "tableta (100 g)", "tabletas (100 g)", 530, 59, 6.3, 29, { h: 4, g: 4.5 }],
