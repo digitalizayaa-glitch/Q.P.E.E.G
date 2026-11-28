@@ -58,7 +58,7 @@ const EXTRA_BY_NAME = {
     "Arroz frito (INISA)": [0.5, 250, 0, 0], "Cebada (INISA)": [3, 2, 0, 0], "Galleta dulce (INISA)": [0.4, 60, 6, 0],
     "Harina de trigo (INISA)": [0.5, 0, 0, 0], "Maicena (INISA)": [0.2, 2, 0, 0], "Maíz pelado (INISA)": [1.5, 5, 0, 0],
     "Pan de rodaja integral (INISA)": [2, 130, 2, 0], "Pan francés (INISA)": [0.8, 180, 0.5, 0],
-    "Pasta cruda (INISA)": [0.6, 1, 0, 0], "Tamal asado (INISA)": [1, 120, 6, 0], "Tortilla de maíz (INISA)": [2, 15, 0, 0],
+    "Pasta cruda (INISA)": [0.6, 1, 0, 0], "Tortilla de maíz (INISA)": [2, 15, 0, 0],
     "Plátano verde (INISA)": [1, 2, 0, 0], "Puré de papa (INISA)": [1.5, 250, 0, 0], "Frijol crudo (INISA)": [4, 3, 0, 0],
     "Arvejas secas (INISA)": [5, 4, 0, 0], "Garbanzo crudo (INISA)": [4, 6, 0, 0], "Lenteja cruda (INISA)": [2.8, 2, 0, 0],
     "Gandul seco (INISA)": [3.5, 4, 0, 0],
